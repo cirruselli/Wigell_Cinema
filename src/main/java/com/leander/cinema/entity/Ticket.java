@@ -31,4 +31,60 @@ public class Ticket {
 
     @Column(name = "price_usd", nullable = false, precision = 10, scale = 2)
     private BigDecimal priceUsd;
+
+    public Ticket() {
+    }
+
+    public Ticket(BigDecimal priceSek, BigDecimal priceUsd) {
+        this.priceSek = priceSek;
+        this.priceUsd = priceUsd;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Customer getCustomer() {
+        return customer;
+    }
+
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
+    }
+
+    public Screening getScreening() {
+        return screening;
+    }
+
+    public void setScreening(Screening screening) {
+        this.screening = screening;
+    }
+
+    public Booking getBooking() {
+        return booking;
+    }
+
+    public void setBooking(Booking booking) {
+        this.booking = booking;
+    }
+
+    public BigDecimal getPriceSek() {
+        return priceSek;
+    }
+
+    public void setPriceSek(BigDecimal priceSek) {
+        this.priceSek = priceSek;
+    }
+
+    public BigDecimal getPriceUsd() {
+        return priceUsd;
+    }
+
+    public void setPriceUsd(BigDecimal priceUsd) {
+        this.priceUsd = priceUsd;
+    }
 }
