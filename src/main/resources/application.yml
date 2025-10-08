@@ -1,0 +1,42 @@
+server:
+  port: 8583
+
+spring:
+  application:
+    name: Wigell Cinema mikrotjänst
+  boot:
+    admin:
+      client:
+        url: http://localhost:9090
+        username: admin
+        password: admin
+        instance:
+          management-base-url: http://localhost:6081
+  datasource:
+    url: jdbc:mysql://localhost:3306/wigell_cinema_db?createDatabaseIfNotExist=true
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+management:
+  server:
+    port: 6081
+  info:
+    env:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+info:
+  app:
+    name: Wigell Cinema mikrotjänst
+    version: 1.0.0
+    description: Wigell Cinema mikrotjänst i grupparbetet i kursen Java Backend HT 2025
