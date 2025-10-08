@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Table(name = "bookings")
@@ -11,8 +12,10 @@ public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column(name = "booking_date")
     private LocalDate bookingDate;
+
     @Column(name = "number_of_guests", nullable = false)
     private int numberOfGuests;
 
@@ -20,6 +23,10 @@ public class Booking {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_id", nullable = false)
     private Room room;
+
+    //Utrustning för att uppdatera teknisk utrustning på enskild bokning
+    @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BookingEquipment> bookingEquipmentList;
 
     //RELATION
     @ManyToOne(fetch = FetchType.LAZY)
@@ -33,6 +40,7 @@ public class Booking {
 
     @Column(name = "total_price_SEK", nullable = false, precision = 10, scale = 2)
     private BigDecimal totalPriceSek;
+
     @Column(name = "total_price_USD", nullable = false, precision = 10, scale = 2)
     private BigDecimal totalPriceUsd;
 
