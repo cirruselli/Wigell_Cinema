@@ -50,6 +50,16 @@ public class Customer {
         this.phone = phone;
     }
 
+    public Customer(String firstName, String lastName, String email, String phone, List<Address> address, List<Ticket> tickets, List<Booking> bookings) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.phone = phone;
+        this.address = address;
+        this.tickets = tickets;
+        this.bookings = bookings;
+    }
+
     public Long getId() {
         return id;
     }

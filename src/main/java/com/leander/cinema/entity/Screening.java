@@ -2,7 +2,7 @@ package com.leander.cinema.entity;
 
 import jakarta.persistence.*;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "screenings")
@@ -11,8 +11,8 @@ public class Screening {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "start_date", nullable = false)
-    private LocalDate startDate;
+    @Column(name = "start_time", nullable = false)
+    private LocalDateTime startTime;
 
     //RELATION
     @ManyToOne(fetch = FetchType.LAZY)
@@ -30,14 +30,14 @@ public class Screening {
     public Screening() {
     }
 
-    public Screening(LocalDate startDate, Room room, String speakerName) {
-        this.startDate = startDate;
+    public Screening(LocalDateTime startTime, Room room, String speakerName) {
+        this.startTime = startTime;
         this.room = room;
         this.speakerName = speakerName;
     }
 
-    public Screening(LocalDate startDate, Room room, Movie movie) {
-        this.startDate = startDate;
+    public Screening(LocalDateTime startTime, Room room, Movie movie) {
+        this.startTime = startTime;
         this.room = room;
         this.movie = movie;
     }
@@ -50,12 +50,12 @@ public class Screening {
         this.id = id;
     }
 
-    public LocalDate getStartDate() {
-        return startDate;
+    public LocalDateTime getStartTime() {
+        return startTime;
     }
 
-    public void setStartDate(LocalDate startDate) {
-        this.startDate = startDate;
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
     }
 
     public Room getRoom() {

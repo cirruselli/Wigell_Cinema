@@ -3,6 +3,7 @@ package com.leander.cinema.entity;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Entity
@@ -18,10 +19,10 @@ public class Room {
     @Column(name = "max_guests", nullable = false)
     private int maxGuests;
 
-    //RELATION
-    //Standard-utrustning för rummet
-    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<RoomEquipment> technicalEquipmentList = new ArrayList<>();
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "technical_equipments", joinColumns = @JoinColumn(name = "room_id"))
+    @Column(name = "equipment")
+    private List<String> equipments = new ArrayList<>(Arrays.asList("Mikrofon", "Högtalare", "Projektor"));
 
     public Room() {
     }
@@ -29,6 +30,12 @@ public class Room {
     public Room(String name, int maxGuests) {
         this.name = name;
         this.maxGuests = maxGuests;
+    }
+
+    public Room(String name, int maxGuests, List<String> equipments) {
+        this.name = name;
+        this.maxGuests = maxGuests;
+        this.equipments = equipments;
     }
 
     public Long getId() {
@@ -55,11 +62,11 @@ public class Room {
         this.maxGuests = maxGuests;
     }
 
-    public List<RoomEquipment> getTechnicalEquipmentList() {
-        return technicalEquipmentList;
+    public List<String> getEquipments() {
+        return equipments;
     }
 
-    public void setTechnicalEquipmentList(List<RoomEquipment> technicalEquipmentList) {
-        this.technicalEquipmentList = technicalEquipmentList;
+    public void setEquipments(List<String> equipments) {
+        this.equipments = equipments;
     }
 }

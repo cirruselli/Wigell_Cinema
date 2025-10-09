@@ -18,13 +18,13 @@ public class Ticket {
 
     //RELATION
     @ManyToOne
-    @JoinColumn(name = "screening_id", nullable = false)
-    private Screening screening;
+    @JoinColumn(name = "room_id")
+    private Room room;
 
     //RELATION
     @ManyToOne
-    @JoinColumn(name = "booking_id", nullable = false)
-    private Booking booking;
+    @JoinColumn(name = "screening_id", nullable = false)
+    private Screening screening;
 
     @Column(name = "price_sek", nullable = false, precision = 10, scale = 2)
     private BigDecimal priceSek;
@@ -36,6 +36,13 @@ public class Ticket {
     }
 
     public Ticket(BigDecimal priceSek, BigDecimal priceUsd) {
+        this.priceSek = priceSek;
+        this.priceUsd = priceUsd;
+    }
+
+    public Ticket(Customer customer, Screening screening, BigDecimal priceSek, BigDecimal priceUsd) {
+        this.customer = customer;
+        this.screening = screening;
         this.priceSek = priceSek;
         this.priceUsd = priceUsd;
     }
@@ -62,14 +69,6 @@ public class Ticket {
 
     public void setScreening(Screening screening) {
         this.screening = screening;
-    }
-
-    public Booking getBooking() {
-        return booking;
-    }
-
-    public void setBooking(Booking booking) {
-        this.booking = booking;
     }
 
     public BigDecimal getPriceSek() {

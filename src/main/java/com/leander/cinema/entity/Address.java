@@ -32,6 +32,13 @@ public class Address {
         this.city = city;
     }
 
+    public Address(String street, String postalCode, String city, Customer customer) {
+        this.street = street;
+        this.postalCode = postalCode;
+        this.city = city;
+        this.customer = customer;
+    }
+
     public Long getId() {
         return id;
     }

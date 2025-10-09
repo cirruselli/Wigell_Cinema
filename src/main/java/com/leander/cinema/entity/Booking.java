@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -13,20 +15,22 @@ public class Booking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "booking_date")
-    private LocalDate bookingDate;
+    @Column(name = "reservation_time")
+    private LocalDateTime reservationTime;
 
     @Column(name = "number_of_guests", nullable = false)
     private int numberOfGuests;
+
+    //Utrustning för rummet vid en patch
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "booking_equipments", joinColumns = @JoinColumn(name = "booking_id"))
+    @Column(name = "equipment")
+    private List<String> equipments = new ArrayList<>();
 
     //RELATION
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_id", nullable = false)
     private Room room;
-
-    //För att uppdatera teknisk utrustning på enskild bokning
-    @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<BookingEquipment> bookingEquipmentList;
 
     //RELATION
     @ManyToOne(fetch = FetchType.LAZY)
@@ -34,7 +38,7 @@ public class Booking {
     private Screening screening;
 
     //RELATION
-    @ManyToOne(fetch = FetchType.LAZY) // Eager fetching kan vara okej här, men om du ofta hämtar bokningar utan kunddata kan LAZY vara bättre.
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
 
@@ -47,9 +51,21 @@ public class Booking {
     public Booking() {
     }
 
-    public Booking(LocalDate bookingDate, int numberOfGuests, Room room, Screening screening, Customer customer, BigDecimal totalPriceSek, BigDecimal totalPriceUsd) {
-        this.bookingDate = bookingDate;
+    //bookingEquipment är inte med här pga ska inte kunna fyllas i vid en POST -> rummets existerande utrustning ska däremot visas i responsen!
+    public Booking(LocalDateTime reservationTime, int numberOfGuests, Room room, Screening screening, Customer customer, BigDecimal totalPriceSek, BigDecimal totalPriceUsd) {
+        this.reservationTime = reservationTime;
         this.numberOfGuests = numberOfGuests;
+        this.room = room;
+        this.screening = screening;
+        this.customer = customer;
+        this.totalPriceSek = totalPriceSek;
+        this.totalPriceUsd = totalPriceUsd;
+    }
+
+    public Booking(LocalDateTime reservationTime, int numberOfGuests, List<String> equipments, Room room, Screening screening, Customer customer, BigDecimal totalPriceSek, BigDecimal totalPriceUsd) {
+        this.reservationTime = reservationTime;
+        this.numberOfGuests = numberOfGuests;
+        this.equipments = equipments;
         this.room = room;
         this.screening = screening;
         this.customer = customer;
@@ -65,12 +81,12 @@ public class Booking {
         this.id = id;
     }
 
-    public LocalDate getBookingDate() {
-        return bookingDate;
+    public LocalDateTime getReservationTime() {
+        return reservationTime;
     }
 
     public void setBookingDate(LocalDate bookingDate) {
-        this.bookingDate = bookingDate;
+        this.reservationTime = reservationTime;
     }
 
     public int getNumberOfGuests() {
@@ -89,12 +105,12 @@ public class Booking {
         this.room = room;
     }
 
-    public List<BookingEquipment> getBookingEquipmentList() {
-        return bookingEquipmentList;
+    public List<String> getEquipments() {
+        return equipments;
     }
 
-    public void setBookingEquipmentList(List<BookingEquipment> bookingEquipmentList) {
-        this.bookingEquipmentList = bookingEquipmentList;
+    public void setEquipments(List<String> equipments) {
+        this.equipments = equipments;
     }
 
     public Screening getScreening() {
