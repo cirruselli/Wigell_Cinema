@@ -40,8 +40,9 @@ public class Ticket {
         this.priceUsd = priceUsd;
     }
 
-    public Ticket(Customer customer, Screening screening, BigDecimal priceSek, BigDecimal priceUsd) {
+    public Ticket(Customer customer, Room room, Screening screening, BigDecimal priceSek, BigDecimal priceUsd) {
         this.customer = customer;
+        this.room = room;
         this.screening = screening;
         this.priceSek = priceSek;
         this.priceUsd = priceUsd;
@@ -61,6 +62,14 @@ public class Ticket {
 
     public void setCustomer(Customer customer) {
         this.customer = customer;
+    }
+
+    public Room getRoom() {
+        return room;
+    }
+
+    public void setRoom(Room room) {
+        this.room = room;
     }
 
     public Screening getScreening() {

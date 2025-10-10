@@ -26,7 +26,7 @@ public class Customer {
 
     //RELATION
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<Address> address = new ArrayList<>();
+    private List<Address> addresses = new ArrayList<>();
 
     //RELATION
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
@@ -55,7 +55,7 @@ public class Customer {
         this.lastName = lastName;
         this.email = email;
         this.phone = phone;
-        this.address = address;
+        this.addresses = address;
         this.tickets = tickets;
         this.bookings = bookings;
     }
@@ -100,12 +100,12 @@ public class Customer {
         this.phone = phone;
     }
 
-    public List<Address> getAddress() {
-        return address;
+    public List<Address> getAddresses() {
+        return addresses;
     }
 
-    public void setAddress(List<Address> address) {
-        this.address = address;
+    public void setAddresses(List<Address> addresses) {
+        this.addresses = addresses;
     }
 
     public List<Ticket> getTickets() {
