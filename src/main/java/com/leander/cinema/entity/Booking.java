@@ -33,8 +33,9 @@ public class Booking {
     private Room room;
 
     //RELATION
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "screening_id", nullable = false)
+    @OneToOne(fetch = FetchType.LAZY)
+    //Unique = true -> en föreställning kan bara ha en bokning -> enligt krav på att bokning avser hela salongen
+    @JoinColumn(name = "screening_id", nullable = false, unique = true)
     private Screening screening;
 
     //RELATION
@@ -85,7 +86,7 @@ public class Booking {
         return reservationTime;
     }
 
-    public void setBookingDate(LocalDate bookingDate) {
+    public void setReservationTime(LocalDateTime reservationTime) {
         this.reservationTime = reservationTime;
     }
 
@@ -97,20 +98,20 @@ public class Booking {
         this.numberOfGuests = numberOfGuests;
     }
 
-    public Room getRoom() {
-        return room;
-    }
-
-    public void setRoom(Room room) {
-        this.room = room;
-    }
-
     public List<String> getEquipments() {
         return equipments;
     }
 
     public void setEquipments(List<String> equipments) {
         this.equipments = equipments;
+    }
+
+    public Room getRoom() {
+        return room;
+    }
+
+    public void setRoom(Room room) {
+        this.room = room;
     }
 
     public Screening getScreening() {

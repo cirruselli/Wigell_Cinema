@@ -3,7 +3,9 @@ package com.leander.cinema.entity;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "addresses")
+@Table(name = "addresses",
+//Förhindrar att samma kund får exakt samma adress flera gånger
+uniqueConstraints = @UniqueConstraint(columnNames = {"street", "postalCode", "city", "customer_id"}))
 public class Address {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -11,15 +11,13 @@ public class Ticket {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "number_of_tickets")
+    private int numberOfTickets;
+
     //RELATION
     @ManyToOne
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
-
-    //RELATION
-    @ManyToOne
-    @JoinColumn(name = "room_id")
-    private Room room;
 
     //RELATION
     @ManyToOne
@@ -32,20 +30,32 @@ public class Ticket {
     @Column(name = "price_usd", nullable = false, precision = 10, scale = 2)
     private BigDecimal priceUsd;
 
+    @Column(name = "total_price_sek", nullable = false)
+    private BigDecimal totalPriceSek;
+
+    @Column(name = "total_price_usd", nullable = false)
+    private BigDecimal totalPriceUsd;
+
+
     public Ticket() {
     }
 
-    public Ticket(BigDecimal priceSek, BigDecimal priceUsd) {
+    public Ticket(int numberOfTickets, BigDecimal priceSek, BigDecimal priceUsd, BigDecimal totalPriceSek, BigDecimal totalPriceUsd) {
+        this.numberOfTickets = numberOfTickets;
         this.priceSek = priceSek;
         this.priceUsd = priceUsd;
+        this.totalPriceSek = totalPriceSek;
+        this.totalPriceUsd = totalPriceUsd;
     }
 
-    public Ticket(Customer customer, Room room, Screening screening, BigDecimal priceSek, BigDecimal priceUsd) {
+    public Ticket(int numberOfTickets, Customer customer, Screening screening, BigDecimal priceSek, BigDecimal priceUsd, BigDecimal totalPriceSek, BigDecimal totalPriceUsd) {
+        this.numberOfTickets = numberOfTickets;
         this.customer = customer;
-        this.room = room;
         this.screening = screening;
         this.priceSek = priceSek;
         this.priceUsd = priceUsd;
+        this.totalPriceSek = totalPriceSek;
+        this.totalPriceUsd = totalPriceUsd;
     }
 
     public Long getId() {
@@ -56,20 +66,20 @@ public class Ticket {
         this.id = id;
     }
 
+    public int getNumberOfTickets() {
+        return numberOfTickets;
+    }
+
+    public void setNumberOfTickets(int numberOfTickets) {
+        this.numberOfTickets = numberOfTickets;
+    }
+
     public Customer getCustomer() {
         return customer;
     }
 
     public void setCustomer(Customer customer) {
         this.customer = customer;
-    }
-
-    public Room getRoom() {
-        return room;
-    }
-
-    public void setRoom(Room room) {
-        this.room = room;
     }
 
     public Screening getScreening() {
@@ -94,5 +104,21 @@ public class Ticket {
 
     public void setPriceUsd(BigDecimal priceUsd) {
         this.priceUsd = priceUsd;
+    }
+
+    public BigDecimal getTotalPriceSek() {
+        return totalPriceSek;
+    }
+
+    public void setTotalPriceSek(BigDecimal totalPriceSek) {
+        this.totalPriceSek = totalPriceSek;
+    }
+
+    public BigDecimal getTotalPriceUsd() {
+        return totalPriceUsd;
+    }
+
+    public void setTotalPriceUsd(BigDecimal totalPriceUsd) {
+        this.totalPriceUsd = totalPriceUsd;
     }
 }
