@@ -1,4 +1,4 @@
-package com.leander.cinema.dto.CustomerDto.booking;
+package com.leander.cinema.dto.CustomerDto.bookingDto;
 
 import jakarta.validation.constraints.FutureOrPresent;
 import java.time.LocalDateTime;

@@ -1,4 +1,4 @@
-package com.leander.cinema.dto.CustomerDto.booking;
+package com.leander.cinema.dto.CustomerDto.bookingDto;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -10,7 +10,8 @@ public record BookingResponseDto(
         List<String> equipments,//om bokningslistan är null (att inget värde finns innan en patch gjorts) så fylls den med listan från room!
         String roomName,
         int maxGuests,
-        String titleOrName,
+        String speakerName,
+        String movieTitle,
         String customerName,
         BigDecimal totalPriceSek,
         BigDecimal totalPriceUsd

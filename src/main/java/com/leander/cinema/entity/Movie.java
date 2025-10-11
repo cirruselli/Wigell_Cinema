@@ -12,7 +12,7 @@ public class Movie {
     @Column(name = "title", nullable = false, length = 150)
     private String title;
 
-    @Column(name = "genre", nullable = false, length = 50)
+    @Column(name = "genre", nullable = false, length = 150)
     private String genre;
 
     @Column(name = "age_limit", nullable = false)

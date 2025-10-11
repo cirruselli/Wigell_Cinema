@@ -14,32 +14,36 @@ public class Screening {
     @Column(name = "start_time", nullable = false)
     private LocalDateTime startTime;
 
-    //RELATION
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "room_id", nullable = false)
-    private Room room;
+    @Column(name = "speaker_name", length = 100)
+    private String speakerName;
 
     //RELATION
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "movie_id")
     private Movie movie;
 
-    @Column(name = "speaker_name", length = 100)
-    private String speakerName;
+    //RELATION
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "room_id", nullable = false)
+    private Room room;
+
+
 
     public Screening() {
     }
 
-    public Screening(LocalDateTime startTime, Room room, String speakerName) {
+    public Screening(LocalDateTime startTime, String speakerName, Room room) {
         this.startTime = startTime;
-        this.room = room;
         this.speakerName = speakerName;
+        this.room = room;
+
     }
 
-    public Screening(LocalDateTime startTime, Room room, Movie movie) {
+    public Screening(LocalDateTime startTime, Movie movie, Room room) {
         this.startTime = startTime;
-        this.room = room;
         this.movie = movie;
+        this.room = room;
+
     }
 
     public Long getId() {
@@ -58,12 +62,12 @@ public class Screening {
         this.startTime = startTime;
     }
 
-    public Room getRoom() {
-        return room;
+    public String getSpeakerName() {
+        return speakerName;
     }
 
-    public void setRoom(Room room) {
-        this.room = room;
+    public void setSpeakerName(String speakerName) {
+        this.speakerName = speakerName;
     }
 
     public Movie getMovie() {
@@ -74,11 +78,11 @@ public class Screening {
         this.movie = movie;
     }
 
-    public String getSpeakerName() {
-        return speakerName;
+    public Room getRoom() {
+        return room;
     }
 
-    public void setSpeakerName(String speakerName) {
-        this.speakerName = speakerName;
+    public void setRoom(Room room) {
+        this.room = room;
     }
 }

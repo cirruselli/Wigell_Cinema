@@ -27,6 +27,12 @@ public class Booking {
     @Column(name = "equipment")
     private List<String> equipments = new ArrayList<>();
 
+    @Column(name = "total_price_SEK", nullable = false, precision = 10, scale = 2)
+    private BigDecimal totalPriceSek;
+
+    @Column(name = "total_price_USD", nullable = false, precision = 10, scale = 2)
+    private BigDecimal totalPriceUsd;
+
     //RELATION
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_id", nullable = false)
@@ -43,35 +49,33 @@ public class Booking {
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
 
-    @Column(name = "total_price_SEK", nullable = false, precision = 10, scale = 2)
-    private BigDecimal totalPriceSek;
 
-    @Column(name = "total_price_USD", nullable = false, precision = 10, scale = 2)
-    private BigDecimal totalPriceUsd;
 
     public Booking() {
     }
 
     //bookingEquipment är inte med här pga ska inte kunna fyllas i vid en POST -> rummets existerande utrustning ska däremot visas i responsen!
-    public Booking(LocalDateTime reservationTime, int numberOfGuests, Room room, Screening screening, Customer customer, BigDecimal totalPriceSek, BigDecimal totalPriceUsd) {
+    public Booking(LocalDateTime reservationTime, int numberOfGuests, BigDecimal totalPriceSek, BigDecimal totalPriceUsd, Room room, Screening screening, Customer customer) {
         this.reservationTime = reservationTime;
         this.numberOfGuests = numberOfGuests;
+        this.totalPriceSek = totalPriceSek;
+        this.totalPriceUsd = totalPriceUsd;
         this.room = room;
         this.screening = screening;
         this.customer = customer;
-        this.totalPriceSek = totalPriceSek;
-        this.totalPriceUsd = totalPriceUsd;
+
     }
 
-    public Booking(LocalDateTime reservationTime, int numberOfGuests, List<String> equipments, Room room, Screening screening, Customer customer, BigDecimal totalPriceSek, BigDecimal totalPriceUsd) {
+    public Booking(LocalDateTime reservationTime, int numberOfGuests, List<String> equipments, BigDecimal totalPriceSek, BigDecimal totalPriceUsd, Room room, Screening screening, Customer customer) {
         this.reservationTime = reservationTime;
         this.numberOfGuests = numberOfGuests;
         this.equipments = equipments;
+        this.totalPriceSek = totalPriceSek;
+        this.totalPriceUsd = totalPriceUsd;
         this.room = room;
         this.screening = screening;
         this.customer = customer;
-        this.totalPriceSek = totalPriceSek;
-        this.totalPriceUsd = totalPriceUsd;
+
     }
 
     public Long getId() {
@@ -106,6 +110,22 @@ public class Booking {
         this.equipments = equipments;
     }
 
+    public BigDecimal getTotalPriceSek() {
+        return totalPriceSek;
+    }
+
+    public void setTotalPriceSek(BigDecimal totalPriceSek) {
+        this.totalPriceSek = totalPriceSek;
+    }
+
+    public BigDecimal getTotalPriceUsd() {
+        return totalPriceUsd;
+    }
+
+    public void setTotalPriceUsd(BigDecimal totalPriceUsd) {
+        this.totalPriceUsd = totalPriceUsd;
+    }
+
     public Room getRoom() {
         return room;
     }
@@ -128,21 +148,5 @@ public class Booking {
 
     public void setCustomer(Customer customer) {
         this.customer = customer;
-    }
-
-    public BigDecimal getTotalPriceSek() {
-        return totalPriceSek;
-    }
-
-    public void setTotalPriceSek(BigDecimal totalPriceSek) {
-        this.totalPriceSek = totalPriceSek;
-    }
-
-    public BigDecimal getTotalPriceUsd() {
-        return totalPriceUsd;
-    }
-
-    public void setTotalPriceUsd(BigDecimal totalPriceUsd) {
-        this.totalPriceUsd = totalPriceUsd;
     }
 }

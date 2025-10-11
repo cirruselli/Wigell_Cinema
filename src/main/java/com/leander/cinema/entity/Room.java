@@ -22,7 +22,7 @@ public class Room {
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "technical_equipments", joinColumns = @JoinColumn(name = "room_id"))
     @Column(name = "equipment")
-    private List<String> standardEquipments = new ArrayList<>(Arrays.asList("Mikrofon", "Högtalare", "Projektor"));
+    private List<String> standardEquipment = new ArrayList<>(Arrays.asList("Mikrofon", "Högtalare", "Projektor"));
 
     public Room() {
     }
@@ -32,10 +32,10 @@ public class Room {
         this.maxGuests = maxGuests;
     }
 
-    public Room(String name, int maxGuests, List<String> standardEquipments) {
+    public Room(String name, int maxGuests, List<String> standardEquipment) {
         this.name = name;
         this.maxGuests = maxGuests;
-        this.standardEquipments = standardEquipments;
+        this.standardEquipment = standardEquipment;
     }
 
     public Long getId() {
@@ -62,11 +62,11 @@ public class Room {
         this.maxGuests = maxGuests;
     }
 
-    public List<String> getStandardEquipments() {
-        return standardEquipments;
+    public List<String> getStandardEquipment() {
+        return standardEquipment;
     }
 
-    public void setStandardEquipments(List<String> standardEquipments) {
-        this.standardEquipments = standardEquipments;
+    public void setStandardEquipment(List<String> standardEquipment) {
+        this.standardEquipment = standardEquipment;
     }
 }

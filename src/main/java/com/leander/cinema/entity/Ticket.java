@@ -11,18 +11,8 @@ public class Ticket {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "number_of_tickets")
+    @Column(name = "number_of_tickets", nullable = false)
     private int numberOfTickets;
-
-    //RELATION
-    @ManyToOne
-    @JoinColumn(name = "customer_id", nullable = false)
-    private Customer customer;
-
-    //RELATION
-    @ManyToOne
-    @JoinColumn(name = "screening_id", nullable = false)
-    private Screening screening;
 
     @Column(name = "price_sek", nullable = false, precision = 10, scale = 2)
     private BigDecimal priceSek;
@@ -36,6 +26,15 @@ public class Ticket {
     @Column(name = "total_price_usd", nullable = false)
     private BigDecimal totalPriceUsd;
 
+    //RELATION
+    @ManyToOne
+    @JoinColumn(name = "customer_id", nullable = false)
+    private Customer customer;
+
+    //RELATION
+    @ManyToOne
+    @JoinColumn(name = "screening_id", nullable = false)
+    private Screening screening;
 
     public Ticket() {
     }
@@ -48,14 +47,14 @@ public class Ticket {
         this.totalPriceUsd = totalPriceUsd;
     }
 
-    public Ticket(int numberOfTickets, Customer customer, Screening screening, BigDecimal priceSek, BigDecimal priceUsd, BigDecimal totalPriceSek, BigDecimal totalPriceUsd) {
+    public Ticket(int numberOfTickets, BigDecimal priceSek, BigDecimal priceUsd, BigDecimal totalPriceSek, BigDecimal totalPriceUsd, Customer customer, Screening screening) {
         this.numberOfTickets = numberOfTickets;
-        this.customer = customer;
-        this.screening = screening;
         this.priceSek = priceSek;
         this.priceUsd = priceUsd;
         this.totalPriceSek = totalPriceSek;
         this.totalPriceUsd = totalPriceUsd;
+        this.customer = customer;
+        this.screening = screening;
     }
 
     public Long getId() {
@@ -72,22 +71,6 @@ public class Ticket {
 
     public void setNumberOfTickets(int numberOfTickets) {
         this.numberOfTickets = numberOfTickets;
-    }
-
-    public Customer getCustomer() {
-        return customer;
-    }
-
-    public void setCustomer(Customer customer) {
-        this.customer = customer;
-    }
-
-    public Screening getScreening() {
-        return screening;
-    }
-
-    public void setScreening(Screening screening) {
-        this.screening = screening;
     }
 
     public BigDecimal getPriceSek() {
@@ -120,5 +103,21 @@ public class Ticket {
 
     public void setTotalPriceUsd(BigDecimal totalPriceUsd) {
         this.totalPriceUsd = totalPriceUsd;
+    }
+
+    public Customer getCustomer() {
+        return customer;
+    }
+
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
+    }
+
+    public Screening getScreening() {
+        return screening;
+    }
+
+    public void setScreening(Screening screening) {
+        this.screening = screening;
     }
 }
