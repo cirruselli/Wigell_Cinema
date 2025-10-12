@@ -8,9 +8,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public record BookingPostRequestDto(
-        @NotNull(message = "Datum måste anges")
-        @FutureOrPresent(message = "Datum kan inte vara bakåt i tiden")
+        @NotNull(message = "Datum och tid måste anges")
+        @FutureOrPresent(message = "Datum/tid kan inte vara bakåt i tiden")
         LocalDateTime reservationTime,
+        @NotNull
         @Min(value = 1, message = "Antal gäster måste vara minst 1")
         int numberOfGuests,
         @NotNull(message = "Utrustning måste anges")

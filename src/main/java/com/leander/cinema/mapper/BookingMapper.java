@@ -4,10 +4,6 @@ import com.leander.cinema.dto.CustomerDto.bookingDto.BookingPostRequestDto;
 import com.leander.cinema.dto.CustomerDto.bookingDto.BookingResponseDto;
 import com.leander.cinema.entity.Booking;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
-
 public class BookingMapper {
     public static Booking toBookingEntity(BookingPostRequestDto body) {
         Booking booking = new Booking();
@@ -18,7 +14,7 @@ public class BookingMapper {
     }
 
     public static BookingResponseDto toBookingResponseDto(Booking booking) {
-        BookingResponseDto response = new BookingResponseDto(
+        return new BookingResponseDto(
                 booking.getId(),
                 booking.getReservationTime(),
                 booking.getNumberOfGuests(),
@@ -29,9 +25,7 @@ public class BookingMapper {
                 booking.getScreening().getMovie().getTitle(),
                 booking.getCustomer().getFirstName(),
                 booking.getCustomer().getLastName(),
-
-                );
-        BigDecimal totalPriceSek,
-        BigDecimal totalPriceUsd
+                booking.getTotalPriceSek(),
+                booking.getTotalPriceUsd());
     }
 }

@@ -13,6 +13,8 @@ import com.leander.cinema.repository.ScreeningRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+
 
 @Service
 public class BookingService {
@@ -29,6 +31,9 @@ public class BookingService {
     //KONTROLLERA CREATEBOOKING-METODEN när föreställning och rum finns!!!!
     //----------------------------------------------------------
     public BookingResponseDto createBooking(BookingPostRequestDto body) {
+
+        // Måste koppla ihop bokningen på den inloggade customern!
+
         Booking booking = BookingMapper.toBookingEntity(body);
 
         Room room = roomRepository.findById(body.roomId())
@@ -41,16 +46,26 @@ public class BookingService {
         Screening screening = screeningRepository.findById(body.screeningId())
                 .orElseThrow(() -> new EntityNotFoundException("Föreställningen med id " + body.screeningId() + " hittades inte"));
 
-        // Eventuellt mappa booking, room och screening till respektive mapperDTO?
+        //Beräkna totalpris
 
-        //Beräkna totalpris -> komplettera med priser i klasserna för rum och föreställning
+        BigDecimal factor = new BigDecimal("9.51");
 
+        //SEK
+        BigDecimal totalPriceSek = room.getPriceSek().add(screening.getPriceSek());
+        booking.setTotalPriceSek(totalPriceSek);
 
+        //USD
+        BigDecimal totalPriceUsd = room.getPriceSek().add(screening.getPriceSek());
+        totalPriceUsd = totalPriceUsd.multiply(factor);
 
+        booking.setTotalPriceSek(totalPriceSek);
+        booking.setTotalPriceUsd(totalPriceUsd);
         booking.setRoom(room);
         booking.setScreening(screening);
         bookingRepository.save(booking);
 
+        // Måste koppla ihop bokningen på den inloggade customern!
+//        booking.setCustomer();
 
         return BookingMapper.toBookingResponseDto(booking);
 
@@ -65,8 +80,6 @@ public class BookingService {
             kan två bokningar boka samma rum samtidigt.
         */
 
-        // Måste koppla ihop bokningen på den inloggade customern!
-//        booking.setCustomer();
     }
 
 }

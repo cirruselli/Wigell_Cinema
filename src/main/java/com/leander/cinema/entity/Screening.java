@@ -2,6 +2,7 @@ package com.leander.cinema.entity;
 
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -17,6 +18,12 @@ public class Screening {
     @Column(name = "speaker_name", length = 100)
     private String speakerName;
 
+    @Column(name = "price_sek", nullable = false)
+    private BigDecimal priceSek;
+
+    @Column(name = "price_usd", nullable = false)
+    private BigDecimal priceUsd;
+
     //RELATION
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "movie_id")
@@ -27,23 +34,22 @@ public class Screening {
     @JoinColumn(name = "room_id", nullable = false)
     private Room room;
 
-
-
     public Screening() {
     }
 
-    public Screening(LocalDateTime startTime, String speakerName, Room room) {
+    public Screening(LocalDateTime startTime, String speakerName, BigDecimal priceSek, BigDecimal priceUsd, Room room) {
         this.startTime = startTime;
         this.speakerName = speakerName;
+        this.priceSek = priceSek;
+        this.priceUsd = priceUsd;
         this.room = room;
-
     }
 
-    public Screening(LocalDateTime startTime, Movie movie, Room room) {
+    public Screening(LocalDateTime startTime, BigDecimal priceSek, BigDecimal priceUsd, Movie movie) {
         this.startTime = startTime;
+        this.priceSek = priceSek;
+        this.priceUsd = priceUsd;
         this.movie = movie;
-        this.room = room;
-
     }
 
     public Long getId() {
@@ -68,6 +74,22 @@ public class Screening {
 
     public void setSpeakerName(String speakerName) {
         this.speakerName = speakerName;
+    }
+
+    public BigDecimal getPriceSek() {
+        return priceSek;
+    }
+
+    public void setPriceSek(BigDecimal priceSek) {
+        this.priceSek = priceSek;
+    }
+
+    public BigDecimal getPriceUsd() {
+        return priceUsd;
+    }
+
+    public void setPriceUsd(BigDecimal priceUsd) {
+        this.priceUsd = priceUsd;
     }
 
     public Movie getMovie() {

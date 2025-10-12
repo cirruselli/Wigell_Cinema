@@ -2,6 +2,7 @@ package com.leander.cinema.entity;
 
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -19,6 +20,12 @@ public class Room {
     @Column(name = "max_guests", nullable = false)
     private int maxGuests;
 
+    @Column(name = "price_sek", nullable = false)
+    private BigDecimal priceSek;
+
+    @Column(name = "price_usd", nullable = false)
+    private BigDecimal priceUsd;
+
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "standard_equipments", joinColumns = @JoinColumn(name = "room_id"))
     @Column(name = "equipment")
@@ -27,14 +34,18 @@ public class Room {
     public Room() {
     }
 
-    public Room(String name, int maxGuests) {
+    public Room(String name, int maxGuests, BigDecimal priceSek,BigDecimal priceUsd) {
         this.name = name;
         this.maxGuests = maxGuests;
+        this.priceSek = priceSek;
+        this.priceUsd = priceUsd;
     }
 
-    public Room(String name, int maxGuests, List<String> standardEquipment) {
+    public Room(String name, int maxGuests, BigDecimal priceSek, BigDecimal priceUsd, List<String> standardEquipment) {
         this.name = name;
         this.maxGuests = maxGuests;
+        this.priceSek = priceSek;
+        this.priceUsd = priceUsd;
         this.standardEquipment = standardEquipment;
     }
 
@@ -60,6 +71,22 @@ public class Room {
 
     public void setMaxGuests(int maxGuests) {
         this.maxGuests = maxGuests;
+    }
+
+    public BigDecimal getPriceSek() {
+        return priceSek;
+    }
+
+    public void setPriceSek(BigDecimal priceSek) {
+        this.priceSek = priceSek;
+    }
+
+    public BigDecimal getPriceUsd() {
+        return priceUsd;
+    }
+
+    public void setPriceUsd(BigDecimal priceUsd) {
+        this.priceUsd = priceUsd;
     }
 
     public List<String> getStandardEquipment() {
