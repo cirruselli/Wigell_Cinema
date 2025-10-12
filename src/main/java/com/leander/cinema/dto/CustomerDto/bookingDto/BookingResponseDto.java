@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public record BookingResponseDto(
+        Long id,
         LocalDateTime reservationTime,
         int numberOfGuests,
         List<String> equipments,//om bokningslistan är null (att inget värde finns innan en patch gjorts) så fylls den med listan från room!
@@ -12,7 +13,8 @@ public record BookingResponseDto(
         int maxGuests,
         String speakerName,
         String movieTitle,
-        String customerName,
+        String customerFirstName,
+        String customerLastName,
         BigDecimal totalPriceSek,
         BigDecimal totalPriceUsd
 ) {

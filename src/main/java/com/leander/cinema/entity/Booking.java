@@ -3,7 +3,6 @@ package com.leander.cinema.entity;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,9 +22,9 @@ public class Booking {
 
     //Utrustning för rummet vid en patch
     @ElementCollection(fetch = FetchType.LAZY)
-    @CollectionTable(name = "booking_equipments", joinColumns = @JoinColumn(name = "booking_id"))
+    @CollectionTable(name = "equipments", joinColumns = @JoinColumn(name = "booking_id"))
     @Column(name = "equipment")
-    private List<String> equipments = new ArrayList<>();
+    private List<String> equipment = new ArrayList<>();
 
     @Column(name = "total_price_SEK", nullable = false, precision = 10, scale = 2)
     private BigDecimal totalPriceSek;
@@ -54,22 +53,30 @@ public class Booking {
     public Booking() {
     }
 
-    //bookingEquipment är inte med här pga ska inte kunna fyllas i vid en POST -> rummets existerande utrustning ska däremot visas i responsen!
-    public Booking(LocalDateTime reservationTime, int numberOfGuests, BigDecimal totalPriceSek, BigDecimal totalPriceUsd, Room room, Screening screening, Customer customer) {
+    public Booking(LocalDateTime reservationTime, int numberOfGuests, List<String> equipment, BigDecimal totalPriceSek, BigDecimal totalPriceUsd) {
         this.reservationTime = reservationTime;
         this.numberOfGuests = numberOfGuests;
+        this.equipment = equipment;
         this.totalPriceSek = totalPriceSek;
         this.totalPriceUsd = totalPriceUsd;
-        this.room = room;
-        this.screening = screening;
-        this.customer = customer;
-
     }
 
-    public Booking(LocalDateTime reservationTime, int numberOfGuests, List<String> equipments, BigDecimal totalPriceSek, BigDecimal totalPriceUsd, Room room, Screening screening, Customer customer) {
+//    //bookingEquipment är inte med här pga ska inte kunna fyllas i vid en POST -> rummets existerande utrustning ska däremot visas i responsen!
+//    public Booking(LocalDateTime reservationTime, int numberOfGuests, BigDecimal totalPriceSek, BigDecimal totalPriceUsd, Room room, Screening screening, Customer customer) {
+//        this.reservationTime = reservationTime;
+//        this.numberOfGuests = numberOfGuests;
+//        this.totalPriceSek = totalPriceSek;
+//        this.totalPriceUsd = totalPriceUsd;
+//        this.room = room;
+//        this.screening = screening;
+//        this.customer = customer;
+//
+//    }
+
+    public Booking(LocalDateTime reservationTime, int numberOfGuests, List<String> equipment, BigDecimal totalPriceSek, BigDecimal totalPriceUsd, Room room, Screening screening, Customer customer) {
         this.reservationTime = reservationTime;
         this.numberOfGuests = numberOfGuests;
-        this.equipments = equipments;
+        this.equipment = equipment;
         this.totalPriceSek = totalPriceSek;
         this.totalPriceUsd = totalPriceUsd;
         this.room = room;
@@ -102,12 +109,12 @@ public class Booking {
         this.numberOfGuests = numberOfGuests;
     }
 
-    public List<String> getEquipments() {
-        return equipments;
+    public List<String> getEquipment() {
+        return equipment;
     }
 
-    public void setEquipments(List<String> equipments) {
-        this.equipments = equipments;
+    public void setEquipment(List<String> equipment) {
+        this.equipment = equipment;
     }
 
     public BigDecimal getTotalPriceSek() {

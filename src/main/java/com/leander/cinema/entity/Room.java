@@ -20,7 +20,7 @@ public class Room {
     private int maxGuests;
 
     @ElementCollection(fetch = FetchType.LAZY)
-    @CollectionTable(name = "technical_equipments", joinColumns = @JoinColumn(name = "room_id"))
+    @CollectionTable(name = "standard_equipments", joinColumns = @JoinColumn(name = "room_id"))
     @Column(name = "equipment")
     private List<String> standardEquipment = new ArrayList<>(Arrays.asList("Mikrofon", "Högtalare", "Projektor"));
 
