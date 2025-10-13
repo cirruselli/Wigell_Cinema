@@ -33,7 +33,6 @@ public class Customer {
     )
     private List<Address> addresses = new ArrayList<>();
 
-
     //RELATION
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Ticket> tickets = new ArrayList<>();

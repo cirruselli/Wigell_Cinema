@@ -1,8 +1,15 @@
 package com.leander.cinema.dto.AdminDto.customerDto;
 
+import com.leander.cinema.dto.AdminDto.addressDto.AdminAddressRequestDto;
+import com.leander.cinema.dto.CustomerDto.bookingDto.BookingPostRequestDto;
+import com.leander.cinema.dto.CustomerDto.ticketDto.TicketPostRequestDto;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+
+import java.util.List;
 
 public record AdminCustomerRequestDto(
         @NotBlank(message = "Förnamn måste anges")
@@ -17,6 +24,17 @@ public record AdminCustomerRequestDto(
         String email,
         @NotBlank(message = "Telefonnummer måste anges")
         @Size(max = 10, message = "Teckenlängd max 10")
-        String phone
+        String phone,
+        @Valid //Validerar listan om det finns element i den
+            /*Size och notnull kompletterar varandra för att tvinga att ett element
+        finns i adresslistan vid både post och put.
+         */
+        @NotNull(message = "Minst en adress måste anges")
+        @Size(min = 1, message = "Minst en adress måste anges")
+        List<AdminAddressRequestDto> addresses,
+        @Valid // Validerar listan om det finns element i den
+        List<TicketPostRequestDto> tickets,
+        @Valid // Validerar listan om det finns element i den
+        List<BookingPostRequestDto> bookings
 ) {
 }

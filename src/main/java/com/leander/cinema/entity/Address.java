@@ -29,11 +29,10 @@ public class Address {
     public Address() {
     }
 
-    public Address(String street, String postalCode, String city, List<Customer> customers) {
+    public Address(String street, String postalCode, String city) {
         this.street = street;
         this.postalCode = postalCode;
         this.city = city;
-        this.customers = customers;
     }
 
     public Long getId() {
