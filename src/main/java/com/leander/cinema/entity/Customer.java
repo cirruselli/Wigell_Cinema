@@ -25,7 +25,8 @@ public class Customer {
     private String phone;
 
     //RELATION
-    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id", nullable = false)
     private List<Address> addresses = new ArrayList<>();
 
     //RELATION

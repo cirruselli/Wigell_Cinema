@@ -3,9 +3,7 @@ package com.leander.cinema.entity;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "addresses",
-//Förhindrar att samma kund får exakt samma adress flera gånger
-uniqueConstraints = @UniqueConstraint(columnNames = {"street", "postalCode", "city", "customer_id"}))
+@Table(name = "addresses")
 public class Address {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,10 +19,6 @@ public class Address {
     @Column(nullable = false, name = "city", length = 100)
     private String city;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "customer_id", nullable = false)
-    private Customer customer;
-
     public Address() {
     }
 
@@ -32,13 +26,6 @@ public class Address {
         this.street = street;
         this.postalCode = postalCode;
         this.city = city;
-    }
-
-    public Address(String street, String postalCode, String city, Customer customer) {
-        this.street = street;
-        this.postalCode = postalCode;
-        this.city = city;
-        this.customer = customer;
     }
 
     public Long getId() {
@@ -71,13 +58,5 @@ public class Address {
 
     public void setCity(String city) {
         this.city = city;
-    }
-
-    public Customer getCustomer() {
-        return customer;
-    }
-
-    public void setCustomer(Customer customer) {
-        this.customer = customer;
     }
 }
