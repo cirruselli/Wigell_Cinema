@@ -2,6 +2,9 @@ package com.leander.cinema.entity;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "addresses")
 public class Address {
@@ -19,13 +22,18 @@ public class Address {
     @Column(nullable = false, name = "city", length = 100)
     private String city;
 
+    @ManyToMany(mappedBy = "addresses", fetch = FetchType.LAZY)
+    private List<Customer> customers = new ArrayList<>();
+
+
     public Address() {
     }
 
-    public Address(String street, String postalCode, String city) {
+    public Address(String street, String postalCode, String city, List<Customer> customers) {
         this.street = street;
         this.postalCode = postalCode;
         this.city = city;
+        this.customers = customers;
     }
 
     public Long getId() {
@@ -58,5 +66,13 @@ public class Address {
 
     public void setCity(String city) {
         this.city = city;
+    }
+
+    public List<Customer> getCustomers() {
+        return customers;
+    }
+
+    public void setCustomers(List<Customer> customers) {
+        this.customers = customers;
     }
 }

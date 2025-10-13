@@ -25,9 +25,14 @@ public class Customer {
     private String phone;
 
     //RELATION
-    @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "customer_id", nullable = false)
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "customer_addresses",
+            joinColumns = @JoinColumn(name = "customer_id"),
+            inverseJoinColumns = @JoinColumn(name = "address_id")
+    )
     private List<Address> addresses = new ArrayList<>();
+
 
     //RELATION
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
@@ -51,12 +56,12 @@ public class Customer {
         this.phone = phone;
     }
 
-    public Customer(String firstName, String lastName, String email, String phone, List<Address> address, List<Ticket> tickets, List<Booking> bookings) {
+    public Customer(String firstName, String lastName, String email, String phone, List<Address> addresses, List<Ticket> tickets, List<Booking> bookings) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.phone = phone;
-        this.addresses = address;
+        this.addresses = addresses;
         this.tickets = tickets;
         this.bookings = bookings;
     }
