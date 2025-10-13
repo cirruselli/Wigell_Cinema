@@ -9,9 +9,11 @@ import com.leander.cinema.mapper.CustomerMapper;
 import com.leander.cinema.repository.AddressRepository;
 import com.leander.cinema.repository.CustomerRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CustomerService {
@@ -34,6 +36,7 @@ public class CustomerService {
         return responseList;
     }
 
+    @Transactional
     public AdminCustomerResponseDto createCustomer(AdminCustomerRequestDto body) {
         Customer customer = CustomerMapper.toCustomerEntity(body);
 
@@ -73,5 +76,33 @@ public class CustomerService {
 
         customerRepository.save(customer);
         return CustomerMapper.toAdminCustomerResponseDto(customer);
+    }
+
+    @Transactional
+    public boolean deleteCustomer(long id) {
+        Optional<Customer> customer = customerRepository.findById(id);
+
+        if (customer.isPresent()) {
+            Customer customerEntity = customer.get();
+            // Tar bort kopplingarna mellan kunden och adressen i mellantabellen (customer_addresses)
+            customerEntity.getAddresses().clear();
+            // Tar bort kunden från tabellen customers
+            customerRepository.delete(customerEntity);
+
+            // Skickar delete av relationerna till DB innan rensning av adresserna i adress-tabellen
+            customerRepository.flush();
+
+            List<Address> allAddresses = addressRepository.findAll();
+            for (Address address : allAddresses) {
+                // Tar bort alla adresser som saknar kopplade kunder
+                if(address.getCustomers() == null || address.getCustomers().isEmpty()) {
+                    addressRepository.delete(address);
+                }
+            }
+            return true;
+        }
+        else{
+            return false;
+        }
     }
 }
