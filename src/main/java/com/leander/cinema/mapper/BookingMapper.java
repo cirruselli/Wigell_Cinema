@@ -7,7 +7,8 @@ import com.leander.cinema.entity.Booking;
 public class BookingMapper {
     public static Booking toBookingEntity(BookingPostRequestDto body) {
         Booking booking = new Booking();
-        booking.setReservationTime(body.reservationTime());
+        booking.setReservationStartTime(body.reservationStartTime());
+        booking.setReservationEndTime(body.reservationEndTime());
         booking.setNumberOfGuests(body.numberOfGuests());
         booking.setEquipment(body.equipment());
         return booking;
@@ -16,7 +17,8 @@ public class BookingMapper {
     public static BookingResponseDto toBookingResponseDto(Booking booking) {
         return new BookingResponseDto(
                 booking.getId(),
-                booking.getReservationTime(),
+                booking.getReservationStartTime(),
+                booking.getReservationEndTime(),
                 booking.getNumberOfGuests(),
                 booking.getEquipment(),
                 booking.getRoom().getName(),

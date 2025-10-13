@@ -14,8 +14,11 @@ public class Booking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "reservation_time")
-    private LocalDateTime reservationTime;
+    @Column(name = "reservation_start_time")
+    private LocalDateTime reservationStartTime;
+
+    @Column(name = "reservation_end_time")
+    private LocalDateTime reservationEndTime;
 
     @Column(name = "number_of_guests", nullable = false)
     private int numberOfGuests;
@@ -53,28 +56,18 @@ public class Booking {
     public Booking() {
     }
 
-    public Booking(LocalDateTime reservationTime, int numberOfGuests, List<String> equipment, BigDecimal totalPriceSek, BigDecimal totalPriceUsd) {
-        this.reservationTime = reservationTime;
+    public Booking(LocalDateTime reservationStartTime, LocalDateTime reservationEndTime, int numberOfGuests, List<String> equipment, BigDecimal totalPriceSek, BigDecimal totalPriceUsd) {
+        this.reservationStartTime = reservationStartTime;
+        this.reservationEndTime = reservationEndTime;
         this.numberOfGuests = numberOfGuests;
         this.equipment = equipment;
         this.totalPriceSek = totalPriceSek;
         this.totalPriceUsd = totalPriceUsd;
     }
 
-//    //bookingEquipment är inte med här pga ska inte kunna fyllas i vid en POST -> rummets existerande utrustning ska däremot visas i responsen!
-//    public Booking(LocalDateTime reservationTime, int numberOfGuests, BigDecimal totalPriceSek, BigDecimal totalPriceUsd, Room room, Screening screening, Customer customer) {
-//        this.reservationTime = reservationTime;
-//        this.numberOfGuests = numberOfGuests;
-//        this.totalPriceSek = totalPriceSek;
-//        this.totalPriceUsd = totalPriceUsd;
-//        this.room = room;
-//        this.screening = screening;
-//        this.customer = customer;
-//
-//    }
-
-    public Booking(LocalDateTime reservationTime, int numberOfGuests, List<String> equipment, BigDecimal totalPriceSek, BigDecimal totalPriceUsd, Room room, Screening screening, Customer customer) {
-        this.reservationTime = reservationTime;
+    public Booking(LocalDateTime reservationStartTime, LocalDateTime reservationEndTime, int numberOfGuests, List<String> equipment, BigDecimal totalPriceSek, BigDecimal totalPriceUsd, Room room, Screening screening, Customer customer) {
+        this.reservationStartTime = reservationStartTime;
+        this.reservationEndTime = reservationEndTime;
         this.numberOfGuests = numberOfGuests;
         this.equipment = equipment;
         this.totalPriceSek = totalPriceSek;
@@ -93,12 +86,20 @@ public class Booking {
         this.id = id;
     }
 
-    public LocalDateTime getReservationTime() {
-        return reservationTime;
+    public LocalDateTime getReservationStartTime() {
+        return reservationStartTime;
     }
 
-    public void setReservationTime(LocalDateTime reservationTime) {
-        this.reservationTime = reservationTime;
+    public void setReservationStartTime(LocalDateTime reservationStartTime) {
+        this.reservationStartTime = reservationStartTime;
+    }
+
+    public LocalDateTime getReservationEndTime() {
+        return reservationEndTime;
+    }
+
+    public void setReservationEndTime(LocalDateTime reservationEndTime) {
+        this.reservationEndTime = reservationEndTime;
     }
 
     public int getNumberOfGuests() {
