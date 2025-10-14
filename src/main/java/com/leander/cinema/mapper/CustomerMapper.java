@@ -17,7 +17,18 @@ import java.util.List;
 public class CustomerMapper {
 
     public static Customer toCustomerEntity (AdminCustomerRequestDto body){
-        return new Customer(body.firstName(), body.lastName(), body.email(), body.phone());
+        return new Customer(
+                body.firstName().trim(),
+                body.lastName().trim(),
+                body.email().trim(),
+                body.phone().trim());
+    }
+
+    public static void updateCustomer (Customer customer, AdminCustomerRequestDto updatedCustomer){
+        customer.setFirstName(updatedCustomer.firstName().trim());
+        customer.setLastName(updatedCustomer.lastName().trim());
+        customer.setEmail(updatedCustomer.email().trim());
+        customer.setPhone(updatedCustomer.phone().trim());
     }
 
     public static AdminCustomerResponseDto toAdminCustomerResponseDto(Customer customer) {

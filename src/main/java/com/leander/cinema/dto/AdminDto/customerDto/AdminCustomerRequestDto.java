@@ -1,8 +1,8 @@
 package com.leander.cinema.dto.AdminDto.customerDto;
 
 import com.leander.cinema.dto.AdminDto.addressDto.AdminAddressRequestDto;
-import com.leander.cinema.dto.CustomerDto.bookingDto.BookingPostRequestDto;
-import com.leander.cinema.dto.CustomerDto.ticketDto.TicketPostRequestDto;
+import com.leander.cinema.dto.AdminDto.bookingDto.AdminBookingUpdateRequestDto;
+import com.leander.cinema.dto.AdminDto.ticketDto.AdminTicketUpdateRequestDto;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -33,8 +33,8 @@ public record AdminCustomerRequestDto(
         @Size(min = 1, message = "Minst en adress måste anges")
         List<AdminAddressRequestDto> addresses,
         @Valid // Validerar listan om det finns element i den
-        List<TicketPostRequestDto> tickets,
+        List<AdminTicketUpdateRequestDto> tickets,
         @Valid // Validerar listan om det finns element i den
-        List<BookingPostRequestDto> bookings
+        List<AdminBookingUpdateRequestDto> bookings
 ) {
 }

@@ -22,7 +22,7 @@ public class AdminController {
     @GetMapping("/customers")
     public ResponseEntity<List<AdminCustomerResponseDto>> customers() {
         List<AdminCustomerResponseDto> response = customerService.getAllCustomers();
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok().body(response);
     }
 
     @PostMapping("/customers")
@@ -30,6 +30,12 @@ public class AdminController {
         AdminCustomerResponseDto response =  customerService.createCustomer(body);
         URI location = URI.create("/customers" + response.customerId());
         return ResponseEntity.created(location).body(response);
+    }
+
+    @PutMapping("/customers/{customerId}")
+    public ResponseEntity<AdminCustomerResponseDto> customer(@PathVariable Long customerId, @Valid @RequestBody AdminCustomerRequestDto body) {
+        AdminCustomerResponseDto response =  customerService.updateCustomer(customerId, body);
+        return ResponseEntity.ok().body(response);
     }
 
     @DeleteMapping("/customers/{customerId}")

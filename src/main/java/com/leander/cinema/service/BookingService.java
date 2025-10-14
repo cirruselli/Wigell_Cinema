@@ -32,7 +32,7 @@ public class BookingService {
     //----------------------------------------------------------
     public BookingResponseDto createBooking(BookingPostRequestDto body) {
 
-        // Måste koppla ihop bokningen på den inloggade customern!
+        // Måste koppla ihop bokningen på den inloggade customern!a
 
         Booking booking = BookingMapper.toBookingEntity(body);
 

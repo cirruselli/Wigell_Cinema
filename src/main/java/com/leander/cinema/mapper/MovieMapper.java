@@ -10,6 +10,11 @@ public class MovieMapper {
     }
 
     public static AdminMovieResponseDto toAdminMovieResponseDto(Movie movie){
-        return new AdminMovieResponseDto(movie.getId(), movie.getTitle(), movie.getGenre(), movie.getAgeLimit(), movie.getDuration());
+        return new AdminMovieResponseDto(
+                movie.getId(),
+                movie.getTitle().trim(),
+                movie.getGenre().trim(),
+                movie.getAgeLimit(),
+                movie.getDuration());
     }
 }
