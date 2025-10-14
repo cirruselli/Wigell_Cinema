@@ -1,5 +1,6 @@
 package com.leander.cinema.service;
 
+import com.leander.cinema.dto.AdminDto.movieDto.AdminMovieRequestDto;
 import com.leander.cinema.dto.AdminDto.movieDto.AdminMovieResponseDto;
 import com.leander.cinema.dto.CustomerDto.movieDto.MovieResponseDto;
 import com.leander.cinema.entity.Movie;
@@ -38,5 +39,10 @@ public class MovieService {
             responseList.add(movieResponse);
         }
         return responseList;
+    }
+
+    public AdminMovieResponseDto createMovie(AdminMovieRequestDto body) {
+        Movie movie = MovieMapper.toMovieEntity(body);
+        return MovieMapper.toAdminMovieResponseDto(movieRepository.save(movie));
     }
 }

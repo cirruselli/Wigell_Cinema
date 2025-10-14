@@ -2,7 +2,10 @@ package com.leander.cinema.controller;
 
 import com.leander.cinema.dto.AdminDto.customerDto.AdminCustomerRequestDto;
 import com.leander.cinema.dto.AdminDto.customerDto.AdminCustomerResponseDto;
+import com.leander.cinema.dto.AdminDto.movieDto.AdminMovieRequestDto;
+import com.leander.cinema.dto.AdminDto.movieDto.AdminMovieResponseDto;
 import com.leander.cinema.service.CustomerService;
+import com.leander.cinema.service.MovieService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,10 +17,15 @@ import java.util.List;
 @RequestMapping("/api/v1")
 public class AdminController {
     private final CustomerService customerService;
+    private final MovieService movieService;
 
-    public AdminController(CustomerService customerService) {
+    public AdminController(CustomerService customerService,
+                           MovieService movieService) {
         this.customerService = customerService;
+        this.movieService = movieService;
     }
+
+    // --- KUNDER ---
 
     @GetMapping("/customers")
     public ResponseEntity<List<AdminCustomerResponseDto>> customers() {
@@ -44,5 +52,14 @@ public class AdminController {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
+    }
+
+    // --- FILMER ---
+
+    @PostMapping("/movies")
+    public ResponseEntity<AdminMovieResponseDto> movies(@Valid @RequestBody AdminMovieRequestDto body) {
+        AdminMovieResponseDto response = movieService.createMovie(body);
+        URI location = URI.create("/movies" + response.id());
+        return ResponseEntity.created(location).body(response);
     }
 }
