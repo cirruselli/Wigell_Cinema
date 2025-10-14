@@ -12,6 +12,7 @@ import com.leander.cinema.repository.RoomRepository;
 import com.leander.cinema.repository.ScreeningRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 
@@ -30,6 +31,7 @@ public class BookingService {
 
     //KONTROLLERA CREATEBOOKING-METODEN när föreställning och rum finns!!!!
     //----------------------------------------------------------
+    @Transactional
     public BookingResponseDto createBooking(BookingPostRequestDto body) {
 
         // Måste koppla ihop bokningen på den inloggade customern!a

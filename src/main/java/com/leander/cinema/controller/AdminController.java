@@ -36,7 +36,7 @@ public class AdminController {
     @PostMapping("/customers")
     public ResponseEntity<AdminCustomerResponseDto> customer(@Valid @RequestBody AdminCustomerRequestDto body) {
         AdminCustomerResponseDto response =  customerService.createCustomer(body);
-        URI location = URI.create("/customers" + response.customerId());
+        URI location = URI.create("/customers/" + response.customerId());
         return ResponseEntity.created(location).body(response);
     }
 
@@ -59,7 +59,15 @@ public class AdminController {
     @PostMapping("/movies")
     public ResponseEntity<AdminMovieResponseDto> movies(@Valid @RequestBody AdminMovieRequestDto body) {
         AdminMovieResponseDto response = movieService.createMovie(body);
-        URI location = URI.create("/movies" + response.id());
+        URI location = URI.create("/movies/" + response.id());
         return ResponseEntity.created(location).body(response);
+    }
+
+    @DeleteMapping("/movies/{movieId}")
+    public ResponseEntity<Void> movie(@PathVariable Long movieId) {
+        if(movieService.deleteMovie(movieId)) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.notFound().build();
     }
 }

@@ -40,6 +40,7 @@ public class CustomerService {
         this.roomRepository = roomRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<AdminCustomerResponseDto> getAllCustomers() {
         List<Customer> customers = customerRepository.findAll();
 
