@@ -18,7 +18,7 @@ public class RoomMapper {
 
     public static Room toRoomEntity (AdminRoomRequestDto requestDto) {
         return new Room(
-                requestDto.name(),
+                requestDto.name().trim(),
                 requestDto.maxGuests(),
                 requestDto.priceSek(),
                 requestDto.standardEquipment()

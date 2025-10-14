@@ -25,8 +25,8 @@ public class MovieMapper {
 
     public static Movie toMovieEntity(AdminMovieRequestDto body){
         return new Movie(
-                body.title(),
-                body.genre(),
+                body.title().trim(),
+                body.genre().trim(),
                 body.ageLimit(),
                 body.duration()
         );
