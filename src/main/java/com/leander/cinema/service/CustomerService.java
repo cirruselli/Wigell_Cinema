@@ -163,10 +163,14 @@ public class CustomerService {
                 ticket.setScreening(ticketScreening);
 
                 ticket.setCustomer(customer);
-                updatedTickets.add(ticket);
+
+                if(!updatedTickets.contains(ticket)) {
+                    updatedTickets.add(ticket);
+                }
             }
 
-            customer.setTickets(updatedTickets);
+            customer.getTickets().clear();
+            customer.getTickets().addAll(updatedTickets);
         }
 
         // --- Uppdatera Booking ---
@@ -196,9 +200,13 @@ public class CustomerService {
                 booking.setTotalPriceUsd(bookingPriceSek.multiply(new BigDecimal("9.51")));
 
                 booking.setCustomer(customer);
-                updatedBookings.add(booking);
+
+                if(!updatedBookings.contains(booking)) {
+                    updatedBookings.add(booking);
+                }
             }
-            customer.setBookings(updatedBookings);
+            customer.getBookings().clear();
+            customer.getBookings().addAll(updatedBookings);
         }
 
         customerRepository.save(customer);
