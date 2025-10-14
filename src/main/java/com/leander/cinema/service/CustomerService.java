@@ -148,7 +148,7 @@ public class CustomerService {
                 // Totalpris för biljetter = antal biljetter * biljettpris
                 BigDecimal ticketTotalSek = ticket.getPriceSek().multiply(BigDecimal.valueOf(ticket.getNumberOfTickets()));
                 //USD
-                BigDecimal factor = new BigDecimal("9.51");
+                BigDecimal factor = new BigDecimal("0.11");
                 //Enskilt biljettpris i USD
                 BigDecimal ticketPriceUsd = ticket.getPriceSek().multiply(factor);
                 //Totalpris i USD
@@ -198,7 +198,7 @@ public class CustomerService {
                 // Beräkna pris för hela salongen
                 BigDecimal bookingPriceSek = room.getPriceSek().add(screening.getPriceSek());
                 booking.setTotalPriceSek(bookingPriceSek);
-                booking.setTotalPriceUsd(bookingPriceSek.multiply(new BigDecimal("9.51")));
+                booking.setTotalPriceUsd(bookingPriceSek.multiply(new BigDecimal("0.11")));
 
                 booking.setCustomer(customer);
 

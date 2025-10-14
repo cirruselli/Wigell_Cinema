@@ -3,8 +3,6 @@ package com.leander.cinema.service;
 import com.leander.cinema.dto.AdminDto.movieDto.AdminMovieRequestDto;
 import com.leander.cinema.dto.AdminDto.movieDto.AdminMovieResponseDto;
 import com.leander.cinema.dto.CustomerDto.movieDto.MovieResponseDto;
-import com.leander.cinema.entity.Address;
-import com.leander.cinema.entity.Customer;
 import com.leander.cinema.entity.Movie;
 import com.leander.cinema.mapper.MovieMapper;
 import com.leander.cinema.repository.MovieRepository;

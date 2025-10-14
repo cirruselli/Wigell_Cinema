@@ -14,9 +14,9 @@ public record BookingPostRequestDto(
         @NotNull(message = "Datum och tid måste anges")
         @FutureOrPresent(message = "Slutdatum/tid kan inte vara bakåt i tiden")
         LocalDateTime reservationEndTime,
-        @NotNull
+        @NotNull(message = "Antal gäster måste anges")
         @Min(value = 1, message = "Antal gäster måste vara minst 1")
-        int numberOfGuests,
+        Integer numberOfGuests,
         @NotNull(message = "Utrustning måste anges")
         List<String> equipment,
         @NotNull(message = "Rum måste anges")

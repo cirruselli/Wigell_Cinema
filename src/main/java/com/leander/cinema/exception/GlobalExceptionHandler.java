@@ -14,7 +14,7 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    //Egna exceptions
+    // --- Egna exceptions ---
     @ExceptionHandler(BookingCapacityExceededException.class)
     public ResponseEntity<String> handleBookingCapacityExceeded(BookingCapacityExceededException ex) {
         return ResponseEntity
@@ -22,7 +22,13 @@ public class GlobalExceptionHandler {
                 .body(ex.getMessage());
     }
 
-    //Färdiga exceptions
+    @ExceptionHandler(RoomAlreadyExistsException.class)
+    public ResponseEntity<String> handleRoomAlreadyExists(RoomAlreadyExistsException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    }
+
+
+    // --- Färdiga exceptions ---
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<String> handleEntityNotFound(EntityNotFoundException ex) {
         return ResponseEntity

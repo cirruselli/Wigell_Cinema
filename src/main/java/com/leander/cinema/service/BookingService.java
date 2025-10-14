@@ -50,7 +50,7 @@ public class BookingService {
 
         //Beräkna totalpris
 
-        BigDecimal factor = new BigDecimal("9.51");
+        BigDecimal factor = new BigDecimal("0.11");
 
         //SEK
         BigDecimal totalPriceSek = room.getPriceSek().add(screening.getPriceSek());

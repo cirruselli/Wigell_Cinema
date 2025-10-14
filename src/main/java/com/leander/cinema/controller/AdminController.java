@@ -4,6 +4,7 @@ import com.leander.cinema.dto.AdminDto.customerDto.AdminCustomerRequestDto;
 import com.leander.cinema.dto.AdminDto.customerDto.AdminCustomerResponseDto;
 import com.leander.cinema.dto.AdminDto.movieDto.AdminMovieRequestDto;
 import com.leander.cinema.dto.AdminDto.movieDto.AdminMovieResponseDto;
+import com.leander.cinema.dto.AdminDto.roomDto.AdminRoomRequestDto;
 import com.leander.cinema.dto.AdminDto.roomDto.AdminRoomResponseDto;
 import com.leander.cinema.service.CustomerService;
 import com.leander.cinema.service.MovieService;
@@ -87,5 +88,12 @@ public class AdminController {
     @GetMapping("/rooms/{roomId}")
     public ResponseEntity<AdminRoomResponseDto> room(@PathVariable Long roomId) {
         return ResponseEntity.ok().body(roomService.getRoomById(roomId));
+    }
+
+    @PostMapping("/rooms")
+    public ResponseEntity<AdminRoomResponseDto> room(@Valid @RequestBody AdminRoomRequestDto body) {
+        AdminRoomResponseDto response = roomService.createRoom(body);
+        URI location = URI.create("/rooms/" + response.id());
+        return ResponseEntity.created(location).body(response);
     }
 }

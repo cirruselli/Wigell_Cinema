@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @Entity
@@ -14,7 +13,7 @@ public class Room {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name", length = 50)
+    @Column(name = "name", length = 50, unique = true, nullable = false)
     private String name;
 
     @Column(name = "max_guests", nullable = false)
@@ -29,7 +28,7 @@ public class Room {
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "standard_equipments", joinColumns = @JoinColumn(name = "room_id"))
     @Column(name = "equipment")
-    private List<String> standardEquipment = new ArrayList<>(Arrays.asList("Mikrofon", "Högtalare", "Projektor"));
+    private List<String> standardEquipment = new ArrayList<>();
 
     public Room() {
     }
@@ -41,11 +40,10 @@ public class Room {
         this.priceUsd = priceUsd;
     }
 
-    public Room(String name, int maxGuests, BigDecimal priceSek, BigDecimal priceUsd, List<String> standardEquipment) {
+    public Room(String name, int maxGuests, BigDecimal priceSek, List<String> standardEquipment) {
         this.name = name;
         this.maxGuests = maxGuests;
         this.priceSek = priceSek;
-        this.priceUsd = priceUsd;
         this.standardEquipment = standardEquipment;
     }
 
