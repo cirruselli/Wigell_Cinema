@@ -33,11 +33,10 @@ public class Room {
     public Room() {
     }
 
-    public Room(String name, int maxGuests, BigDecimal priceSek,BigDecimal priceUsd) {
+    public Room(String name, int maxGuests, BigDecimal priceSek) {
         this.name = name;
         this.maxGuests = maxGuests;
         this.priceSek = priceSek;
-        this.priceUsd = priceUsd;
     }
 
     public Room(String name, int maxGuests, BigDecimal priceSek, List<String> standardEquipment) {

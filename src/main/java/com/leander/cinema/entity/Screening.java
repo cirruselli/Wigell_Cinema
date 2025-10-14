@@ -26,29 +26,33 @@ public class Screening {
 
     //RELATION
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "room_id", nullable = false)
+    private Room room;
+
+    //RELATION
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "movie_id")
     private Movie movie;
 
     //RELATION
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "room_id", nullable = false)
-    private Room room;
+    @JoinColumn(name = "speaker_id")
+    private Speaker speaker;
 
     public Screening() {
     }
 
-    public Screening(LocalDateTime startTime, String speakerName, BigDecimal priceSek, BigDecimal priceUsd, Room room) {
+    public Screening(LocalDateTime startTime, BigDecimal priceSek, Room room, Speaker speaker) {
         this.startTime = startTime;
-        this.speakerName = speakerName;
         this.priceSek = priceSek;
-        this.priceUsd = priceUsd;
         this.room = room;
+        this.speaker = speaker;
     }
 
-    public Screening(LocalDateTime startTime, BigDecimal priceSek, BigDecimal priceUsd, Movie movie) {
+    public Screening(LocalDateTime startTime, BigDecimal priceSek, Room room, Movie movie) {
         this.startTime = startTime;
         this.priceSek = priceSek;
-        this.priceUsd = priceUsd;
+        this.room = room;
         this.movie = movie;
     }
 
