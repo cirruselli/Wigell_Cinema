@@ -46,6 +46,21 @@ public class Room {
         this.standardEquipment = standardEquipment;
     }
 
+    public Room(String name, int maxGuests, BigDecimal priceSek, BigDecimal priceUsd) {
+        this.name = name;
+        this.maxGuests = maxGuests;
+        this.priceSek = priceSek;
+        this.priceUsd = priceUsd;
+    }
+
+    public Room(String name, int maxGuests, BigDecimal priceSek, BigDecimal priceUsd, List<String> standardEquipment) {
+        this.name = name;
+        this.maxGuests = maxGuests;
+        this.priceSek = priceSek;
+        this.priceUsd = priceUsd;
+        this.standardEquipment = standardEquipment;
+    }
+
     public Long getId() {
         return id;
     }

@@ -4,8 +4,6 @@ import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "bookings")
@@ -23,11 +21,11 @@ public class Booking {
     @Column(name = "number_of_guests", nullable = false)
     private int numberOfGuests;
 
-    //Utrustning för rummet vid en patch
-    @ElementCollection(fetch = FetchType.LAZY)
-    @CollectionTable(name = "equipments", joinColumns = @JoinColumn(name = "booking_id"))
-    @Column(name = "equipment")
-    private List<String> equipment = new ArrayList<>();
+//    //Utrustning för rummet vid en patch
+//    @ElementCollection(fetch = FetchType.LAZY)
+//    @CollectionTable(name = "equipments", joinColumns = @JoinColumn(name = "booking_id"))
+//    @Column(name = "equipment")
+//    private List<String> equipment = new ArrayList<>();
 
     @Column(name = "total_price_SEK", nullable = false, precision = 10, scale = 2)
     private BigDecimal totalPriceSek;
@@ -56,20 +54,18 @@ public class Booking {
     public Booking() {
     }
 
-    public Booking(LocalDateTime reservationStartTime, LocalDateTime reservationEndTime, int numberOfGuests, List<String> equipment, BigDecimal totalPriceSek, BigDecimal totalPriceUsd) {
+    public Booking(LocalDateTime reservationStartTime, LocalDateTime reservationEndTime, int numberOfGuests, BigDecimal totalPriceSek, BigDecimal totalPriceUsd) {
         this.reservationStartTime = reservationStartTime;
         this.reservationEndTime = reservationEndTime;
         this.numberOfGuests = numberOfGuests;
-        this.equipment = equipment;
         this.totalPriceSek = totalPriceSek;
         this.totalPriceUsd = totalPriceUsd;
     }
 
-    public Booking(LocalDateTime reservationStartTime, LocalDateTime reservationEndTime, int numberOfGuests, List<String> equipment, BigDecimal totalPriceSek, BigDecimal totalPriceUsd, Room room, Screening screening, Customer customer) {
+    public Booking(LocalDateTime reservationStartTime, LocalDateTime reservationEndTime, int numberOfGuests, BigDecimal totalPriceSek, BigDecimal totalPriceUsd, Room room, Screening screening, Customer customer) {
         this.reservationStartTime = reservationStartTime;
         this.reservationEndTime = reservationEndTime;
         this.numberOfGuests = numberOfGuests;
-        this.equipment = equipment;
         this.totalPriceSek = totalPriceSek;
         this.totalPriceUsd = totalPriceUsd;
         this.room = room;
@@ -108,14 +104,6 @@ public class Booking {
 
     public void setNumberOfGuests(int numberOfGuests) {
         this.numberOfGuests = numberOfGuests;
-    }
-
-    public List<String> getEquipment() {
-        return equipment;
-    }
-
-    public void setEquipment(List<String> equipment) {
-        this.equipment = equipment;
     }
 
     public BigDecimal getTotalPriceSek() {

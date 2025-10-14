@@ -2,6 +2,7 @@ package com.leander.cinema.controller;
 
 import com.leander.cinema.dto.AdminDto.customerDto.AdminCustomerRequestDto;
 import com.leander.cinema.dto.AdminDto.customerDto.AdminCustomerResponseDto;
+import com.leander.cinema.dto.AdminDto.customerDto.AdminCustomerWithAccountCreateDto;
 import com.leander.cinema.dto.AdminDto.movieDto.AdminMovieRequestDto;
 import com.leander.cinema.dto.AdminDto.movieDto.AdminMovieResponseDto;
 import com.leander.cinema.dto.AdminDto.roomDto.AdminRoomRequestDto;
@@ -40,7 +41,7 @@ public class AdminController {
     }
 
     @PostMapping("/customers")
-    public ResponseEntity<AdminCustomerResponseDto> customer(@Valid @RequestBody AdminCustomerRequestDto body) {
+    public ResponseEntity<AdminCustomerResponseDto> customer(@Valid @RequestBody AdminCustomerWithAccountCreateDto body) {
         AdminCustomerResponseDto response = customerService.createCustomer(body);
         URI location = URI.create("/customers/" + response.customerId());
         return ResponseEntity.created(location).body(response);
@@ -61,6 +62,12 @@ public class AdminController {
     }
 
     // --- FILMER ---
+
+//    @GetMapping("/movies")
+//    public List<?> movies(Authentication auth) {
+//        List<AdminMovieResponseDto> response = movieService.getAllMoviesForAdmin();
+//        return ResponseEntity.ok(response);
+//    }
 
     @PostMapping("/movies")
     public ResponseEntity<AdminMovieResponseDto> movie(@Valid @RequestBody AdminMovieRequestDto body) {
@@ -103,4 +110,5 @@ public class AdminController {
         return ResponseEntity.ok().body(response);
     }
 
+    // --- FÖRESTÄLLNING ---
 }

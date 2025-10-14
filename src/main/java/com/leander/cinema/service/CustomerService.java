@@ -4,11 +4,15 @@ import com.leander.cinema.dto.AdminDto.addressDto.AdminAddressRequestDto;
 import com.leander.cinema.dto.AdminDto.bookingDto.AdminBookingUpdateRequestDto;
 import com.leander.cinema.dto.AdminDto.customerDto.AdminCustomerRequestDto;
 import com.leander.cinema.dto.AdminDto.customerDto.AdminCustomerResponseDto;
+import com.leander.cinema.dto.AdminDto.customerDto.AdminCustomerWithAccountCreateDto;
 import com.leander.cinema.dto.AdminDto.ticketDto.AdminTicketUpdateRequestDto;
 import com.leander.cinema.entity.*;
 import com.leander.cinema.mapper.CustomerMapper;
 import com.leander.cinema.repository.*;
+import com.leander.cinema.security.AppUser;
+import com.leander.cinema.security.Role;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +20,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class CustomerService {
@@ -25,19 +30,22 @@ public class CustomerService {
     private final ScreeningRepository screeningRepository;
     private final BookingRepository bookingRepository;
     private final RoomRepository roomRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public CustomerService(CustomerRepository customerRepository,
                            AddressRepository addressRepository,
                            TicketRepository ticketRepository,
                            ScreeningRepository screeningRepository,
                            BookingRepository bookingRepository,
-                           RoomRepository roomRepository) {
+                           RoomRepository roomRepository,
+                           PasswordEncoder passwordEncoder) {
         this.customerRepository = customerRepository;
         this.addressRepository = addressRepository;
         this.ticketRepository = ticketRepository;
         this.screeningRepository = screeningRepository;
         this.bookingRepository = bookingRepository;
         this.roomRepository = roomRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional(readOnly = true)
@@ -53,12 +61,13 @@ public class CustomerService {
     }
 
     @Transactional
-    public AdminCustomerResponseDto createCustomer(AdminCustomerRequestDto body) {
-        Customer customer = CustomerMapper.toCustomerEntity(body);
+    public AdminCustomerResponseDto createCustomer(AdminCustomerWithAccountCreateDto newUser) {
+
+        Customer customer = CustomerMapper.toCustomerEntity(newUser);
 
         List<Address> addresses = new ArrayList<>();
 
-        for (AdminAddressRequestDto addressDto : body.addresses()) {
+        for (AdminAddressRequestDto addressDto : newUser.addresses()) {
 
             String street = addressDto.street().trim();
             String postalCode = addressDto.postalCode().trim();
@@ -90,6 +99,15 @@ public class CustomerService {
          */
         customer.setTickets(new ArrayList<>());
         customer.setBookings(new ArrayList<>());
+
+        AppUser appUser = new AppUser(
+                newUser.username().trim(),
+                passwordEncoder.encode(newUser.password().trim()),
+                Set.of(Role.USER),
+                customer
+        );
+
+        customer.setAppUser(appUser);
 
         customerRepository.save(customer);
         return CustomerMapper.toAdminCustomerResponseDto(customer);
@@ -195,7 +213,7 @@ public class CustomerService {
                         .orElseThrow(() -> new EntityNotFoundException("Föreställning med id " + bookingDto.screeningId() + " hittades inte"));
                 booking.setScreening(screening);
 
-                // Beräkna pris för hela salongen
+                // Beräkna pris för hela rummet
                 BigDecimal bookingPriceSek = room.getPriceSek().add(screening.getPriceSek());
                 booking.setTotalPriceSek(bookingPriceSek);
                 booking.setTotalPriceUsd(bookingPriceSek.multiply(new BigDecimal("0.11")));

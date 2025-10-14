@@ -44,6 +44,7 @@ public class MovieService {
         }
         return responseList;
     }
+
     @Transactional
     public AdminMovieResponseDto createMovie(AdminMovieRequestDto body) {
         Movie movie = MovieMapper.toMovieEntity(body);

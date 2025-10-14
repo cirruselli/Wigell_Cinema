@@ -5,6 +5,6 @@ public record AdminMovieResponseDto(
         String title,
         String genre,
         int ageLimit,
-        double duration
+        int duration
 ) {
 }

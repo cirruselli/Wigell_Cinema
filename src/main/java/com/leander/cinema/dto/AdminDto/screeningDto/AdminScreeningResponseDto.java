@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 public record AdminScreeningResponseDto(
         Long id,
         LocalDateTime startTime,
-        String nameOrTitle
+        String name,
+        String title
 ) {
 }

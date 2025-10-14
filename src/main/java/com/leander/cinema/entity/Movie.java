@@ -19,12 +19,12 @@ public class Movie {
     private int ageLimit;
 
     @Column(name = "duration", nullable = false)
-    private double duration;
+    private int duration;
 
     public Movie() {
     }
 
-    public Movie(String title, String genre, int ageLimit, double duration) {
+    public Movie(String title, String genre, int ageLimit, int duration) {
         this.title = title;
         this.genre = genre;
         this.ageLimit = ageLimit;
@@ -63,11 +63,11 @@ public class Movie {
         this.ageLimit = ageLimit;
     }
 
-    public double getDuration() {
+    public int getDuration() {
         return duration;
     }
 
-    public void setDuration(double duration) {
+    public void setDuration(int duration) {
         this.duration = duration;
     }
 }

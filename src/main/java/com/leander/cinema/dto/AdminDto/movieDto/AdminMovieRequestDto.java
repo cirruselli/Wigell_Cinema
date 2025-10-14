@@ -18,6 +18,6 @@ public record AdminMovieRequestDto(
 
         @NotNull(message = "Längden på filmen måste anges")
         @Min(value = 0, message = "Längden måste vara större än 0")
-        Double duration
+        Integer duration
 ) {
 }

@@ -22,12 +22,12 @@ public class CustomerController {
         this.movieService = movieService;
         this.bookingService = bookingService;
     }
-
-    @GetMapping("/movies")
-    public ResponseEntity<List<MovieResponseDto>> movies() {
-        List<MovieResponseDto> response = movieService.getAllMoviesForCustomer();
-        return ResponseEntity.ok(response);
-    }
+//
+//    @GetMapping("/movies")
+//    public ResponseEntity<List<MovieResponseDto>> movies() {
+//        List<MovieResponseDto> response = movieService.getAllMoviesForCustomer();
+//        return ResponseEntity.ok(response);
+//    }
 
     @PostMapping("/bookings")
     public ResponseEntity<BookingResponseDto> booking(@Valid @RequestBody BookingPostRequestDto requestDto) {

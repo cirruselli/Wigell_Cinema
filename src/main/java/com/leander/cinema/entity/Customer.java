@@ -1,5 +1,6 @@
 package com.leander.cinema.entity;
 
+import com.leander.cinema.security.AppUser;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -41,9 +42,8 @@ public class Customer {
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Booking> bookings = new ArrayList<>();
 
-//    // ANVÄNDARNAMN
-//    private AppUser appUser;
-
+    @OneToOne(mappedBy = "customer", cascade = CascadeType.ALL)
+    private AppUser appUser;
 
     public Customer() {
     }
@@ -55,14 +55,12 @@ public class Customer {
         this.phone = phone;
     }
 
-    public Customer(String firstName, String lastName, String email, String phone, List<Address> addresses, List<Ticket> tickets, List<Booking> bookings) {
+    public Customer(String firstName, String lastName, String email, String phone, List<Address> addresses) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.phone = phone;
         this.addresses = addresses;
-        this.tickets = tickets;
-        this.bookings = bookings;
     }
 
     public Long getId() {
@@ -127,5 +125,13 @@ public class Customer {
 
     public void setBookings(List<Booking> bookings) {
         this.bookings = bookings;
+    }
+
+    public AppUser getAppUser() {
+        return appUser;
+    }
+
+    public void setAppUser(AppUser appUser) {
+        this.appUser = appUser;
     }
 }

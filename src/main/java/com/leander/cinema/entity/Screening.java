@@ -15,13 +15,10 @@ public class Screening {
     @Column(name = "start_time", nullable = false)
     private LocalDateTime startTime;
 
-    @Column(name = "speaker_name", length = 100)
-    private String speakerName;
-
-    @Column(name = "price_sek", nullable = false)
+    @Column(name = "price_sek")
     private BigDecimal priceSek;
 
-    @Column(name = "price_usd", nullable = false)
+    @Column(name = "price_usd")
     private BigDecimal priceUsd;
 
     //RELATION
@@ -42,18 +39,23 @@ public class Screening {
     public Screening() {
     }
 
-    public Screening(LocalDateTime startTime, BigDecimal priceSek, Room room, Speaker speaker) {
+    public Screening(LocalDateTime startTime, Room room, Speaker speaker) {
         this.startTime = startTime;
-        this.priceSek = priceSek;
         this.room = room;
         this.speaker = speaker;
     }
 
-    public Screening(LocalDateTime startTime, BigDecimal priceSek, Room room, Movie movie) {
+    public Screening(LocalDateTime startTime, Room room, Movie movie) {
         this.startTime = startTime;
-        this.priceSek = priceSek;
         this.room = room;
         this.movie = movie;
+    }
+
+    public Screening(LocalDateTime startTime, BigDecimal priceSek, BigDecimal priceUsd, Room room) {
+        this.startTime = startTime;
+        this.priceSek = priceSek;
+        this.priceUsd = priceUsd;
+        this.room = room;
     }
 
     public Long getId() {
@@ -72,14 +74,6 @@ public class Screening {
         this.startTime = startTime;
     }
 
-    public String getSpeakerName() {
-        return speakerName;
-    }
-
-    public void setSpeakerName(String speakerName) {
-        this.speakerName = speakerName;
-    }
-
     public BigDecimal getPriceSek() {
         return priceSek;
     }
@@ -96,6 +90,14 @@ public class Screening {
         this.priceUsd = priceUsd;
     }
 
+    public Room getRoom() {
+        return room;
+    }
+
+    public void setRoom(Room room) {
+        this.room = room;
+    }
+
     public Movie getMovie() {
         return movie;
     }
@@ -104,11 +106,11 @@ public class Screening {
         this.movie = movie;
     }
 
-    public Room getRoom() {
-        return room;
+    public Speaker getSpeaker() {
+        return speaker;
     }
 
-    public void setRoom(Room room) {
-        this.room = room;
+    public void setSpeaker(Speaker speaker) {
+        this.speaker = speaker;
     }
 }
