@@ -24,4 +24,11 @@ public class RoomMapper {
                 requestDto.standardEquipment()
         );
     }
+
+    public static void updateRoom(Room room, AdminRoomRequestDto requestDto) {
+        room.setName(requestDto.name().trim());
+        room.setMaxGuests(requestDto.maxGuests());
+        room.setPriceSek(requestDto.priceSek());
+        room.setStandardEquipment(requestDto.standardEquipment());
+    }
 }

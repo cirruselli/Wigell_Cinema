@@ -37,7 +37,7 @@ public class RoomService {
     @Transactional(readOnly = true)
     public AdminRoomResponseDto getRoomById(Long id) {
         Room room = roomRepository.findById(id)
-                .orElseThrow(()-> new EntityNotFoundException("Rum med id " + id + " hittades inte"));
+                .orElseThrow(() -> new EntityNotFoundException("Rum med id " + id + " hittades inte"));
         return RoomMapper.toAdminRoomResponseDto(room);
     }
 
@@ -56,11 +56,33 @@ public class RoomService {
 
         room.setPriceUsd(priceUsd);
 
-        if(body.standardEquipment() == null){
+        if (body.standardEquipment() == null) {
             room.setStandardEquipment(new ArrayList<>(Arrays.asList("Mikrofon", "Högtalare", "Projektor")));
         }
 
         roomRepository.save(room);
+        return RoomMapper.toAdminRoomResponseDto(room);
+    }
+
+    @Transactional
+    public AdminRoomResponseDto updateRoom(Long id, AdminRoomRequestDto body) {
+        Room room = roomRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Rum med id " + id + " hittades inte"));
+
+        RoomMapper.updateRoom(room, body);
+
+        // --- Beräkna USD ---
+        BigDecimal priceSek = body.priceSek();
+        BigDecimal factor = new BigDecimal("0.11");
+        BigDecimal priceUsd = priceSek.multiply(factor);
+        room.setPriceUsd(priceUsd);
+
+        if (body.standardEquipment() == null) {
+            room.setStandardEquipment(new ArrayList<>(Arrays.asList("Mikrofon", "Högtalare", "Projektor")));
+        }
+
+        roomRepository.save(room);
+
         return RoomMapper.toAdminRoomResponseDto(room);
     }
 }

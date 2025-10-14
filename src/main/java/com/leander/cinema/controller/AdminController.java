@@ -96,4 +96,11 @@ public class AdminController {
         URI location = URI.create("/rooms/" + response.id());
         return ResponseEntity.created(location).body(response);
     }
+
+    @PutMapping("/rooms/{roomId}")
+    public ResponseEntity<AdminRoomResponseDto> room(@PathVariable Long roomId, @Valid @RequestBody AdminRoomRequestDto body) {
+        AdminRoomResponseDto response = roomService.updateRoom(roomId, body);
+        return ResponseEntity.ok().body(response);
+    }
+
 }
