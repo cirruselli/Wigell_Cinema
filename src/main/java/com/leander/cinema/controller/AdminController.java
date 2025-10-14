@@ -83,4 +83,9 @@ public class AdminController {
         List<AdminRoomResponseDto> response = roomService.getAllRooms();
         return ResponseEntity.ok().body(response);
     }
+
+    @GetMapping("/rooms/{roomId}")
+    public ResponseEntity<AdminRoomResponseDto> room(@PathVariable Long roomId) {
+        return ResponseEntity.ok().body(roomService.getRoomById(roomId));
+    }
 }
