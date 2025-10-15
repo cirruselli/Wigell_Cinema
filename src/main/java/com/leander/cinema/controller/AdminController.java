@@ -7,11 +7,14 @@ import com.leander.cinema.dto.AdminDto.movieDto.AdminMovieRequestDto;
 import com.leander.cinema.dto.AdminDto.movieDto.AdminMovieResponseDto;
 import com.leander.cinema.dto.AdminDto.roomDto.AdminRoomRequestDto;
 import com.leander.cinema.dto.AdminDto.roomDto.AdminRoomResponseDto;
+import com.leander.cinema.dto.AdminDto.screeningDto.AdminScreeningResponseDto;
 import com.leander.cinema.service.CustomerService;
 import com.leander.cinema.service.MovieService;
 import com.leander.cinema.service.RoomService;
+import com.leander.cinema.service.ScreeningService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -23,13 +26,16 @@ public class AdminController {
     private final CustomerService customerService;
     private final MovieService movieService;
     private final RoomService roomService;
+    private final ScreeningService screeningService;
 
     public AdminController(CustomerService customerService,
                            MovieService movieService,
-                           RoomService roomService) {
+                           RoomService roomService,
+                           ScreeningService screeningService) {
         this.customerService = customerService;
         this.movieService = movieService;
         this.roomService = roomService;
+        this.screeningService = screeningService;
     }
 
     // --- KUNDER ---
@@ -116,4 +122,11 @@ public class AdminController {
     }
 
     // --- FÖRESTÄLLNING ---
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/screenings")
+    public ResponseEntity<List<AdminScreeningResponseDto>> screenings() {
+        List<AdminScreeningResponseDto> response = screeningService.getAllScreenings();
+        return ResponseEntity.ok().body(response);
+    }
 }
