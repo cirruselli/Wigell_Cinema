@@ -69,6 +69,11 @@ public class AdminController {
 //        return ResponseEntity.ok(response);
 //    }
 
+    @GetMapping("/movies/{movieId}")
+    public ResponseEntity<AdminMovieResponseDto> movie(@PathVariable Long movieId) {
+        return ResponseEntity.ok().body(movieService.getMovieById(movieId));
+    }
+
     @PostMapping("/movies")
     public ResponseEntity<AdminMovieResponseDto> movie(@Valid @RequestBody AdminMovieRequestDto body) {
         AdminMovieResponseDto response = movieService.createMovie(body);
@@ -77,7 +82,7 @@ public class AdminController {
     }
 
     @DeleteMapping("/movies/{movieId}")
-    public ResponseEntity<Void> movie(@PathVariable Long movieId) {
+    public ResponseEntity<Void> movie(@PathVariable Long movieId, @RequestParam(required = false) String ignore) {
         if (movieService.deleteMovie(movieId)) {
             return ResponseEntity.noContent().build();
         }

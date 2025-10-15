@@ -4,8 +4,11 @@ import com.leander.cinema.dto.AdminDto.movieDto.AdminMovieRequestDto;
 import com.leander.cinema.dto.AdminDto.movieDto.AdminMovieResponseDto;
 import com.leander.cinema.dto.CustomerDto.movieDto.MovieResponseDto;
 import com.leander.cinema.entity.Movie;
+import com.leander.cinema.entity.Room;
 import com.leander.cinema.mapper.MovieMapper;
+import com.leander.cinema.mapper.RoomMapper;
 import com.leander.cinema.repository.MovieRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,6 +46,13 @@ public class MovieService {
             responseList.add(movieResponse);
         }
         return responseList;
+    }
+
+    @Transactional(readOnly = true)
+    public AdminMovieResponseDto getMovieById(Long id) {
+        Movie movie = movieRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Film med id " + id + " hittades inte"));
+        return MovieMapper.toAdminMovieResponseDto(movie);
     }
 
     @Transactional
