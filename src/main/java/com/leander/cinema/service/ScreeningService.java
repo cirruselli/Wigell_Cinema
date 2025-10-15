@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ScreeningService {
@@ -89,5 +90,16 @@ public class ScreeningService {
         screeningRepository.save(screening);
 
         return ScreeningMapper.toAdminScreeningResponseDto(screening);
+    }
+
+    @Transactional
+    public boolean deleteScreening(Long id) {
+        Optional<Screening> screening = screeningRepository.findById(id);
+
+        if (screening.isPresent()) {
+            screeningRepository.delete(screening.get());
+            return true;
+        }
+        return false;
     }
 }

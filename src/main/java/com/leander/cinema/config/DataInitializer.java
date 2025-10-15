@@ -238,8 +238,15 @@ public class DataInitializer {
                         customer2
                 );
 
+                booking1.setScreening(screening1);
+                screening1.getBookings().add(booking1);
                 bookingRepository.save(booking1);
+
+                booking2.setScreening(screening2);
+                screening2.getBookings().add(booking2);
                 bookingRepository.save(booking2);
+
+
             }
         };
     }

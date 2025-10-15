@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "screenings")
@@ -38,6 +40,11 @@ public class Screening {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "speaker_id")
     private Speaker speaker;
+
+    //RELATION
+    @OneToMany(mappedBy = "screening", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Booking> bookings = new ArrayList<>();
+
 
     public Screening() {
     }
@@ -128,5 +135,13 @@ public class Screening {
 
     public void setSpeaker(Speaker speaker) {
         this.speaker = speaker;
+    }
+
+    public List<Booking> getBookings() {
+        return bookings;
+    }
+
+    public void setBookings(List<Booking> bookings) {
+        this.bookings = bookings;
     }
 }

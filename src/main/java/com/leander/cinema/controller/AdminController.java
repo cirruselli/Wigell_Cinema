@@ -138,4 +138,12 @@ public class AdminController {
         URI location = URI.create("/screenings/" + response.screeningId());
         return ResponseEntity.created(location).body(response);
     }
+
+    @DeleteMapping("/screenings/{screeningId}")
+    public ResponseEntity<Void> screening(@PathVariable Long screeningId) {
+        if (screeningService.deleteScreening(screeningId)) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
 }
