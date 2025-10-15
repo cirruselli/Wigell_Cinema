@@ -15,6 +15,11 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     // --- Egna exceptions ---
+    @ExceptionHandler(CustomerOwnershipException.class)
+    public ResponseEntity<String> handleOwnershipException(CustomerOwnershipException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+
     @ExceptionHandler(BookingCapacityExceededException.class)
     public ResponseEntity<String> handleBookingCapacityExceeded(BookingCapacityExceededException ex) {
         return ResponseEntity

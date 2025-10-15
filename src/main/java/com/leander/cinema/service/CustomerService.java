@@ -7,6 +7,7 @@ import com.leander.cinema.dto.AdminDto.customerDto.AdminCustomerResponseDto;
 import com.leander.cinema.dto.AdminDto.customerDto.AdminCustomerWithAccountCreateDto;
 import com.leander.cinema.dto.AdminDto.ticketDto.AdminTicketUpdateRequestDto;
 import com.leander.cinema.entity.*;
+import com.leander.cinema.exception.CustomerOwnershipException;
 import com.leander.cinema.mapper.CustomerMapper;
 import com.leander.cinema.repository.*;
 import com.leander.cinema.security.AppUser;
@@ -176,11 +177,6 @@ public class CustomerService {
                 ticket.setPriceUsd(ticketPriceUsd);
                 ticket.setTotalPriceUsd(ticketTotalUsd);
 
-                Screening ticketScreening = screeningRepository.findById(ticketDto.screeningId())
-                        .orElseThrow(() -> new EntityNotFoundException(
-                                "Föreställning med id " + ticketDto.screeningId() + " hittades inte"));
-                ticket.setScreening(ticketScreening);
-
                 ticket.setCustomer(customer);
 
                 if(!updatedTickets.contains(ticket)) {
@@ -201,22 +197,15 @@ public class CustomerService {
                 Booking booking = bookingRepository.findById(bookingDto.id())
                         .orElseThrow(() -> new EntityNotFoundException("Bokning med id " + bookingDto.id() + " hittades inte"));
 
+                //Kontrollera att bokningen tillhör kunden
+                if (!booking.getCustomer().getId().equals(customer.getId())) {
+                    throw new CustomerOwnershipException(
+                            "Bokning med id " + bookingDto.id() + " tillhör inte kunden med id " + customer.getId());
+                }
+
                 booking.setReservationStartTime(bookingDto.reservationStartTime());
                 booking.setReservationEndTime(bookingDto.reservationEndTime());
                 booking.setNumberOfGuests(bookingDto.numberOfGuests());
-
-                Room room = roomRepository.findById(bookingDto.roomId())
-                        .orElseThrow(() -> new EntityNotFoundException("Rum med id " + bookingDto.roomId() + " hittades inte"));
-                booking.setRoom(room);
-
-                Screening screening = screeningRepository.findById(bookingDto.screeningId())
-                        .orElseThrow(() -> new EntityNotFoundException("Föreställning med id " + bookingDto.screeningId() + " hittades inte"));
-                booking.setScreening(screening);
-
-                // Beräkna pris för hela rummet
-                BigDecimal bookingPriceSek = room.getPriceSek().add(screening.getPriceSek());
-                booking.setTotalPriceSek(bookingPriceSek);
-                booking.setTotalPriceUsd(bookingPriceSek.multiply(new BigDecimal("0.11")));
 
                 booking.setCustomer(customer);
 

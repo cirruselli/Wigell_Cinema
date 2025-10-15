@@ -5,7 +5,6 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 public record AdminBookingUpdateRequestDto(
         @NotNull(message = "Boknings-ID måste anges")
@@ -18,12 +17,5 @@ public record AdminBookingUpdateRequestDto(
         LocalDateTime reservationEndTime,
         @NotNull
         @Min(value = 1, message = "Antal gäster måste vara minst 1")
-        int numberOfGuests,
-        @NotNull(message = "Utrustning måste anges")
-        List<String> equipment,
-        @NotNull(message = "Rum måste anges")
-        Long roomId,
-        @NotNull(message = "Föreställning måste anges")
-        Long screeningId
-) {
+        int numberOfGuests) {
 }

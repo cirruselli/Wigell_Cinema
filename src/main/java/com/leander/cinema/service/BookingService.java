@@ -36,8 +36,6 @@ public class BookingService {
 
         // Måste koppla ihop bokningen på den inloggade customern!a
 
-        Booking booking = BookingMapper.toBookingEntity(body);
-
         Room room = roomRepository.findById(body.roomId())
                 .orElseThrow(() -> new EntityNotFoundException("Rummet med id " + body.roomId() + " hittades inte"));
 
@@ -47,6 +45,9 @@ public class BookingService {
 
         Screening screening = screeningRepository.findById(body.screeningId())
                 .orElseThrow(() -> new EntityNotFoundException("Föreställningen med id " + body.screeningId() + " hittades inte"));
+
+
+        Booking booking = BookingMapper.toBookingEntity(body);
 
         //Beräkna totalpris
 

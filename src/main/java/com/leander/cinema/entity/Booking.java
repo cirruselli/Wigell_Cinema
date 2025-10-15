@@ -41,7 +41,7 @@ public class Booking {
     //RELATION
     @OneToOne(fetch = FetchType.LAZY)
     //Unique = true -> en föreställning kan bara ha en bokning -> enligt krav på att bokning avser hela salongen
-    @JoinColumn(name = "screening_id", nullable = false)
+    @JoinColumn(name = "screening_id", nullable = false, unique = true)
     private Screening screening;
 
     //RELATION
