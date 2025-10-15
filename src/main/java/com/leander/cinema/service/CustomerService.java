@@ -160,6 +160,11 @@ public class CustomerService {
                 Ticket ticket = ticketRepository.findById(ticketDto.id())
                         .orElseThrow(() -> new EntityNotFoundException("Biljett med id " + ticketDto.id() + " hittades inte"));
 
+                //Kontrollera att biljetten tillhör kunden
+                if (!ticket.getCustomer().getId().equals(customer.getId())) {
+                    throw new CustomerOwnershipException("Biljett med id " + ticketDto.id() + " tillhör inte kunden");
+                }
+
                 ticket.setNumberOfTickets(ticketDto.numberOfTickets());
 
                 //***********KONTROLLERA BILJETTPRIS OCH BOKNINGSPRIS! *******************************
