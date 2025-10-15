@@ -49,6 +49,7 @@ public class CustomerService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    // === Lista kunder ===
     @Transactional(readOnly = true)
     public List<AdminCustomerResponseDto> getAllCustomers() {
         List<Customer> customers = customerRepository.findAll();
@@ -61,6 +62,7 @@ public class CustomerService {
         return responseList;
     }
 
+    // === Lägga till kund ===
     @Transactional
     public AdminCustomerResponseDto createCustomer(AdminCustomerWithAccountCreateDto newUser) {
 
@@ -114,6 +116,7 @@ public class CustomerService {
         return CustomerMapper.toAdminCustomerResponseDto(customer);
     }
 
+    // === Uppdatera kund ===
     @Transactional
     public AdminCustomerResponseDto updateCustomer(Long id, AdminCustomerRequestDto requestDto) {
         Customer customer = customerRepository.findById(id)
@@ -227,7 +230,7 @@ public class CustomerService {
         return CustomerMapper.toAdminCustomerResponseDto(customer);
     }
 
-
+    // === Ta bort kund ===
     @Transactional
     public boolean deleteCustomer(Long id) {
         Optional<Customer> customer = customerRepository.findById(id);

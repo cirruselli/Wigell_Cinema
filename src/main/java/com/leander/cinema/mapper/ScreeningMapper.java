@@ -1,5 +1,6 @@
 package com.leander.cinema.mapper;
 
+import com.leander.cinema.dto.AdminDto.screeningDto.AdminScreeningRequestDto;
 import com.leander.cinema.dto.AdminDto.screeningDto.AdminScreeningResponseDto;
 import com.leander.cinema.entity.Screening;
 
@@ -7,6 +8,14 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public class ScreeningMapper {
+    public static Screening toScreeningEntity(AdminScreeningRequestDto body) {
+        return new Screening(
+                body.startTime(),
+                body.endTime(),
+                body.priceSek()
+        );
+    }
+
     public static AdminScreeningResponseDto toAdminScreeningResponseDto(Screening screening) {
 
         // === Room ===

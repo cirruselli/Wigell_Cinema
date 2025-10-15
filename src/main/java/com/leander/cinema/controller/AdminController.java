@@ -7,6 +7,7 @@ import com.leander.cinema.dto.AdminDto.movieDto.AdminMovieRequestDto;
 import com.leander.cinema.dto.AdminDto.movieDto.AdminMovieResponseDto;
 import com.leander.cinema.dto.AdminDto.roomDto.AdminRoomRequestDto;
 import com.leander.cinema.dto.AdminDto.roomDto.AdminRoomResponseDto;
+import com.leander.cinema.dto.AdminDto.screeningDto.AdminScreeningRequestDto;
 import com.leander.cinema.dto.AdminDto.screeningDto.AdminScreeningResponseDto;
 import com.leander.cinema.service.CustomerService;
 import com.leander.cinema.service.MovieService;
@@ -83,7 +84,7 @@ public class AdminController {
     @PostMapping("/movies")
     public ResponseEntity<AdminMovieResponseDto> movie(@Valid @RequestBody AdminMovieRequestDto body) {
         AdminMovieResponseDto response = movieService.createMovie(body);
-        URI location = URI.create("/movies/" + response.id());
+        URI location = URI.create("/movies/" + response.movieId());
         return ResponseEntity.created(location).body(response);
     }
 
@@ -111,7 +112,7 @@ public class AdminController {
     @PostMapping("/rooms")
     public ResponseEntity<AdminRoomResponseDto> room(@Valid @RequestBody AdminRoomRequestDto body) {
         AdminRoomResponseDto response = roomService.createRoom(body);
-        URI location = URI.create("/rooms/" + response.id());
+        URI location = URI.create("/rooms/" + response.roomId());
         return ResponseEntity.created(location).body(response);
     }
 
@@ -121,12 +122,20 @@ public class AdminController {
         return ResponseEntity.ok().body(response);
     }
 
-    // --- FÖRESTÄLLNING ---
+    // --- FÖRESTÄLLNINGAR ---
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/screenings")
     public ResponseEntity<List<AdminScreeningResponseDto>> screenings() {
         List<AdminScreeningResponseDto> response = screeningService.getAllScreenings();
         return ResponseEntity.ok().body(response);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/screenings")
+    public ResponseEntity<AdminScreeningResponseDto> screening(@Valid @RequestBody AdminScreeningRequestDto body) {
+        AdminScreeningResponseDto response = screeningService.createScreening(body);
+        URI location = URI.create("/screenings/" + response.screeningId());
+        return ResponseEntity.created(location).body(response);
     }
 }

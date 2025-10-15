@@ -1,7 +1,7 @@
 package com.leander.cinema.dto.AdminDto.movieDto;
 
 public record AdminMovieResponseDto(
-        Long id,
+        Long movieId,
         String title,
         String genre,
         int ageLimit,

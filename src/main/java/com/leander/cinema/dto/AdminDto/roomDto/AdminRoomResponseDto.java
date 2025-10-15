@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public record AdminRoomResponseDto(
-        Long id,
+        Long roomId,
         String name,
         int maxGuests,
         BigDecimal priceSek,

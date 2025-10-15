@@ -15,6 +15,13 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     // --- Egna exceptions ---
+    @ExceptionHandler(InvalidScreeningException.class)
+    public ResponseEntity<String> handleInvalidScreening(InvalidScreeningException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ex.getMessage());
+    }
+
     @ExceptionHandler(BookingConflictException.class)
     public ResponseEntity<String> handleBookingConflict(BookingConflictException ex) {
         return ResponseEntity
@@ -24,7 +31,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(CustomerOwnershipException.class)
     public ResponseEntity<String> handleOwnershipException(CustomerOwnershipException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ex.getMessage());
     }
 
     @ExceptionHandler(BookingCapacityExceededException.class)
@@ -36,7 +45,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(RoomAlreadyExistsException.class)
     public ResponseEntity<String> handleRoomAlreadyExists(RoomAlreadyExistsException ex) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(ex.getMessage());
     }
 
 

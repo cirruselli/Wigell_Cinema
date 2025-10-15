@@ -42,6 +42,12 @@ public class Screening {
     public Screening() {
     }
 
+    public Screening(LocalDateTime startTime, LocalDateTime endTime, BigDecimal priceSek) {
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.priceSek = priceSek;
+    }
+
     public Screening(LocalDateTime startTime, LocalDateTime endTime, BigDecimal priceSek, BigDecimal priceUsd, Room room, Speaker speaker) {
         this.startTime = startTime;
         this.endTime = endTime;
@@ -58,14 +64,6 @@ public class Screening {
         this.priceUsd = priceUsd;
         this.room = room;
         this.movie = movie;
-    }
-
-    public Screening(LocalDateTime startTime, LocalDateTime endTime, BigDecimal priceSek, BigDecimal priceUsd, Room room) {
-        this.startTime = startTime;
-        this.endTime = endTime;
-        this.priceSek = priceSek;
-        this.priceUsd = priceUsd;
-        this.room = room;
     }
 
     public Long getId() {

@@ -54,6 +54,8 @@ public class BookingService {
         Screening screening = screeningRepository.findById(body.screeningId())
                 .orElseThrow(() -> new EntityNotFoundException("Föreställningen med id " + body.screeningId() + " hittades inte"));
 
+        //ÄNDRA DATUM UTIFRÅN ATT BOKNING INTE HAR DATUM OCH ATT SCREENING HAR DATUM SOM SKA KONTROLLERAS
+
         if (body.reservationEndTime().isBefore(body.reservationStartTime())) {
             throw new BookingConflictException("Reservationens slutdatum/tid kan inte vara före startdatum/tid.");
         }

@@ -17,6 +17,6 @@ public record AdminScreeningRequestDto(
         @NotNull(message = "Rum måste anges")
         Long roomId,
         Long movieId,
-        Long SpeakerId
+        Long speakerId
 ) {
 }

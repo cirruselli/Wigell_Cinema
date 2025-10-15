@@ -4,9 +4,7 @@ import com.leander.cinema.dto.AdminDto.movieDto.AdminMovieRequestDto;
 import com.leander.cinema.dto.AdminDto.movieDto.AdminMovieResponseDto;
 import com.leander.cinema.dto.CustomerDto.movieDto.MovieResponseDto;
 import com.leander.cinema.entity.Movie;
-import com.leander.cinema.entity.Room;
 import com.leander.cinema.mapper.MovieMapper;
-import com.leander.cinema.mapper.RoomMapper;
 import com.leander.cinema.repository.MovieRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
@@ -58,7 +56,8 @@ public class MovieService {
     @Transactional
     public AdminMovieResponseDto createMovie(AdminMovieRequestDto body) {
         Movie movie = MovieMapper.toMovieEntity(body);
-        return MovieMapper.toAdminMovieResponseDto(movieRepository.save(movie));
+        movieRepository.save(movie);
+        return MovieMapper.toAdminMovieResponseDto(movie);
     }
 
     public boolean deleteMovie(Long id) {

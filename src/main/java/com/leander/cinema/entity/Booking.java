@@ -12,6 +12,8 @@ public class Booking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    //TA BORT TIDERNA!!!!!!!!!!
+
     @Column(name = "reservation_start_time")
     private LocalDateTime reservationStartTime;
 
