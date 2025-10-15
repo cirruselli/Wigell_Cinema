@@ -10,45 +10,62 @@ public class BookingMapper {
         booking.setReservationStartTime(body.reservationStartTime());
         booking.setReservationEndTime(body.reservationEndTime());
         booking.setNumberOfGuests(body.numberOfGuests());
-        booking.getScreening().getRoom().setStandardEquipment(body.equipment());
         return booking;
     }
 
     public static BookingResponseDto toBookingResponseDto(Booking booking) {
+        //Kontrollerar att inga null-värden sätts
+        // Room
+        String roomName = "----";
+        int maxGuests = 0;
+        if (booking.getRoom() != null) {
+            if (booking.getRoom().getName() != null) {
+                roomName = booking.getRoom().getName();
+            }
+            maxGuests = booking.getRoom().getMaxGuests();
+        }
+
+        // Speaker
+        String speakerName = "----";
+        if (booking.getScreening() != null && booking.getScreening().getSpeaker() != null) {
+            if (booking.getScreening().getSpeaker().getName() != null) {
+                speakerName = booking.getScreening().getSpeaker().getName();
+            }
+        }
+
+        // Movie
+        String movieTitle = "----";
+        if (booking.getScreening() != null && booking.getScreening().getMovie() != null) {
+            if (booking.getScreening().getMovie().getTitle() != null) {
+                movieTitle = booking.getScreening().getMovie().getTitle();
+            }
+        }
+
+        // Customer
+        String customerFirstName = "----";
+        String customerLastName = "----";
+        if (booking.getCustomer() != null) {
+            if (booking.getCustomer().getFirstName() != null) {
+                customerFirstName = booking.getCustomer().getFirstName();
+            }
+            if (booking.getCustomer().getLastName() != null) {
+                customerLastName = booking.getCustomer().getLastName();
+            }
+        }
+
         return new BookingResponseDto(
                 booking.getId(),
                 booking.getReservationStartTime(),
                 booking.getReservationEndTime(),
                 booking.getNumberOfGuests(),
-                booking.getRoom().getName(),
-                booking.getRoom().getMaxGuests(),
-                booking.getRoom().getStandardEquipment(),
-                booking.getScreening().getSpeaker().getName(),
-                booking.getScreening().getMovie().getTitle(),
-                booking.getCustomer().getFirstName(),
-                booking.getCustomer().getLastName(),
+                roomName,
+                maxGuests,
+                speakerName,
+                movieTitle,
+                customerFirstName,
+                customerLastName,
                 booking.getTotalPriceSek(),
-                booking.getTotalPriceUsd());
+                booking.getTotalPriceUsd()
+        );
     }
-
-//    public static AdminBookingResponseDto toAdminBookingResponseDto(Booking booking) {
-//        return new AdminBookingResponseDto(
-//                booking.getId(),
-//                booking.getReservationStartTime(),
-//                booking.getReservationEndTime(),
-//                booking.getNumberOfGuests(),
-//                booking.getRoom().getId(),
-//                booking.getRoom().getName(),
-//                booking.getRoom().getMaxGuests(),
-//                booking.getRoom().getStandardEquipment(),
-//                booking.getScreening().getSpeaker().getId(),
-//                booking.getScreening().getSpeaker().getName(),
-//                booking.getScreening().getSpeaker().getDuration(),
-//                booking.getScreening().getMovie().getId(),
-//                booking.getScreening().getMovie().getTitle(),
-//                booking.getScreening().getMovie().getDuration(),
-//                booking.getTotalPriceSek(),
-//                booking.getTotalPriceUsd());
-//    }
-
 }

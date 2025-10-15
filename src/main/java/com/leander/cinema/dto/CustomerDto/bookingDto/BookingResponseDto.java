@@ -2,7 +2,6 @@ package com.leander.cinema.dto.CustomerDto.bookingDto;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 
 public record BookingResponseDto(
         Long id,
@@ -11,7 +10,6 @@ public record BookingResponseDto(
         int numberOfGuests,
         String roomName,
         int maxGuests,
-        List<String> equipments,
         String speakerName,
         String movieTitle,
         String customerFirstName,

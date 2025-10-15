@@ -176,24 +176,32 @@ public class DataInitializer {
 
                 Screening screening1 = new Screening(
                         LocalDateTime.of(2025, 10, 20, 18, 0),
+                        new BigDecimal("1200.00"),
+                        new BigDecimal("120.00"),
                         room1,
                         movie1
                 );
 
                 Screening screening2 = new Screening(
                         LocalDateTime.of(2025, 10, 21, 15, 0),
+                        new BigDecimal("1200.00"),
+                        new BigDecimal("120.00"),
                         room2,
                         movie2
                 );
 
                 Screening screening3 = new Screening(
                         LocalDateTime.of(2025, 10, 22, 20, 0),
+                        new BigDecimal("1200.00"),
+                        new BigDecimal("120.00"),
                         room1,
                         movie3
                 );
 
                 Screening screening4 = new Screening(
                         LocalDateTime.of(2025, 10, 23, 17, 30),
+                        new BigDecimal("20000.00"),
+                        new BigDecimal("2000.00"),
                         room5,
                         speaker1
                 );
@@ -209,7 +217,7 @@ public class DataInitializer {
                         LocalDateTime.of(2025, 10, 15, 20, 30),
                         4,
                         new BigDecimal("1200.00"),
-                        new BigDecimal("100.00"),
+                        new BigDecimal("120.00"),
                         room1,
                         screening1,
                         customer1
@@ -220,7 +228,7 @@ public class DataInitializer {
                         LocalDateTime.of(2025, 10, 16, 17, 0),
                         2,
                         new BigDecimal("600.00"),
-                        new BigDecimal("50.00"),
+                        new BigDecimal("60.00"),
                         room2,
                         screening2,
                         customer2

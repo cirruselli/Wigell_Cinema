@@ -15,6 +15,13 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     // --- Egna exceptions ---
+    @ExceptionHandler(BookingConflictException.class)
+    public ResponseEntity<String> handleBookingConflict(BookingConflictException ex) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(ex.getMessage());
+    }
+
     @ExceptionHandler(CustomerOwnershipException.class)
     public ResponseEntity<String> handleOwnershipException(CustomerOwnershipException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());

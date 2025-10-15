@@ -15,10 +15,10 @@ public class Screening {
     @Column(name = "start_time", nullable = false)
     private LocalDateTime startTime;
 
-    @Column(name = "price_sek")
+    @Column(name = "price_sek", nullable = false)
     private BigDecimal priceSek;
 
-    @Column(name = "price_usd")
+    @Column(name = "price_usd", nullable = false)
     private BigDecimal priceUsd;
 
     //RELATION
@@ -39,14 +39,18 @@ public class Screening {
     public Screening() {
     }
 
-    public Screening(LocalDateTime startTime, Room room, Speaker speaker) {
+    public Screening(LocalDateTime startTime, BigDecimal priceSek, BigDecimal priceUsd, Room room, Speaker speaker) {
         this.startTime = startTime;
+        this.priceSek = priceSek;
+        this.priceUsd = priceUsd;
         this.room = room;
         this.speaker = speaker;
     }
 
-    public Screening(LocalDateTime startTime, Room room, Movie movie) {
+    public Screening(LocalDateTime startTime, BigDecimal priceSek, BigDecimal priceUsd, Room room, Movie movie) {
         this.startTime = startTime;
+        this.priceSek = priceSek;
+        this.priceUsd = priceUsd;
         this.room = room;
         this.movie = movie;
     }

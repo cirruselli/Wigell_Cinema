@@ -6,11 +6,16 @@ import com.leander.cinema.entity.Booking;
 import com.leander.cinema.entity.Room;
 import com.leander.cinema.entity.Screening;
 import com.leander.cinema.exception.BookingCapacityExceededException;
+import com.leander.cinema.exception.BookingConflictException;
 import com.leander.cinema.mapper.BookingMapper;
+import com.leander.cinema.repository.AppUserRepository;
 import com.leander.cinema.repository.BookingRepository;
 import com.leander.cinema.repository.RoomRepository;
 import com.leander.cinema.repository.ScreeningRepository;
+import com.leander.cinema.security.AppUser;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,19 +27,22 @@ public class BookingService {
     private final BookingRepository bookingRepository;
     private final RoomRepository roomRepository;
     private final ScreeningRepository screeningRepository;
+    private final AppUserRepository appUserRepository;
 
-    public BookingService(BookingRepository bookingRepository, RoomRepository roomRepository, ScreeningRepository screeningRepository) {
+    public BookingService(BookingRepository bookingRepository, RoomRepository roomRepository, ScreeningRepository screeningRepository, AppUserRepository appUserRepository) {
         this.bookingRepository = bookingRepository;
         this.roomRepository = roomRepository;
         this.screeningRepository = screeningRepository;
+        this.appUserRepository = appUserRepository;
     }
 
-    //KONTROLLERA CREATEBOOKING-METODEN när föreställning och rum finns!!!!
-    //----------------------------------------------------------
+    //Kunden reserverar lokal
     @Transactional
     public BookingResponseDto createBooking(BookingPostRequestDto body) {
-
-        // Måste koppla ihop bokningen på den inloggade customern!a
+        //Hämta inloggad användare
+        String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+        AppUser currentUser = appUserRepository.findByUsername(currentUsername)
+                .orElseThrow(() -> new AccessDeniedException("Ingen användare hittades"));
 
         Room room = roomRepository.findById(body.roomId())
                 .orElseThrow(() -> new EntityNotFoundException("Rummet med id " + body.roomId() + " hittades inte"));
@@ -46,11 +54,20 @@ public class BookingService {
         Screening screening = screeningRepository.findById(body.screeningId())
                 .orElseThrow(() -> new EntityNotFoundException("Föreställningen med id " + body.screeningId() + " hittades inte"));
 
+        if (body.reservationEndTime().isBefore(body.reservationStartTime())) {
+            throw new BookingConflictException("Reservationens slutdatum/tid kan inte vara före startdatum/tid.");
+        }
+
+        if (bookingRepository.existsByRoomAndReservationStartTimeLessThanAndReservationEndTimeGreaterThan(
+                room, body.reservationEndTime(), body.reservationStartTime())) {
+            throw new BookingConflictException("Rummet är upptaget under den valda tiden.");
+        }
 
         Booking booking = BookingMapper.toBookingEntity(body);
+        //Bokningen kopplas till den inloggade kunden
+        booking.setCustomer(currentUser.getCustomer());
 
         //Beräkna totalpris
-
         BigDecimal factor = new BigDecimal("0.11");
 
         //SEK
@@ -65,24 +82,9 @@ public class BookingService {
         booking.setTotalPriceUsd(totalPriceUsd);
         booking.setRoom(room);
         booking.setScreening(screening);
+
         bookingRepository.save(booking);
 
-        // Måste koppla ihop bokningen på den inloggade customern!
-//        booking.setCustomer();
-
         return BookingMapper.toBookingResponseDto(booking);
-
-        /* Ska man kunna skapa en egen föreställning direkt vid bokningen? isf ändra i BookingPostRequestDto
-        från ScreeningId till hela objektet Screening.
-         */
-
-            /*Ska man kunna boka samma rum och föreställning två gånger samma tid?? Om inte så inför
-            nya attribut i Bookingklassen med starttid och sluttid för att kunna kontrollera om
-            ett rum / föreställning är upptagen denna tid... Kolla om det finns en bokning för samma
-            screening och room. Om flera bokningar kan kopplas till samma Screening och samma Room samtidigt,
-            kan två bokningar boka samma rum samtidigt.
-        */
-
     }
-
 }
