@@ -11,6 +11,9 @@ management:
   info:
     env:
       enabled: true
+  endpoint:
+    health:
+      show-details: always
 
 info:
   app:
@@ -78,6 +81,3 @@ management:
     web:
       exposure:
         include: health,info
-  endpoint:
-    health:
-      show-details: always
