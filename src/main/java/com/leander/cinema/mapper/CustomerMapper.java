@@ -4,9 +4,8 @@ import com.leander.cinema.dto.AdminDto.addressDto.AdminAddressResponseDto;
 import com.leander.cinema.dto.AdminDto.bookingDto.AdminBookingResponseDto;
 import com.leander.cinema.dto.AdminDto.customerDto.AdminCustomerRequestDto;
 import com.leander.cinema.dto.AdminDto.customerDto.AdminCustomerResponseDto;
-import com.leander.cinema.dto.AdminDto.customerDto.AdminCustomerWithAccountCreateDto;
+import com.leander.cinema.dto.AdminDto.customerDto.AdminCustomerWithAccountRequestDto;
 import com.leander.cinema.dto.AdminDto.ticketDto.AdminTicketResponseDto;
-import com.leander.cinema.dto.CustomerDto.bookingDto.BookingResponseDto;
 import com.leander.cinema.entity.Address;
 import com.leander.cinema.entity.Booking;
 import com.leander.cinema.entity.Customer;
@@ -18,7 +17,7 @@ import java.util.List;
 
 public class CustomerMapper {
 
-    public static Customer toCustomerEntity(AdminCustomerWithAccountCreateDto body) {
+    public static Customer toCustomerEntity(AdminCustomerWithAccountRequestDto body) {
         return new Customer(
                 body.firstName().trim(),
                 body.lastName().trim(),
@@ -26,7 +25,7 @@ public class CustomerMapper {
                 body.phone().trim());
     }
 
-    public static void updateCustomer(Customer customer, AdminCustomerRequestDto updatedCustomer) {
+    public static void updateCustomer(Customer customer, AdminCustomerWithAccountRequestDto updatedCustomer) {
         customer.setFirstName(updatedCustomer.firstName().trim());
         customer.setLastName(updatedCustomer.lastName().trim());
         customer.setEmail(updatedCustomer.email().trim());
@@ -60,36 +59,25 @@ public class CustomerMapper {
         List<AdminBookingResponseDto> bookingDtos = new ArrayList<>();
         for (Booking booking : customer.getBookings()) {
 
-            Long speakerId = null;
             Long movieId = null;
-
-            String speakerName = null;
-            String movieTitle = null;
-
-            int speakerDuration = 0;
+            String speakerName = "----";
+            String movieTitle = "----";
             int movieDuration = 0;
 
-            if (booking.getScreening() != null && booking.getScreening().getId() != null) {
-                if (booking.getScreening().getSpeaker() != null) {
-                    speakerId = booking.getScreening().getSpeaker().getId();
-                    speakerName = booking.getScreening().getSpeaker().getName();
-                    speakerDuration = booking.getScreening().getSpeaker().getDuration();
-                } else {
-                    speakerId = null;
-                    speakerName = "----";
-                    speakerDuration = 0;
-                }
-
+            if (booking.getScreening() != null) {
+                // Om screening har film
                 if (booking.getScreening().getMovie() != null) {
                     movieId = booking.getScreening().getMovie().getId();
                     movieTitle = booking.getScreening().getMovie().getTitle();
                     movieDuration = booking.getScreening().getMovie().getDuration();
-                } else {
-                    movieId = null;
-                    movieTitle = "----";
-                    movieDuration = 0;
+                }
+
+                // Om screening har en egen talare
+                if (booking.getScreening().getSpeakerName() != null && !booking.getScreening().getSpeakerName().isBlank()) {
+                    speakerName = booking.getScreening().getSpeakerName();
                 }
             }
+
 
             bookingDtos.add(new AdminBookingResponseDto(
                     booking.getId(),
@@ -100,9 +88,7 @@ public class CustomerMapper {
                     booking.getRoom().getName(),
                     booking.getRoom().getMaxGuests(),
                     booking.getRoom().getStandardEquipment(),
-                    speakerId,
                     speakerName,
-                    speakerDuration,
                     movieId,
                     movieTitle,
                     movieDuration,
@@ -118,7 +104,8 @@ public class CustomerMapper {
                 customer.getPhone(),
                 addressDtos,
                 ticketDtos,
-                bookingDtos
+                bookingDtos,
+                customer.getAppUser().getUsername()
         );
     }
 }

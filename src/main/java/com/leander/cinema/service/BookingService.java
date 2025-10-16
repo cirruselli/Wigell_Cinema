@@ -7,6 +7,7 @@ import com.leander.cinema.entity.Room;
 import com.leander.cinema.entity.Screening;
 import com.leander.cinema.exception.BookingCapacityExceededException;
 import com.leander.cinema.exception.BookingConflictException;
+import com.leander.cinema.exception.InvalidBookingException;
 import com.leander.cinema.mapper.BookingMapper;
 import com.leander.cinema.repository.AppUserRepository;
 import com.leander.cinema.repository.BookingRepository;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 
 @Service
@@ -54,27 +56,62 @@ public class BookingService {
         Screening screening = screeningRepository.findById(body.screeningId())
                 .orElseThrow(() -> new EntityNotFoundException("Föreställningen med id " + body.screeningId() + " hittades inte"));
 
-        //ÄNDRA DATUM UTIFRÅN ATT BOKNING INTE HAR DATUM OCH ATT SCREENING HAR DATUM SOM SKA KONTROLLERAS
+        Booking booking = BookingMapper.toBookingEntity(body);
+        booking.setScreening(screening);
+        booking.setRoom(room);
+        //Bokningen kopplas till inloggad användare
+        booking.setCustomer(currentUser.getCustomer());
 
+        // Tider för bokningen sätts av användaren
+        booking.setReservationStartTime(body.reservationStartTime());
+        booking.setReservationEndTime(body.reservationEndTime());
+
+        //Kontrollera att reservationens slut inte är före start
         if (body.reservationEndTime().isBefore(body.reservationStartTime())) {
             throw new BookingConflictException("Reservationens slutdatum/tid kan inte vara före startdatum/tid.");
         }
 
-        if (bookingRepository.existsByRoomAndReservationStartTimeLessThanAndReservationEndTimeGreaterThan(
-                room, body.reservationEndTime(), body.reservationStartTime())) {
+        // === Kontrollera krock med andra bokningar i samma rum ===
+
+        //Rummet är inte redan bokat under tiden
+        boolean roomBookingConflict = bookingRepository.existsByRoomAndReservationStartTimeLessThanAndReservationEndTimeGreaterThan(
+                room, booking.getReservationEndTime(), booking.getReservationStartTime());
+
+        if (roomBookingConflict) {
             throw new BookingConflictException("Rummet är upptaget under den valda tiden.");
         }
 
-        Booking booking = BookingMapper.toBookingEntity(body);
-        //Bokningen kopplas till den inloggade kunden
-        booking.setCustomer(currentUser.getCustomer());
+        //Det finns ingen annan screening i samma rum som krockar i tid
+        boolean screeningConflict = screeningRepository.existsScreeningInRoomDuring(
+                booking.getRoom().getId(),
+                booking.getReservationStartTime(),
+                booking.getReservationEndTime(),
+                booking.getScreening().getId()
+        );
 
-        //Beräkna totalpris
+        if (screeningConflict) {
+            throw new BookingConflictException("Rummet är redan upptaget av en annan föreställning under den valda tiden.");
+        }
+
+        //Samma film får inte visas parallellt i olika rum
+        if (screening.getMovie() != null) { // endast för filmvisningar
+            boolean sameMovieOverlap = screeningRepository.existsByMovieIdAndTimeOverlap(
+                    booking.getScreening().getId(),
+                    booking.getReservationStartTime(),
+                    booking.getReservationEndTime()
+            );
+
+            if (sameMovieOverlap) {
+                throw new InvalidBookingException("Filmen visas redan under denna tid i en annan salong.");
+            }
+        }
+
+
+        // === Beräkna totalpris ===
         BigDecimal factor = new BigDecimal("0.11");
 
         //SEK
         BigDecimal totalPriceSek = room.getPriceSek().add(screening.getPriceSek());
-        booking.setTotalPriceSek(totalPriceSek);
 
         //USD
         BigDecimal totalPriceUsd = room.getPriceSek().add(screening.getPriceSek());
@@ -82,11 +119,41 @@ public class BookingService {
 
         booking.setTotalPriceSek(totalPriceSek);
         booking.setTotalPriceUsd(totalPriceUsd);
-        booking.setRoom(room);
-        booking.setScreening(screening);
 
         bookingRepository.save(booking);
 
         return BookingMapper.toBookingResponseDto(booking);
     }
+
+//    @Transactional
+//    public BookingResponseDto updateBooking(Long bookingId, BookingPatchDto body) {
+//        Booking booking = bookingRepository.findById(bookingId)
+//                .orElseThrow(() -> new EntityNotFoundException("Bokningen hittades inte"));
+//
+//        // Uppdatera datum/tid om de finns
+//        if (body.getReservationStartTime() != null) {
+//            booking.setReservationStartTime(body.getReservationStartTime());
+//        }
+//        if (body.getReservationEndTime() != null) {
+//            booking.setReservationEndTime(body.getReservationEndTime());
+//        }
+//
+//        // Uppdatera teknisk utrustning om det finns
+//        if (body.getEquipment() != null) {
+//            booking.setEquipment(body.getEquipment());
+//        }
+//
+//        // Kontrollera krock med andra bokningar eller screening
+//        Room room = booking.getScreening().getRoom();
+//        if (bookingRepository.existsByRoomAndReservationStartTimeLessThanAndReservationEndTimeGreaterThan(
+//                room, booking.getReservationEndTime(), booking.getReservationStartTime())) {
+//            throw new BookingConflictException("Rummet är upptaget under den valda tiden.");
+//        }
+
+    /// /Behövs orpphanremovial i bokningens relation med screening - fast screening ska ju inte uppdateras faktiskt!
+//
+//        bookingRepository.save(booking);
+//        return BookingMapper.toBookingResponseDto(booking);
+//    }
+
 }

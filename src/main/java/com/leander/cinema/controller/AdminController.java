@@ -2,7 +2,7 @@ package com.leander.cinema.controller;
 
 import com.leander.cinema.dto.AdminDto.customerDto.AdminCustomerRequestDto;
 import com.leander.cinema.dto.AdminDto.customerDto.AdminCustomerResponseDto;
-import com.leander.cinema.dto.AdminDto.customerDto.AdminCustomerWithAccountCreateDto;
+import com.leander.cinema.dto.AdminDto.customerDto.AdminCustomerWithAccountRequestDto;
 import com.leander.cinema.dto.AdminDto.movieDto.AdminMovieRequestDto;
 import com.leander.cinema.dto.AdminDto.movieDto.AdminMovieResponseDto;
 import com.leander.cinema.dto.AdminDto.roomDto.AdminRoomRequestDto;
@@ -48,14 +48,14 @@ public class AdminController {
     }
 
     @PostMapping("/customers")
-    public ResponseEntity<AdminCustomerResponseDto> customer(@Valid @RequestBody AdminCustomerWithAccountCreateDto body) {
+    public ResponseEntity<AdminCustomerResponseDto> customer(@Valid @RequestBody AdminCustomerWithAccountRequestDto body) {
         AdminCustomerResponseDto response = customerService.createCustomer(body);
         URI location = URI.create("/customers/" + response.customerId());
         return ResponseEntity.created(location).body(response);
     }
 
     @PutMapping("/customers/{customerId}")
-    public ResponseEntity<AdminCustomerResponseDto> customer(@PathVariable Long customerId, @Valid @RequestBody AdminCustomerRequestDto body) {
+    public ResponseEntity<AdminCustomerResponseDto> customer(@PathVariable Long customerId, @Valid @RequestBody AdminCustomerWithAccountRequestDto body) {
         AdminCustomerResponseDto response = customerService.updateCustomer(customerId, body);
         return ResponseEntity.ok().body(response);
     }

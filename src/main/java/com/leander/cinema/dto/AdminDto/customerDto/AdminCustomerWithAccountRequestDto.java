@@ -11,7 +11,7 @@ import jakarta.validation.constraints.Size;
 
 import java.util.List;
 
-public record AdminCustomerWithAccountCreateDto(
+public record AdminCustomerWithAccountRequestDto(
         @NotBlank(message = "Förnamn måste anges")
         @Size(max = 50, message = "Teckenlängd max 50")
         String firstName,

@@ -26,6 +26,9 @@ public class Screening {
     @Column(name = "price_usd", nullable = false)
     private BigDecimal priceUsd;
 
+    @Column(name = "speaker_name")
+    private String speakerName;
+
     //RELATION
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_id", nullable = false)
@@ -37,12 +40,7 @@ public class Screening {
     private Movie movie;
 
     //RELATION
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "speaker_id")
-    private Speaker speaker;
-
-    //RELATION
-    @OneToMany(mappedBy = "screening", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "screening", cascade = CascadeType.ALL)
     private List<Booking> bookings = new ArrayList<>();
 
 
@@ -55,13 +53,13 @@ public class Screening {
         this.priceSek = priceSek;
     }
 
-    public Screening(LocalDateTime startTime, LocalDateTime endTime, BigDecimal priceSek, BigDecimal priceUsd, Room room, Speaker speaker) {
+    public Screening(LocalDateTime startTime, LocalDateTime endTime, BigDecimal priceSek, BigDecimal priceUsd, String speakerName, Room room) {
         this.startTime = startTime;
         this.endTime = endTime;
         this.priceSek = priceSek;
         this.priceUsd = priceUsd;
+        this.speakerName = speakerName;
         this.room = room;
-        this.speaker = speaker;
     }
 
     public Screening(LocalDateTime startTime, LocalDateTime endTime, BigDecimal priceSek, BigDecimal priceUsd, Room room, Movie movie) {
@@ -113,6 +111,14 @@ public class Screening {
         this.priceUsd = priceUsd;
     }
 
+    public String getSpeakerName() {
+        return speakerName;
+    }
+
+    public void setSpeakerName(String speaker) {
+        this.speakerName = speaker;
+    }
+
     public Room getRoom() {
         return room;
     }
@@ -127,14 +133,6 @@ public class Screening {
 
     public void setMovie(Movie movie) {
         this.movie = movie;
-    }
-
-    public Speaker getSpeaker() {
-        return speaker;
-    }
-
-    public void setSpeaker(Speaker speaker) {
-        this.speaker = speaker;
     }
 
     public List<Booking> getBookings() {

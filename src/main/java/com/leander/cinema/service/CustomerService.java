@@ -4,7 +4,7 @@ import com.leander.cinema.dto.AdminDto.addressDto.AdminAddressRequestDto;
 import com.leander.cinema.dto.AdminDto.bookingDto.AdminBookingUpdateRequestDto;
 import com.leander.cinema.dto.AdminDto.customerDto.AdminCustomerRequestDto;
 import com.leander.cinema.dto.AdminDto.customerDto.AdminCustomerResponseDto;
-import com.leander.cinema.dto.AdminDto.customerDto.AdminCustomerWithAccountCreateDto;
+import com.leander.cinema.dto.AdminDto.customerDto.AdminCustomerWithAccountRequestDto;
 import com.leander.cinema.dto.AdminDto.ticketDto.AdminTicketUpdateRequestDto;
 import com.leander.cinema.entity.*;
 import com.leander.cinema.exception.CustomerOwnershipException;
@@ -64,7 +64,7 @@ public class CustomerService {
 
     // === Lägga till kund ===
     @Transactional
-    public AdminCustomerResponseDto createCustomer(AdminCustomerWithAccountCreateDto newUser) {
+    public AdminCustomerResponseDto createCustomer(AdminCustomerWithAccountRequestDto newUser) {
 
         Customer customer = CustomerMapper.toCustomerEntity(newUser);
 
@@ -118,7 +118,7 @@ public class CustomerService {
 
     // === Uppdatera kund ===
     @Transactional
-    public AdminCustomerResponseDto updateCustomer(Long id, AdminCustomerRequestDto requestDto) {
+    public AdminCustomerResponseDto updateCustomer(Long id, AdminCustomerWithAccountRequestDto requestDto) {
         Customer customer = customerRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Kund med id " + id + " hittades inte"));
 
@@ -223,6 +223,17 @@ public class CustomerService {
             }
             customer.getBookings().clear();
             customer.getBookings().addAll(updatedBookings);
+        }
+
+        // --- Uppdatera AppUser ---
+        AppUser appUser = customer.getAppUser();
+        if (appUser != null) {
+            if (requestDto.username() != null && !requestDto.username().isBlank()) {
+                appUser.setUsername(requestDto.username());
+            }
+            if (requestDto.password() != null && !requestDto.password().isBlank()) {
+                appUser.setPassword(passwordEncoder.encode(requestDto.password()));
+            }
         }
 
         customerRepository.save(customer);

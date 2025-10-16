@@ -26,8 +26,7 @@ public class DataInitializer {
                                MovieRepository movieRepository,
                                BookingRepository bookingRepository,
                                RoomRepository roomRepository,
-                               ScreeningRepository screeningRepository,
-                               SpeakerRepository speakerRepository) {
+                               ScreeningRepository screeningRepository) {
         return args -> {
             if (appUserRepository.count() == 0) {
                 AppUser admin1 = new AppUser(
@@ -129,44 +128,11 @@ public class DataInitializer {
                 movieRepository.save(movie4);
                 movieRepository.save(movie5);
 
-
-                Speaker speaker1 = new Speaker();
-                speaker1.setName("Johan Glans");
-                speaker1.setDuration(90); // minuter
-                speaker1.setPriceSek(new BigDecimal("25000.00"));
-                speaker1.setPriceUsd(new BigDecimal("2500.00"));
-
-                Speaker speaker2 = new Speaker();
-                speaker2.setName("Carl Stanley");
-                speaker2.setDuration(60);
-                speaker2.setPriceSek(new BigDecimal("20000.00"));
-                speaker2.setPriceUsd(new BigDecimal("2000.00"));
-
-                Speaker speaker3 = new Speaker();
-                speaker3.setName("Lars Engstrand");
-                speaker3.setDuration(75);
-                speaker3.setPriceSek(new BigDecimal("18000.00"));
-                speaker3.setPriceUsd(new BigDecimal("1800.00"));
-
-                Speaker speaker4 = new Speaker();
-                speaker4.setName("Anders Hansen");
-                speaker4.setDuration(60);
-                speaker4.setPriceSek(new BigDecimal("22000.00"));
-                speaker4.setPriceUsd(new BigDecimal("2200.00"));
-
-                speakerRepository.save(speaker1);
-                speakerRepository.save(speaker2);
-                speakerRepository.save(speaker3);
-                speakerRepository.save(speaker4);
-
-                System.out.println("4 svenska komiker/föreläsare skapade och sparade!");
-
-
                 Room room1 = new Room("Salong A", 200, new BigDecimal("5000.00"), new BigDecimal("500.00"), List.of("Ljudanläggning", "Screen"));
                 Room room2 = new Room("Salong B", 150, new BigDecimal("2000.00"), new BigDecimal("200.00"), List.of("Ljudanläggning", "Screen"));
-                Room room3 = new Room("Stora konferensrummet", 50, new BigDecimal("1500.00"), new BigDecimal("150.00"));
-                Room room4 = new Room("Naturscen", 1000, new BigDecimal("20000.00"), new BigDecimal("2000.00"));
-                Room room5 = new Room("Hörnan", 500, new BigDecimal("15000.00"), new BigDecimal("1500.00"), List.of("Högtalare", "Scen", "Strålkastare", "Mikrofon"));
+                Room room3 = new Room("Stora konferensrummet", 50, new BigDecimal("1500.00"), new BigDecimal("150.00"), List.of("Whiteboard", "Projektor"));
+                Room room4 = new Room("Naturscenen", 1000, new BigDecimal("20000.00"), new BigDecimal("2000.00"), List.of("Naturscen", "Projektor"));
+                Room room5 = new Room("Hörnan", 500, new BigDecimal("15000.00"), new BigDecimal("1500.00"), List.of("Högtalare", "Scen", "Scenbelysning", "Mikrofon", "Projektor"));
 
                 roomRepository.save(room1);
                 roomRepository.save(room2);
@@ -206,8 +172,8 @@ public class DataInitializer {
                         LocalDateTime.of(2025, 10, 23, 20, 30),
                         new BigDecimal("20000.00"),
                         new BigDecimal("2000.00"),
-                        room5,
-                        speaker1
+                        "Professor Lena Andersson – AI och framtidens samhälle",
+                        room5
                 );
 
                 screeningRepository.save(screening1);
@@ -217,8 +183,8 @@ public class DataInitializer {
 
 
                 Booking booking1 = new Booking(
-                        LocalDateTime.of(2025, 10, 15, 18, 0),
-                        LocalDateTime.of(2025, 10, 15, 20, 30),
+                        LocalDateTime.of(2025, 10, 25, 18, 0),
+                        LocalDateTime.of(2025, 10, 25, 20, 30),
                         4,
                         new BigDecimal("1200.00"),
                         new BigDecimal("120.00"),
@@ -228,13 +194,13 @@ public class DataInitializer {
                 );
 
                 Booking booking2 = new Booking(
-                        LocalDateTime.of(2025, 10, 16, 15, 0),
-                        LocalDateTime.of(2025, 10, 16, 17, 0),
+                        LocalDateTime.of(2025, 10, 26, 15, 0),
+                        LocalDateTime.of(2025, 10, 26, 17, 0),
                         2,
                         new BigDecimal("600.00"),
                         new BigDecimal("60.00"),
                         room2,
-                        screening2,
+                        screening4,
                         customer2
                 );
 

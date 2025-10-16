@@ -14,7 +14,15 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // --- Egna exceptions ---
+    // === Egna exceptions ===
+
+    @ExceptionHandler(InvalidBookingException.class)
+    public ResponseEntity<String> handleInvalidBooking(InvalidBookingException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ex.getMessage());
+    }
+
     @ExceptionHandler(InvalidScreeningException.class)
     public ResponseEntity<String> handleInvalidScreening(InvalidScreeningException ex) {
         return ResponseEntity
@@ -51,7 +59,8 @@ public class GlobalExceptionHandler {
     }
 
 
-    // --- Färdiga exceptions ---
+    // === Färdiga exceptions ===
+
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<String> handleEntityNotFound(EntityNotFoundException ex) {
         return ResponseEntity

@@ -27,11 +27,13 @@ public class BookingMapper {
 
         // Speaker
         String speakerName = "----";
-        if (booking.getScreening() != null && booking.getScreening().getSpeaker() != null) {
-            if (booking.getScreening().getSpeaker().getName() != null) {
-                speakerName = booking.getScreening().getSpeaker().getName();
+        if (booking.getScreening() != null) {
+            String screeningSpeaker = booking.getScreening().getSpeakerName();
+            if (screeningSpeaker != null && !screeningSpeaker.isBlank()) {
+                speakerName = screeningSpeaker;
             }
         }
+
 
         // Movie
         String movieTitle = "----";

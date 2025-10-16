@@ -5,13 +5,11 @@ import com.leander.cinema.dto.AdminDto.screeningDto.AdminScreeningResponseDto;
 import com.leander.cinema.entity.Movie;
 import com.leander.cinema.entity.Room;
 import com.leander.cinema.entity.Screening;
-import com.leander.cinema.entity.Speaker;
 import com.leander.cinema.exception.InvalidScreeningException;
 import com.leander.cinema.mapper.ScreeningMapper;
 import com.leander.cinema.repository.MovieRepository;
 import com.leander.cinema.repository.RoomRepository;
 import com.leander.cinema.repository.ScreeningRepository;
-import com.leander.cinema.repository.SpeakerRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,14 +23,12 @@ import java.util.Optional;
 public class ScreeningService {
     private final ScreeningRepository screeningRepository;
     private final RoomRepository roomRepository;
-    private final SpeakerRepository speakerRepository;
     private final MovieRepository movieRepository;
 
     public ScreeningService(ScreeningRepository screeningRepository,
-                            RoomRepository roomRepository, SpeakerRepository speakerRepository, MovieRepository movieRepository) {
+                            RoomRepository roomRepository, MovieRepository movieRepository) {
         this.screeningRepository = screeningRepository;
         this.roomRepository = roomRepository;
-        this.speakerRepository = speakerRepository;
         this.movieRepository = movieRepository;
     }
 
@@ -54,21 +50,22 @@ public class ScreeningService {
         Room room = roomRepository.findById(body.roomId())
                 .orElseThrow(() -> new EntityNotFoundException("Rummet med id " + body.roomId() + " hittades inte"));
 
-        if ((body.speakerId() == null && body.movieId() == null) ||
-                (body.speakerId() != null && body.movieId() != null)) {
+        if ((body.speakerName() == null && body.movieId() == null) ||
+                (body.speakerName() != null && body.movieId() != null)) {
             throw new InvalidScreeningException("En screening måste ha antingen talare eller film, inte båda.");
         }
 
-        Speaker speaker = null;
+        String speaker = null;
         Movie movie = null;
-        if (body.speakerId() != null) {
-            speaker = speakerRepository.findById(body.speakerId())
-                    .orElseThrow(() -> new EntityNotFoundException("Talare med id " + body.speakerId() + " hittades inte"));
+
+        if (body.speakerName() != null) {
+            speaker = body.speakerName().trim();
         } else {
             movie = movieRepository.findById(body.movieId())
                     .orElseThrow(() -> new EntityNotFoundException("Film med id " + body.movieId() + " hittades inte"));
         }
 
+        //Förhindrar att två visningar sker i samma salong samtidigt
         boolean conflict = screeningRepository.existsOverlappingScreening(
                 body.roomId(),
                 body.startTime(),
@@ -79,9 +76,22 @@ public class ScreeningService {
             throw new InvalidScreeningException("Rummet är redan bokat under denna tid.");
         }
 
+        //Förhindrar att samma film eller talare schemaläggs parallellt
+        boolean contentConflict = screeningRepository.existsByMovieOrSpeakerAndOverlap(
+                body.movieId(),
+                body.speakerName(),
+                body.startTime(),
+                body.endTime()
+        );
+
+        if (contentConflict) {
+            throw new InvalidScreeningException("Denna film eller talare är redan schemalagd under den valda tiden.");
+        }
+
+
         Screening screening = ScreeningMapper.toScreeningEntity(body);
         screening.setRoom(room);
-        screening.setSpeaker(speaker);
+        screening.setSpeakerName(speaker);
         screening.setMovie(movie);
 
         BigDecimal factor = new BigDecimal("0.11");

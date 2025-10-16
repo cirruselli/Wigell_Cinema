@@ -14,6 +14,7 @@ public record AdminCustomerResponseDto(
         String phone,
         List<AdminAddressResponseDto> addresses,
         List<AdminTicketResponseDto> tickets,
-        List<AdminBookingResponseDto> bookings
+        List<AdminBookingResponseDto> bookings,
+        String username
 ) {
 }

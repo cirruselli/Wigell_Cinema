@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "bookings")
@@ -11,8 +13,6 @@ public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    //TA BORT TIDERNA!!!!!!!!!!
 
     @Column(name = "reservation_start_time")
     private LocalDateTime reservationStartTime;
@@ -23,11 +23,11 @@ public class Booking {
     @Column(name = "number_of_guests", nullable = false)
     private int numberOfGuests;
 
-//    //Utrustning för rummet vid en patch
-//    @ElementCollection(fetch = FetchType.LAZY)
-//    @CollectionTable(name = "equipments", joinColumns = @JoinColumn(name = "booking_id"))
-//    @Column(name = "equipment")
-//    private List<String> equipment = new ArrayList<>();
+    //Utrustning för rummet vid en patch
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "equipments", joinColumns = @JoinColumn(name = "booking_id"))
+    @Column(name = "equipment")
+    private List<String> equipment = new ArrayList<>();
 
     @Column(name = "total_price_SEK", nullable = false, precision = 10, scale = 2)
     private BigDecimal totalPriceSek;
@@ -105,6 +105,14 @@ public class Booking {
 
     public void setNumberOfGuests(int numberOfGuests) {
         this.numberOfGuests = numberOfGuests;
+    }
+
+    public List<String> getEquipment() {
+        return equipment;
+    }
+
+    public void setEquipment(List<String> equipment) {
+        this.equipment = equipment;
     }
 
     public BigDecimal getTotalPriceSek() {

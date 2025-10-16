@@ -37,19 +37,9 @@ public class ScreeningMapper {
         }
 
         // === Speaker ===
-        Long speakerId = null;
-        String speakerName = "";
-        BigDecimal speakerPriceSek = null;
-        BigDecimal speakerPriceUsd = null;
-        int speakerDuration = 0;
-
-        if (screening.getSpeaker() != null) {
-            speakerId = screening.getSpeaker().getId();
-            if (screening.getSpeaker().getName() != null)
-                speakerName = screening.getSpeaker().getName();
-            speakerPriceSek = screening.getSpeaker().getPriceSek();
-            speakerPriceUsd = screening.getSpeaker().getPriceUsd();
-            speakerDuration = screening.getSpeaker().getDuration();
+        String speakerName = "----";
+        if (screening.getSpeakerName() != null && !screening.getSpeakerName().isBlank()) {
+            speakerName = screening.getSpeakerName();
         }
 
         // === Movie ===
@@ -81,11 +71,7 @@ public class ScreeningMapper {
                 roomPriceSek,
                 roomPriceUsd,
                 roomEquipment,
-                speakerId,
                 speakerName,
-                speakerPriceSek,
-                speakerPriceUsd,
-                speakerDuration,
                 movieId,
                 movieTitle,
                 genre,
