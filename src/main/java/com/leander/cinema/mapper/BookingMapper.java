@@ -4,6 +4,8 @@ import com.leander.cinema.dto.CustomerDto.bookingDto.BookingPostRequestDto;
 import com.leander.cinema.dto.CustomerDto.bookingDto.BookingResponseDto;
 import com.leander.cinema.entity.Booking;
 
+import java.util.List;
+
 public class BookingMapper {
     public static Booking toBookingEntity(BookingPostRequestDto body) {
         Booking booking = new Booking();
@@ -55,12 +57,19 @@ public class BookingMapper {
             }
         }
 
+        // Equipment
+        List<String> equipments = List.of();
+        if (booking.getRoom().getStandardEquipment() != null) {
+            equipments = booking.getRoom().getStandardEquipment();
+        }
+
         return new BookingResponseDto(
                 booking.getId(),
                 booking.getReservationStartTime(),
                 booking.getReservationEndTime(),
                 booking.getNumberOfGuests(),
                 roomName,
+                equipments,
                 maxGuests,
                 speakerName,
                 movieTitle,

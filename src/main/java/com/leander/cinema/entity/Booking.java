@@ -23,11 +23,11 @@ public class Booking {
     @Column(name = "number_of_guests", nullable = false)
     private int numberOfGuests;
 
-    //Utrustning för rummet vid en patch
-    @ElementCollection(fetch = FetchType.LAZY)
-    @CollectionTable(name = "equipments", joinColumns = @JoinColumn(name = "booking_id"))
-    @Column(name = "equipment")
-    private List<String> equipment = new ArrayList<>();
+//    //Utrustning för rummet vid en patch
+//    @ElementCollection(fetch = FetchType.LAZY)
+//    @CollectionTable(name = "booking_equipments", joinColumns = @JoinColumn(name = "booking_id"))
+//    @Column(name = "equipment")
+//    private List<String> bookingEquipment = new ArrayList<>();
 
     @Column(name = "total_price_SEK", nullable = false, precision = 10, scale = 2)
     private BigDecimal totalPriceSek;
@@ -107,13 +107,13 @@ public class Booking {
         this.numberOfGuests = numberOfGuests;
     }
 
-    public List<String> getEquipment() {
-        return equipment;
-    }
-
-    public void setEquipment(List<String> equipment) {
-        this.equipment = equipment;
-    }
+//    public List<String> getBookingEquipment() {
+//        return bookingEquipment;
+//    }
+//
+//    public void setBookingEquipment(List<String> bookingEquipment) {
+//        this.bookingEquipment = bookingEquipment;
+//    }
 
     public BigDecimal getTotalPriceSek() {
         return totalPriceSek;

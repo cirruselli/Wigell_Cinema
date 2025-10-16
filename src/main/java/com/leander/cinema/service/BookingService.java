@@ -1,5 +1,6 @@
 package com.leander.cinema.service;
 
+import com.leander.cinema.dto.CustomerDto.bookingDto.BookingPatchRequestDto;
 import com.leander.cinema.dto.CustomerDto.bookingDto.BookingPostRequestDto;
 import com.leander.cinema.dto.CustomerDto.bookingDto.BookingResponseDto;
 import com.leander.cinema.entity.Booking;
@@ -21,7 +22,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 
 @Service
@@ -125,35 +125,41 @@ public class BookingService {
         return BookingMapper.toBookingResponseDto(booking);
     }
 
-//    @Transactional
-//    public BookingResponseDto updateBooking(Long bookingId, BookingPatchDto body) {
-//        Booking booking = bookingRepository.findById(bookingId)
-//                .orElseThrow(() -> new EntityNotFoundException("Bokningen hittades inte"));
-//
-//        // Uppdatera datum/tid om de finns
-//        if (body.getReservationStartTime() != null) {
-//            booking.setReservationStartTime(body.getReservationStartTime());
-//        }
-//        if (body.getReservationEndTime() != null) {
-//            booking.setReservationEndTime(body.getReservationEndTime());
-//        }
-//
-//        // Uppdatera teknisk utrustning om det finns
-//        if (body.getEquipment() != null) {
-//            booking.setEquipment(body.getEquipment());
-//        }
-//
-//        // Kontrollera krock med andra bokningar eller screening
-//        Room room = booking.getScreening().getRoom();
-//        if (bookingRepository.existsByRoomAndReservationStartTimeLessThanAndReservationEndTimeGreaterThan(
-//                room, booking.getReservationEndTime(), booking.getReservationStartTime())) {
-//            throw new BookingConflictException("Rummet är upptaget under den valda tiden.");
-//        }
+    @Transactional
+    public BookingResponseDto updateBooking(Long bookingId, BookingPatchRequestDto body) {
+        //Hämta inloggad användare
+        String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+        AppUser currentUser = appUserRepository.findByUsername(currentUsername)
+                .orElseThrow(() -> new AccessDeniedException("Ingen användare hittades"));
 
-    /// /Behövs orpphanremovial i bokningens relation med screening - fast screening ska ju inte uppdateras faktiskt!
-//
-//        bookingRepository.save(booking);
-//        return BookingMapper.toBookingResponseDto(booking);
-//    }
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new EntityNotFoundException("Bokningen hittades inte"));
+
+        if (!booking.getCustomer().getId().equals(currentUser.getCustomer().getId())) {
+            throw new AccessDeniedException("Du kan bara uppdatera dina egna bokningar.");
+        }
+
+        if (body.reservationStartTime() != null) {
+            booking.setReservationStartTime(body.reservationStartTime());
+        }
+        if (body.reservationEndTime()!= null) {
+            booking.setReservationEndTime(body.reservationEndTime());
+        }
+
+        if (body.equipment() != null) {
+            booking.getRoom().setStandardEquipment(body.equipment());
+        }
+
+        Room room = booking.getRoom();
+
+        //Rums-krock
+        if (bookingRepository.existsByRoomAndReservationStartTimeLessThanAndReservationEndTimeGreaterThanAndIdNot(
+                room, booking.getReservationEndTime(), booking.getReservationStartTime(), bookingId)) {
+            throw new BookingConflictException("Rummet är upptaget under den valda tiden.");
+        }
+
+        bookingRepository.save(booking);
+        return BookingMapper.toBookingResponseDto(booking);
+    }
 
 }
