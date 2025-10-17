@@ -11,6 +11,8 @@ import com.leander.cinema.entity.Booking;
 import com.leander.cinema.entity.Customer;
 import com.leander.cinema.entity.Ticket;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,20 +65,27 @@ public class CustomerMapper {
                 bookingDto = BookingMapper.toAdminBookingResponseDto(ticket.getBooking());
             }
 
+            // Dynamisk beräkning av pris per biljett och totalpris
+            BigDecimal priceSek = calculateTicketPrice(ticket);
+            BigDecimal totalPriceSek = priceSek.multiply(BigDecimal.valueOf(ticket.getNumberOfTickets()));
+            BigDecimal factor = new BigDecimal("0.11");
+            BigDecimal priceUsd = priceSek.multiply(factor);
+            BigDecimal totalPriceUsd = totalPriceSek.multiply(factor);
+
+
             ticketDtos.add(new AdminTicketResponseDto(
                     ticket.getId(),
                     ticket.getNumberOfTickets(),
                     ticket.getCustomer().getFirstName(),
                     ticket.getCustomer().getLastName(),
-                    ticket.getPriceSek(),
-                    ticket.getPriceUsd(),
-                    ticket.getTotalPriceSek(),
-                    ticket.getTotalPriceUsd(),
+                    priceSek,
+                    priceUsd,
+                    totalPriceSek,
+                    totalPriceUsd,
                     screeningDto,
                     bookingDto
             ));
         }
-
 
         // --- Bokningar ---
         List<AdminBookingResponseDto> bookingDtos = new ArrayList<>();
@@ -95,6 +104,31 @@ public class CustomerMapper {
                 bookingDtos,
                 customer.getAppUser().getUsername()
         );
+    }
+
+    //Hjälpmetod för att beräkna biljettpris
+    public static BigDecimal calculateTicketPrice(Ticket ticket) {
+        if (ticket.getBooking() != null) {
+            Booking booking = ticket.getBooking();
+            if (booking.getSpeakerName() != null) {
+                // Bokning med egen talare + room
+                return booking.getTotalPriceSek()
+                        .divide(BigDecimal.valueOf(booking.getNumberOfGuests()), 2, RoundingMode.HALF_UP);
+            } else if (booking.getScreening() != null) {
+                // Bokning med screening + room
+                BigDecimal screeningPrice = booking.getScreening().getPriceSek();
+                BigDecimal roomShare = booking.getRoom().getPriceSek()
+                        .divide(BigDecimal.valueOf(booking.getRoom().getMaxGuests()), 2, RoundingMode.HALF_UP);
+                return screeningPrice.add(roomShare);
+            }
+        } else if (ticket.getScreening() != null) {
+            // Ticket direkt till screening (utan booking)
+            BigDecimal screeningPrice = ticket.getScreening().getPriceSek();
+            BigDecimal roomShare = ticket.getScreening().getRoom().getPriceSek()
+                    .divide(BigDecimal.valueOf(ticket.getScreening().getRoom().getMaxGuests()), 2, RoundingMode.HALF_UP);
+            return screeningPrice.add(roomShare);
+        }
+        return BigDecimal.ZERO;
     }
 
 }

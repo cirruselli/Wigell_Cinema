@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -56,6 +57,7 @@ public class CustomerService {
         this.appUserRepository = appUserRepository;
         this.passwordEncoder = passwordEncoder;
     }
+
 
     // === Lista kunder ===
     @Transactional(readOnly = true)
@@ -200,20 +202,12 @@ public class CustomerService {
 
                 ticket.setNumberOfTickets(ticketDto.numberOfTickets());
 
-                //***********KONTROLLERA BILJETTPRIS OCH BOKNINGSPRIS! *******************************
-                //SEK
-                // Totalpris för biljetter = antal biljetter * biljettpris
-                BigDecimal ticketTotalSek = ticket.getPriceSek().multiply(BigDecimal.valueOf(ticket.getNumberOfTickets()));
-                //USD
-                BigDecimal factor = new BigDecimal("0.11");
-                //Enskilt biljettpris i USD
-                BigDecimal ticketPriceUsd = ticket.getPriceSek().multiply(factor);
-                //Totalpris i USD
-                BigDecimal ticketTotalUsd = ticketTotalSek.multiply(factor);
+                //Beräknar bara om totalbeloppet då enhetspriset ska vara låst vid uppdatering!
 
-                ticket.setTotalPriceSek(ticketTotalSek);
-                ticket.setPriceUsd(ticketPriceUsd);
-                ticket.setTotalPriceUsd(ticketTotalUsd);
+                ticket.setTotalPriceSek(ticket.getPriceSek()
+                        .multiply(BigDecimal.valueOf(ticket.getNumberOfTickets())));
+                ticket.setTotalPriceUsd(ticket.getPriceUsd()
+                        .multiply(BigDecimal.valueOf(ticket.getNumberOfTickets())));
 
                 ticket.setCustomer(customer);
 

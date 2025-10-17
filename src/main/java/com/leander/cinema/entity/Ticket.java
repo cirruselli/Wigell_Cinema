@@ -33,12 +33,12 @@ public class Ticket {
 
     //RELATION
     @ManyToOne
-    @JoinColumn(name = "screening_id", nullable = false)
+    @JoinColumn(name = "screening_id")
     private Screening screening;
 
     //RELATION
     @ManyToOne
-    @JoinColumn(name = "booking_id", nullable = false)
+    @JoinColumn(name = "booking_id")
     private Booking booking;
 
     public Ticket() {

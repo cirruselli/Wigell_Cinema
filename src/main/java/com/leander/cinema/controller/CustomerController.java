@@ -3,9 +3,11 @@ package com.leander.cinema.controller;
 import com.leander.cinema.dto.CustomerDto.bookingDto.BookingPatchRequestDto;
 import com.leander.cinema.dto.CustomerDto.bookingDto.BookingPostRequestDto;
 import com.leander.cinema.dto.CustomerDto.bookingDto.BookingResponseDto;
+import com.leander.cinema.dto.CustomerDto.ticketDto.TicketRequestDto;
+import com.leander.cinema.dto.CustomerDto.ticketDto.TicketResponseDto;
 import com.leander.cinema.service.BookingService;
-import com.leander.cinema.service.CustomerService;
 import com.leander.cinema.service.MovieService;
+import com.leander.cinema.service.TicketService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,14 +19,14 @@ import java.net.URI;
 public class CustomerController {
     private final MovieService movieService;
     private final BookingService bookingService;
-    private final CustomerService customerService;
+    private final TicketService ticketService;
 
     public CustomerController(MovieService movieService,
                               BookingService bookingService,
-                              CustomerService customerService) {
+                              TicketService ticketService) {
         this.movieService = movieService;
         this.bookingService = bookingService;
-        this.customerService = customerService;
+        this.ticketService = ticketService;
     }
 //
 //    @GetMapping("/movies")
@@ -34,8 +36,8 @@ public class CustomerController {
 //    }
 
     @PostMapping("/bookings")
-    public ResponseEntity<BookingResponseDto> booking(@Valid @RequestBody BookingPostRequestDto requestDto) {
-        BookingResponseDto response = bookingService.createBooking(requestDto);
+    public ResponseEntity<BookingResponseDto> booking(@Valid @RequestBody BookingPostRequestDto body) {
+        BookingResponseDto response = bookingService.createBooking(body);
         URI location = URI.create("/api/v1/bookings" + response.id());
         return ResponseEntity.created(location).body(response);
     }
@@ -45,6 +47,14 @@ public class CustomerController {
         BookingResponseDto response = bookingService.updateBooking(bookingId, body);
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/tickets")
+    public ResponseEntity<TicketResponseDto> ticket(@Valid @RequestBody TicketRequestDto body) {
+        TicketResponseDto response = ticketService.buyTicket(body);
+        URI location = URI.create("/api/v1/tickets" + response.ticketId());
+        return ResponseEntity.created(location).body(response);
+    }
+
 
 
     // Lista föreställiningar ska ha    @PreAuthorize("hasRole('USER')")  för att undivka att admin kommer åt endpointen

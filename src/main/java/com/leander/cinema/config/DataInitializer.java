@@ -143,8 +143,8 @@ public class DataInitializer {
                 Screening screening1 = new Screening(
                         LocalDateTime.of(2025, 10, 20, 18, 0),
                         LocalDateTime.of(2025, 10, 20, 21, 0),
-                        new BigDecimal("1200.00"),
                         new BigDecimal("120.00"),
+                        new BigDecimal("12.00"),
                         room1,
                         movie1
                 );
@@ -152,8 +152,8 @@ public class DataInitializer {
                 Screening screening2 = new Screening(
                         LocalDateTime.of(2025, 10, 21, 15, 0),
                         LocalDateTime.of(2025, 10, 21, 18, 0),
-                        new BigDecimal("1200.00"),
                         new BigDecimal("120.00"),
+                        new BigDecimal("12.00"),
                         room2,
                         movie2
                 );
@@ -161,8 +161,8 @@ public class DataInitializer {
                 Screening screening3 = new Screening(
                         LocalDateTime.of(2025, 10, 22, 20, 0),
                         LocalDateTime.of(2025, 10, 22, 23, 0),
-                        new BigDecimal("1200.00"),
                         new BigDecimal("120.00"),
+                        new BigDecimal("12.00"),
                         room1,
                         movie3
                 );
@@ -170,8 +170,8 @@ public class DataInitializer {
                 Screening screening4 = new Screening(
                         LocalDateTime.of(2025, 10, 23, 17, 30),
                         LocalDateTime.of(2025, 10, 23, 20, 30),
-                        new BigDecimal("20000.00"),
-                        new BigDecimal("2000.00"),
+                        new BigDecimal("200.00"),
+                        new BigDecimal("20.00"),
                         room2,
                         movie4
                 );
@@ -187,8 +187,8 @@ public class DataInitializer {
                         LocalDateTime.of(2025, 10, 25, 20, 30),
                         "Sara Karlsson",
                         20,
+                        new BigDecimal("12000.00"),
                         new BigDecimal("1200.00"),
-                        new BigDecimal("120.00"),
                         room1,
                         customer1
                 );
@@ -198,8 +198,8 @@ public class DataInitializer {
                         LocalDateTime.of(2025, 10, 26, 17, 0),
                         "Johan Glans",
                         150,
-                        new BigDecimal("600.00"),
-                        new BigDecimal("60.00"),
+                        new BigDecimal("60000.00"),
+                        new BigDecimal("6000.00"),
                         room2,
                         customer2
                 );
