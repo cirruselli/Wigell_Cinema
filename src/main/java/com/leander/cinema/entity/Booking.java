@@ -4,8 +4,6 @@ import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "bookings")
@@ -14,20 +12,17 @@ public class Booking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "reservation_start_time")
+    @Column(name = "reservation_start_time", nullable = false)
     private LocalDateTime reservationStartTime;
 
-    @Column(name = "reservation_end_time")
+    @Column(name = "reservation_end_time", nullable = false)
     private LocalDateTime reservationEndTime;
+
+    @Column(name = "speaker_name")
+    private String speakerName;
 
     @Column(name = "number_of_guests", nullable = false)
     private int numberOfGuests;
-
-//    //Utrustning för rummet vid en patch
-//    @ElementCollection(fetch = FetchType.LAZY)
-//    @CollectionTable(name = "booking_equipments", joinColumns = @JoinColumn(name = "booking_id"))
-//    @Column(name = "equipment")
-//    private List<String> bookingEquipment = new ArrayList<>();
 
     @Column(name = "total_price_SEK", nullable = false, precision = 10, scale = 2)
     private BigDecimal totalPriceSek;
@@ -41,8 +36,8 @@ public class Booking {
     private Room room;
 
     //RELATION
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "screening_id", nullable = false)
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "screening_id")
     private Screening screening;
 
     //RELATION
@@ -50,17 +45,18 @@ public class Booking {
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
 
-
-
     public Booking() {
     }
 
-    public Booking(LocalDateTime reservationStartTime, LocalDateTime reservationEndTime, int numberOfGuests, BigDecimal totalPriceSek, BigDecimal totalPriceUsd) {
+    public Booking(LocalDateTime reservationStartTime, LocalDateTime reservationEndTime, String speakerName, int numberOfGuests, BigDecimal totalPriceSek, BigDecimal totalPriceUsd, Room room, Customer customer) {
         this.reservationStartTime = reservationStartTime;
         this.reservationEndTime = reservationEndTime;
+        this.speakerName = speakerName;
         this.numberOfGuests = numberOfGuests;
         this.totalPriceSek = totalPriceSek;
         this.totalPriceUsd = totalPriceUsd;
+        this.room = room;
+        this.customer = customer;
     }
 
     public Booking(LocalDateTime reservationStartTime, LocalDateTime reservationEndTime, int numberOfGuests, BigDecimal totalPriceSek, BigDecimal totalPriceUsd, Room room, Screening screening, Customer customer) {
@@ -99,6 +95,14 @@ public class Booking {
         this.reservationEndTime = reservationEndTime;
     }
 
+    public String getSpeakerName() {
+        return speakerName;
+    }
+
+    public void setSpeakerName(String speakerName) {
+        this.speakerName = speakerName;
+    }
+
     public int getNumberOfGuests() {
         return numberOfGuests;
     }
@@ -106,14 +110,6 @@ public class Booking {
     public void setNumberOfGuests(int numberOfGuests) {
         this.numberOfGuests = numberOfGuests;
     }
-
-//    public List<String> getBookingEquipment() {
-//        return bookingEquipment;
-//    }
-//
-//    public void setBookingEquipment(List<String> bookingEquipment) {
-//        this.bookingEquipment = bookingEquipment;
-//    }
 
     public BigDecimal getTotalPriceSek() {
         return totalPriceSek;

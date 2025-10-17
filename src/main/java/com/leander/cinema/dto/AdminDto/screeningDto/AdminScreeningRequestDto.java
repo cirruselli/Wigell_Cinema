@@ -16,7 +16,6 @@ public record AdminScreeningRequestDto(
         BigDecimal priceSek,
         @NotNull(message = "Rum måste anges")
         Long roomId,
-        Long movieId,
-        String speakerName
+        Long movieId
 ) {
 }

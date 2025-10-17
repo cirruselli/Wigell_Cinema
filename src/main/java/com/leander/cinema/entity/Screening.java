@@ -26,9 +26,6 @@ public class Screening {
     @Column(name = "price_usd", nullable = false)
     private BigDecimal priceUsd;
 
-    @Column(name = "speaker_name")
-    private String speakerName;
-
     //RELATION
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_id", nullable = false)
@@ -39,11 +36,6 @@ public class Screening {
     @JoinColumn(name = "movie_id")
     private Movie movie;
 
-    //RELATION
-    @OneToMany(mappedBy = "screening", cascade = CascadeType.ALL)
-    private List<Booking> bookings = new ArrayList<>();
-
-
     public Screening() {
     }
 
@@ -51,15 +43,6 @@ public class Screening {
         this.startTime = startTime;
         this.endTime = endTime;
         this.priceSek = priceSek;
-    }
-
-    public Screening(LocalDateTime startTime, LocalDateTime endTime, BigDecimal priceSek, BigDecimal priceUsd, String speakerName, Room room) {
-        this.startTime = startTime;
-        this.endTime = endTime;
-        this.priceSek = priceSek;
-        this.priceUsd = priceUsd;
-        this.speakerName = speakerName;
-        this.room = room;
     }
 
     public Screening(LocalDateTime startTime, LocalDateTime endTime, BigDecimal priceSek, BigDecimal priceUsd, Room room, Movie movie) {
@@ -111,14 +94,6 @@ public class Screening {
         this.priceUsd = priceUsd;
     }
 
-    public String getSpeakerName() {
-        return speakerName;
-    }
-
-    public void setSpeakerName(String speaker) {
-        this.speakerName = speaker;
-    }
-
     public Room getRoom() {
         return room;
     }
@@ -133,13 +108,5 @@ public class Screening {
 
     public void setMovie(Movie movie) {
         this.movie = movie;
-    }
-
-    public List<Booking> getBookings() {
-        return bookings;
-    }
-
-    public void setBookings(List<Booking> bookings) {
-        this.bookings = bookings;
     }
 }

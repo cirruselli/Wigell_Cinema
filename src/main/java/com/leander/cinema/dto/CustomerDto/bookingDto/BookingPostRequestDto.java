@@ -18,7 +18,7 @@ public record BookingPostRequestDto(
         Integer numberOfGuests,
         @NotNull(message = "Rum måste anges")
         Long roomId,
-        @NotNull(message = "Föreställning måste anges")
+        String speakerName,
         Long screeningId
 ) {
 }

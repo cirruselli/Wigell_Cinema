@@ -172,8 +172,8 @@ public class DataInitializer {
                         LocalDateTime.of(2025, 10, 23, 20, 30),
                         new BigDecimal("20000.00"),
                         new BigDecimal("2000.00"),
-                        "Professor Lena Andersson – AI och framtidens samhälle",
-                        room5
+                        room2,
+                        movie4
                 );
 
                 screeningRepository.save(screening1);
@@ -185,31 +185,26 @@ public class DataInitializer {
                 Booking booking1 = new Booking(
                         LocalDateTime.of(2025, 10, 25, 18, 0),
                         LocalDateTime.of(2025, 10, 25, 20, 30),
-                        4,
+                        "Sara Karlsson",
+                        20,
                         new BigDecimal("1200.00"),
                         new BigDecimal("120.00"),
                         room1,
-                        screening1,
                         customer1
                 );
 
                 Booking booking2 = new Booking(
                         LocalDateTime.of(2025, 10, 26, 15, 0),
                         LocalDateTime.of(2025, 10, 26, 17, 0),
-                        2,
+                        "Johan Glans",
+                        150,
                         new BigDecimal("600.00"),
                         new BigDecimal("60.00"),
                         room2,
-                        screening4,
                         customer2
                 );
 
-                booking1.setScreening(screening1);
-                screening1.getBookings().add(booking1);
                 bookingRepository.save(booking1);
-
-                booking2.setScreening(screening2);
-                screening2.getBookings().add(booking2);
                 bookingRepository.save(booking2);
 
 

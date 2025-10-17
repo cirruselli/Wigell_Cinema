@@ -38,93 +38,96 @@ public class BookingService {
         this.appUserRepository = appUserRepository;
     }
 
-    //Kunden reserverar lokal
-    @Transactional
-    public BookingResponseDto createBooking(BookingPostRequestDto body) {
-        //Hämta inloggad användare
-        String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
-        AppUser currentUser = appUserRepository.findByUsername(currentUsername)
-                .orElseThrow(() -> new AccessDeniedException("Ingen användare hittades"));
+//    // EJ KLAR MED CREATE BOOKING DÅ???? UTIFRÅN NYTT ATTRIBUT MED SPEKAER I BOOKING OSV
+//
+//    //Kunden reserverar lokal -> bokning skapas
+//    @Transactional
+//    public BookingResponseDto createBooking(BookingPostRequestDto body) {
+//        //Hämta inloggad användare
+//        String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+//        AppUser currentUser = appUserRepository.findByUsername(currentUsername)
+//                .orElseThrow(() -> new AccessDeniedException("Ingen användare hittades"));
+//
+//        Room room = roomRepository.findById(body.roomId())
+//                .orElseThrow(() -> new EntityNotFoundException("Rummet med id " + body.roomId() + " hittades inte"));
+//
+//        if (body.numberOfGuests() > room.getMaxGuests()) {
+//            throw new BookingCapacityExceededException("Antal gäster överstiger rummets kapacitet på " + room.getMaxGuests() + " gäster");
+//        }
+//
+//        Screening screening = screeningRepository.findById(body.screeningId())
+//                .orElseThrow(() -> new EntityNotFoundException("Föreställningen med id " + body.screeningId() + " hittades inte"));
+//
+//        Booking booking = BookingMapper.toBookingEntity(body);
+//        booking.setScreening(screening);
+//        booking.setRoom(room);
+//        //Bokningen kopplas till inloggad användare
+//        booking.setCustomer(currentUser.getCustomer());
+//
+//        // Tider för bokningen sätts av användaren
+//        booking.setReservationStartTime(body.reservationStartTime());
+//        booking.setReservationEndTime(body.reservationEndTime());
+//
+//        //Kontrollera att reservationens slut inte är före start
+//        if (body.reservationEndTime().isBefore(body.reservationStartTime())) {
+//            throw new BookingConflictException("Reservationens slutdatum/tid kan inte vara före startdatum/tid.");
+//        }
+//
+//        // === Kontrollera krock med andra bokningar i samma rum ===
+//
+//        //Rummet är inte redan bokat under tiden
+//        boolean roomBookingConflict = bookingRepository.existsByRoomAndReservationStartTimeLessThanAndReservationEndTimeGreaterThan(
+//                room, booking.getReservationEndTime(), booking.getReservationStartTime());
+//
+//        if (roomBookingConflict) {
+//            throw new BookingConflictException("Rummet är upptaget under den valda tiden.");
+//        }
+//
+//        //Det finns ingen annan screening i samma rum som krockar i tid
+//        boolean screeningConflict = screeningRepository.existsScreeningInRoomDuring(
+//                booking.getRoom().getId(),
+//                booking.getReservationStartTime(),
+//                booking.getReservationEndTime(),
+//                booking.getScreening().getId()
+//        );
+//
+//        if (screeningConflict) {
+//            throw new BookingConflictException("Rummet är redan upptaget av en annan föreställning under den valda tiden.");
+//        }
+//
+//        //Samma film får inte visas parallellt i olika rum
+//        if (screening.getMovie() != null) { // endast för filmvisningar
+//            boolean sameMovieOverlap = screeningRepository.existsByMovieIdAndTimeOverlap(
+//                    booking.getScreening().getId(),
+//                    booking.getReservationStartTime(),
+//                    booking.getReservationEndTime()
+//            );
+//
+//            if (sameMovieOverlap) {
+//                throw new InvalidBookingException("Filmen visas redan under denna tid i en annan salong.");
+//            }
+//        }
+//
+//
+//        // === Beräkna totalpris ===
+//        BigDecimal factor = new BigDecimal("0.11");
+//
+//        //SEK
+//        BigDecimal totalPriceSek = room.getPriceSek().add(screening.getPriceSek());
+//
+//        //USD
+//        BigDecimal totalPriceUsd = room.getPriceSek().add(screening.getPriceSek());
+//        totalPriceUsd = totalPriceUsd.multiply(factor);
+//
+//        booking.setTotalPriceSek(totalPriceSek);
+//        booking.setTotalPriceUsd(totalPriceUsd);
+//
+//        bookingRepository.save(booking);
+//
+//        return BookingMapper.toBookingResponseDto(booking);
+//    }
 
-        Room room = roomRepository.findById(body.roomId())
-                .orElseThrow(() -> new EntityNotFoundException("Rummet med id " + body.roomId() + " hittades inte"));
-
-        if (body.numberOfGuests() > room.getMaxGuests()) {
-            throw new BookingCapacityExceededException("Antal gäster överstiger rummets kapacitet på " + room.getMaxGuests() + " gäster");
-        }
-
-        Screening screening = screeningRepository.findById(body.screeningId())
-                .orElseThrow(() -> new EntityNotFoundException("Föreställningen med id " + body.screeningId() + " hittades inte"));
-
-        Booking booking = BookingMapper.toBookingEntity(body);
-        booking.setScreening(screening);
-        booking.setRoom(room);
-        //Bokningen kopplas till inloggad användare
-        booking.setCustomer(currentUser.getCustomer());
-
-        // Tider för bokningen sätts av användaren
-        booking.setReservationStartTime(body.reservationStartTime());
-        booking.setReservationEndTime(body.reservationEndTime());
-
-        //Kontrollera att reservationens slut inte är före start
-        if (body.reservationEndTime().isBefore(body.reservationStartTime())) {
-            throw new BookingConflictException("Reservationens slutdatum/tid kan inte vara före startdatum/tid.");
-        }
-
-        // === Kontrollera krock med andra bokningar i samma rum ===
-
-        //Rummet är inte redan bokat under tiden
-        boolean roomBookingConflict = bookingRepository.existsByRoomAndReservationStartTimeLessThanAndReservationEndTimeGreaterThan(
-                room, booking.getReservationEndTime(), booking.getReservationStartTime());
-
-        if (roomBookingConflict) {
-            throw new BookingConflictException("Rummet är upptaget under den valda tiden.");
-        }
-
-        //Det finns ingen annan screening i samma rum som krockar i tid
-        boolean screeningConflict = screeningRepository.existsScreeningInRoomDuring(
-                booking.getRoom().getId(),
-                booking.getReservationStartTime(),
-                booking.getReservationEndTime(),
-                booking.getScreening().getId()
-        );
-
-        if (screeningConflict) {
-            throw new BookingConflictException("Rummet är redan upptaget av en annan föreställning under den valda tiden.");
-        }
-
-        //Samma film får inte visas parallellt i olika rum
-        if (screening.getMovie() != null) { // endast för filmvisningar
-            boolean sameMovieOverlap = screeningRepository.existsByMovieIdAndTimeOverlap(
-                    booking.getScreening().getId(),
-                    booking.getReservationStartTime(),
-                    booking.getReservationEndTime()
-            );
-
-            if (sameMovieOverlap) {
-                throw new InvalidBookingException("Filmen visas redan under denna tid i en annan salong.");
-            }
-        }
-
-
-        // === Beräkna totalpris ===
-        BigDecimal factor = new BigDecimal("0.11");
-
-        //SEK
-        BigDecimal totalPriceSek = room.getPriceSek().add(screening.getPriceSek());
-
-        //USD
-        BigDecimal totalPriceUsd = room.getPriceSek().add(screening.getPriceSek());
-        totalPriceUsd = totalPriceUsd.multiply(factor);
-
-        booking.setTotalPriceSek(totalPriceSek);
-        booking.setTotalPriceUsd(totalPriceUsd);
-
-        bookingRepository.save(booking);
-
-        return BookingMapper.toBookingResponseDto(booking);
-    }
-
+    // Kunden uppdaterar bokning
     @Transactional
     public BookingResponseDto updateBooking(Long bookingId, BookingPatchRequestDto body) {
         //Hämta inloggad användare

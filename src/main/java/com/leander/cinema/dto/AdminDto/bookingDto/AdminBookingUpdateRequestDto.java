@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 public record AdminBookingUpdateRequestDto(
         @NotNull(message = "Boknings-ID måste anges")
-        Long id,
+        Long bookingId,
         @NotNull(message = "Datum och tid måste anges")
         @FutureOrPresent(message = "Startdatum/tid kan inte vara bakåt i tiden")
         LocalDateTime reservationStartTime,
@@ -17,5 +17,8 @@ public record AdminBookingUpdateRequestDto(
         LocalDateTime reservationEndTime,
         @NotNull
         @Min(value = 1, message = "Antal gäster måste vara minst 1")
-        int numberOfGuests) {
+        int numberOfGuests,
+        String speakerName,
+        Long screeningId,
+        Long roomId ) {
 }

@@ -29,16 +29,19 @@ public class CustomerController {
 //        return ResponseEntity.ok(response);
 //    }
 
-    @PostMapping("/bookings")
-    public ResponseEntity<BookingResponseDto> booking(@Valid @RequestBody BookingPostRequestDto requestDto) {
-        BookingResponseDto response = bookingService.createBooking(requestDto);
-        URI location = URI.create("/api/v1/bookings" + response.id());
-        return ResponseEntity.created(location).body(response);
-    }
+//    @PostMapping("/bookings")
+//    public ResponseEntity<BookingResponseDto> booking(@Valid @RequestBody BookingPostRequestDto requestDto) {
+//        BookingResponseDto response = bookingService.createBooking(requestDto);
+//        URI location = URI.create("/api/v1/bookings" + response.id());
+//        return ResponseEntity.created(location).body(response);
+//    }
 
     @PatchMapping("/bookings/{bookingId}")
     public ResponseEntity<BookingResponseDto> booking(@PathVariable Long bookingId, @Valid @RequestBody BookingPatchRequestDto body) {
         BookingResponseDto response = bookingService.updateBooking(bookingId, body);
         return ResponseEntity.ok(response);
     }
+
+
+    // Lista föreställiningar ska ha    @PreAuthorize("hasRole('USER')")  för att undivka att admin kommer åt endpointen
 }

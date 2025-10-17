@@ -1,5 +1,9 @@
 package com.leander.cinema.mapper;
 
+import com.leander.cinema.dto.AdminDto.bookingDto.AdminBookingResponseDto;
+import com.leander.cinema.dto.AdminDto.movieDto.AdminMovieResponseDto;
+import com.leander.cinema.dto.AdminDto.roomDto.AdminRoomResponseDto;
+import com.leander.cinema.dto.AdminDto.screeningDto.AdminScreeningResponseDto;
 import com.leander.cinema.dto.CustomerDto.bookingDto.BookingPostRequestDto;
 import com.leander.cinema.dto.CustomerDto.bookingDto.BookingResponseDto;
 import com.leander.cinema.entity.Booking;
@@ -12,6 +16,7 @@ public class BookingMapper {
         booking.setReservationStartTime(body.reservationStartTime());
         booking.setReservationEndTime(body.reservationEndTime());
         booking.setNumberOfGuests(body.numberOfGuests());
+        booking.setSpeakerName(body.speakerName().trim());
         return booking;
     }
 
@@ -20,29 +25,41 @@ public class BookingMapper {
         // Room
         String roomName = "----";
         int maxGuests = 0;
+        List<String> equipments = List.of();
         if (booking.getRoom() != null) {
             if (booking.getRoom().getName() != null) {
                 roomName = booking.getRoom().getName();
             }
             maxGuests = booking.getRoom().getMaxGuests();
+
+            if (booking.getRoom().getStandardEquipment() != null) {
+                equipments = booking.getRoom().getStandardEquipment();
+            }
         }
 
         // Speaker
         String speakerName = "----";
-        if (booking.getScreening() != null) {
-            String screeningSpeaker = booking.getScreening().getSpeakerName();
-            if (screeningSpeaker != null && !screeningSpeaker.isBlank()) {
-                speakerName = screeningSpeaker;
-            }
+        if (booking.getSpeakerName() != null && !booking.getSpeakerName().isBlank()) {
+            speakerName = booking.getSpeakerName();
         }
-
 
         // Movie
         String movieTitle = "----";
+        String genre = "----";
+        int ageLimit = 0;
+        int duration = 0;
+
         if (booking.getScreening() != null && booking.getScreening().getMovie() != null) {
-            if (booking.getScreening().getMovie().getTitle() != null) {
-                movieTitle = booking.getScreening().getMovie().getTitle();
+            var movie = booking.getScreening().getMovie();
+
+            if (movie.getTitle() != null) {
+                movieTitle = movie.getTitle();
             }
+            if (movie.getGenre() != null) {
+                genre = movie.getGenre();
+            }
+            ageLimit = movie.getAgeLimit();
+            duration = movie.getDuration();
         }
 
         // Customer
@@ -57,12 +74,6 @@ public class BookingMapper {
             }
         }
 
-        // Equipment
-        List<String> equipments = List.of();
-        if (booking.getRoom().getStandardEquipment() != null) {
-            equipments = booking.getRoom().getStandardEquipment();
-        }
-
         return new BookingResponseDto(
                 booking.getId(),
                 booking.getReservationStartTime(),
@@ -73,10 +84,69 @@ public class BookingMapper {
                 maxGuests,
                 speakerName,
                 movieTitle,
+                genre,
+                ageLimit,
+                duration,
                 customerFirstName,
                 customerLastName,
                 booking.getTotalPriceSek(),
                 booking.getTotalPriceUsd()
+        );
+    }
+
+    public static AdminBookingResponseDto toAdminBookingResponseDto(Booking booking) {
+        // Bokningens rum (alltid det som gäller)
+        AdminRoomResponseDto roomDto = null;
+        if (booking.getRoom() != null) {
+            var room = booking.getRoom();
+            roomDto = new AdminRoomResponseDto(
+                    room.getId(),
+                    room.getName(),
+                    room.getMaxGuests(),
+                    room.getPriceSek(),
+                    room.getPriceUsd(),
+                    room.getStandardEquipment()
+            );
+        }
+
+        // Screening (utan filmens rum och tider)
+        AdminScreeningResponseDto screeningDto = null;
+        if (booking.getScreening() != null) {
+            var screening = booking.getScreening();
+
+            AdminMovieResponseDto movieDto = null;
+            if (screening.getMovie() != null) {
+                var movie = screening.getMovie();
+                movieDto = new AdminMovieResponseDto(
+                        movie.getId(),
+                        movie.getTitle(),
+                        movie.getGenre(),
+                        movie.getAgeLimit(),
+                        movie.getDuration()
+                );
+            }
+
+            screeningDto = new AdminScreeningResponseDto(
+                    screening.getId(),
+                    null, // Ta bort startTime
+                    null, // Ta bort endTime
+                    screening.getPriceSek(),
+                    screening.getPriceUsd(),
+                    null,   // Inget rum på screening
+                    movieDto
+            );
+        }
+
+        return new AdminBookingResponseDto(
+                booking.getId(),
+                booking.getReservationStartTime(), // alltid bokningens tider
+                booking.getReservationEndTime(),   // alltid bokningens tider
+                booking.getNumberOfGuests(),
+                roomDto,                      // Kundens valda rum
+                booking.getTotalPriceSek(),
+                booking.getTotalPriceUsd(),
+                booking.getSpeakerName(),
+                screeningDto                  // Screening utan screeningens egna rum
         );
     }
 }

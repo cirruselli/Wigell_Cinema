@@ -1,14 +1,20 @@
 package com.leander.cinema.dto.AdminDto.ticketDto;
 
+import com.leander.cinema.dto.AdminDto.bookingDto.AdminBookingResponseDto;
+import com.leander.cinema.dto.AdminDto.screeningDto.AdminScreeningResponseDto;
+
 import java.math.BigDecimal;
 
 public record AdminTicketResponseDto(
         Long id,
         int numberOfTickets,
-        String fistName,
-        String lastName,
+        String customerFistName,
+        String customerLastName,
+        BigDecimal priceSek,
+        BigDecimal priceUsd,
         BigDecimal totalPriceSek,
         BigDecimal totalPriceUsd,
-        Long screeningId
+        AdminScreeningResponseDto screeningDto,
+        AdminBookingResponseDto bookingDto
 ) {
 }

@@ -47,23 +47,17 @@ public class ScreeningService {
     @Transactional
     public AdminScreeningResponseDto createScreening(AdminScreeningRequestDto body) {
 
+        //Kontroller av tiderna
+        if (body.endTime().isBefore(body.startTime())) {
+            throw new InvalidScreeningException("Sluttiden kan inte vara före starttiden.");
+        }
+
         Room room = roomRepository.findById(body.roomId())
-                .orElseThrow(() -> new EntityNotFoundException("Rummet med id " + body.roomId() + " hittades inte"));
+                .orElseThrow(() -> new EntityNotFoundException("Rummet med id " + body.roomId() + " hittades inte."));
 
-        if ((body.speakerName() == null && body.movieId() == null) ||
-                (body.speakerName() != null && body.movieId() != null)) {
-            throw new InvalidScreeningException("En screening måste ha antingen talare eller film, inte båda.");
-        }
 
-        String speaker = null;
-        Movie movie = null;
-
-        if (body.speakerName() != null) {
-            speaker = body.speakerName().trim();
-        } else {
-            movie = movieRepository.findById(body.movieId())
-                    .orElseThrow(() -> new EntityNotFoundException("Film med id " + body.movieId() + " hittades inte"));
-        }
+        Movie movie = movieRepository.findById(body.movieId())
+                    .orElseThrow(() -> new EntityNotFoundException("Film med id " + body.movieId() + " hittades inte."));
 
         //Förhindrar att två visningar sker i samma salong samtidigt
         boolean conflict = screeningRepository.existsOverlappingScreening(
@@ -76,26 +70,13 @@ public class ScreeningService {
             throw new InvalidScreeningException("Rummet är redan bokat under denna tid.");
         }
 
-        //Förhindrar att samma film eller talare schemaläggs parallellt
-        boolean contentConflict = screeningRepository.existsByMovieOrSpeakerAndOverlap(
-                body.movieId(),
-                body.speakerName(),
-                body.startTime(),
-                body.endTime()
-        );
-
-        if (contentConflict) {
-            throw new InvalidScreeningException("Denna film eller talare är redan schemalagd under den valda tiden.");
-        }
-
-
         Screening screening = ScreeningMapper.toScreeningEntity(body);
         screening.setRoom(room);
-        screening.setSpeakerName(speaker);
         screening.setMovie(movie);
 
         BigDecimal factor = new BigDecimal("0.11");
-        screening.setPriceUsd(screening.getPriceSek().multiply(factor));
+        BigDecimal priceUsd = screening.getPriceSek().multiply(factor);
+        screening.setPriceUsd(priceUsd);
 
         screeningRepository.save(screening);
 

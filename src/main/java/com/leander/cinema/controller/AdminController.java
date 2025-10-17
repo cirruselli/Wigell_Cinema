@@ -1,7 +1,5 @@
 package com.leander.cinema.controller;
 
-import com.leander.cinema.dto.AdminDto.bookingDto.AdminBookingResponseDto;
-import com.leander.cinema.dto.AdminDto.customerDto.AdminCustomerRequestDto;
 import com.leander.cinema.dto.AdminDto.customerDto.AdminCustomerResponseDto;
 import com.leander.cinema.dto.AdminDto.customerDto.AdminCustomerWithAccountRequestDto;
 import com.leander.cinema.dto.AdminDto.movieDto.AdminMovieRequestDto;

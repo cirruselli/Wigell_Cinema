@@ -6,8 +6,10 @@ import jakarta.validation.constraints.NotNull;
 
 public record AdminTicketUpdateRequestDto(
         @NotNull(message = "Biljett-ID måste anges")
-        Long id,
+        Long ticketId,
         @Min(value = 1, message = "Antal biljetter måste vara minst 1")
-        @Max(value = 20, message = "Max antal biljetter är 20")
-        int numberOfTickets){
+        @Max(value = 6, message = "Max antal biljetter är 6")
+        int numberOfTickets,
+        Long screeningId,
+        Long bookingId){
 }

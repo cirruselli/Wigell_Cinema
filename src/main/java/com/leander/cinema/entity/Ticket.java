@@ -36,6 +36,11 @@ public class Ticket {
     @JoinColumn(name = "screening_id", nullable = false)
     private Screening screening;
 
+    //RELATION
+    @ManyToOne
+    @JoinColumn(name = "booking_id", nullable = false)
+    private Booking booking;
+
     public Ticket() {
     }
 
@@ -48,7 +53,7 @@ public class Ticket {
         this.screening = screening;
     }
 
-    public Ticket(int numberOfTickets, BigDecimal priceSek, BigDecimal priceUsd, BigDecimal totalPriceSek, BigDecimal totalPriceUsd, Customer customer, Screening screening) {
+    public Ticket(int numberOfTickets, BigDecimal priceSek, BigDecimal priceUsd, BigDecimal totalPriceSek, BigDecimal totalPriceUsd, Customer customer, Screening screening, Booking booking) {
         this.numberOfTickets = numberOfTickets;
         this.priceSek = priceSek;
         this.priceUsd = priceUsd;
@@ -56,6 +61,7 @@ public class Ticket {
         this.totalPriceUsd = totalPriceUsd;
         this.customer = customer;
         this.screening = screening;
+        this.booking = booking;
     }
 
     public Long getId() {
@@ -120,5 +126,13 @@ public class Ticket {
 
     public void setScreening(Screening screening) {
         this.screening = screening;
+    }
+
+    public Booking getBooking() {
+        return booking;
+    }
+
+    public void setBooking(Booking booking) {
+        this.booking = booking;
     }
 }

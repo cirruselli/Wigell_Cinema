@@ -41,7 +41,7 @@ public record AdminCustomerWithAccountRequestDto(
         @Size(min = 4, max = 10, message = "Användarnamn mellan 4-10 tecken")
         String username,
         @NotBlank(message = "Lösenord måste anges")
-        @Size(min = 4, max = 20)
+        @Size(min = 4, max = 20, message = "Lösenord mellan 4 och 20 tecken")
         String password
 ) {
 }

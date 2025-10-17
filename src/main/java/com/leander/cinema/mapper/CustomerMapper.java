@@ -2,9 +2,9 @@ package com.leander.cinema.mapper;
 
 import com.leander.cinema.dto.AdminDto.addressDto.AdminAddressResponseDto;
 import com.leander.cinema.dto.AdminDto.bookingDto.AdminBookingResponseDto;
-import com.leander.cinema.dto.AdminDto.customerDto.AdminCustomerRequestDto;
 import com.leander.cinema.dto.AdminDto.customerDto.AdminCustomerResponseDto;
 import com.leander.cinema.dto.AdminDto.customerDto.AdminCustomerWithAccountRequestDto;
+import com.leander.cinema.dto.AdminDto.screeningDto.AdminScreeningResponseDto;
 import com.leander.cinema.dto.AdminDto.ticketDto.AdminTicketResponseDto;
 import com.leander.cinema.entity.Address;
 import com.leander.cinema.entity.Booking;
@@ -33,6 +33,8 @@ public class CustomerMapper {
     }
 
     public static AdminCustomerResponseDto toAdminCustomerResponseDto(Customer customer) {
+
+        // --- Adresser ---
         List<AdminAddressResponseDto> addressDtos = new ArrayList<>();
         for (Address address : customer.getAddresses()) {
             addressDtos.add(new AdminAddressResponseDto(
@@ -43,57 +45,43 @@ public class CustomerMapper {
             ));
         }
 
+        // --- Biljetter ---
         List<AdminTicketResponseDto> ticketDtos = new ArrayList<>();
+
         for (Ticket ticket : customer.getTickets()) {
+
+            AdminScreeningResponseDto screeningDto = null;
+            AdminBookingResponseDto bookingDto = null;
+
+            // Om biljetten hör till en screening
+            if (ticket.getScreening() != null) {
+                screeningDto = ScreeningMapper.toAdminScreeningResponseDto(ticket.getScreening());
+            }
+
+            // Om biljetten hör till en bokning
+            if (ticket.getBooking() != null) {
+                bookingDto = BookingMapper.toAdminBookingResponseDto(ticket.getBooking());
+            }
+
             ticketDtos.add(new AdminTicketResponseDto(
                     ticket.getId(),
                     ticket.getNumberOfTickets(),
                     ticket.getCustomer().getFirstName(),
                     ticket.getCustomer().getLastName(),
+                    ticket.getPriceSek(),
+                    ticket.getPriceUsd(),
                     ticket.getTotalPriceSek(),
                     ticket.getTotalPriceUsd(),
-                    ticket.getScreening().getId()
+                    screeningDto,
+                    bookingDto
             ));
         }
 
+
+        // --- Bokningar ---
         List<AdminBookingResponseDto> bookingDtos = new ArrayList<>();
         for (Booking booking : customer.getBookings()) {
-
-            Long movieId = null;
-            String speakerName = "----";
-            String movieTitle = "----";
-            int movieDuration = 0;
-
-            if (booking.getScreening() != null) {
-                // Om screening har film
-                if (booking.getScreening().getMovie() != null) {
-                    movieId = booking.getScreening().getMovie().getId();
-                    movieTitle = booking.getScreening().getMovie().getTitle();
-                    movieDuration = booking.getScreening().getMovie().getDuration();
-                }
-
-                // Om screening har en egen talare
-                if (booking.getScreening().getSpeakerName() != null && !booking.getScreening().getSpeakerName().isBlank()) {
-                    speakerName = booking.getScreening().getSpeakerName();
-                }
-            }
-
-
-            bookingDtos.add(new AdminBookingResponseDto(
-                    booking.getId(),
-                    booking.getReservationStartTime(),
-                    booking.getReservationEndTime(),
-                    booking.getNumberOfGuests(),
-                    booking.getRoom().getId(),
-                    booking.getRoom().getName(),
-                    booking.getRoom().getMaxGuests(),
-                    booking.getRoom().getStandardEquipment(),
-                    speakerName,
-                    movieId,
-                    movieTitle,
-                    movieDuration,
-                    booking.getTotalPriceSek(),
-                    booking.getTotalPriceUsd()));
+            bookingDtos.add(BookingMapper.toAdminBookingResponseDto(booking));
         }
 
         return new AdminCustomerResponseDto(
@@ -108,4 +96,6 @@ public class CustomerMapper {
                 customer.getAppUser().getUsername()
         );
     }
+
 }
+
