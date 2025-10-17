@@ -16,6 +16,16 @@ public class GlobalExceptionHandler {
 
     // === Egna exceptions ===
 
+    @ExceptionHandler(AddressAlreadyExistsException.class)
+    public ResponseEntity<String> handleAddressAlreadyExists(AddressAlreadyExistsException ex) {
+        return ResponseEntity.badRequest().body(ex.getMessage());
+    }
+
+    @ExceptionHandler(CustomerNotFoundException.class)
+    public ResponseEntity<String> handleCustomerNotFound(CustomerNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
     @ExceptionHandler(InvalidBookingException.class)
     public ResponseEntity<String> handleInvalidBooking(InvalidBookingException ex) {
         return ResponseEntity

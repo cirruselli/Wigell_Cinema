@@ -1,5 +1,7 @@
 package com.leander.cinema.controller;
 
+import com.leander.cinema.dto.AdminDto.addressDto.AdminAddressRequestDto;
+import com.leander.cinema.dto.AdminDto.addressDto.AdminAddressResponseDto;
 import com.leander.cinema.dto.AdminDto.customerDto.AdminCustomerResponseDto;
 import com.leander.cinema.dto.AdminDto.customerDto.AdminCustomerWithAccountRequestDto;
 import com.leander.cinema.dto.AdminDto.movieDto.AdminMovieRequestDto;
@@ -38,7 +40,7 @@ public class AdminController {
         this.screeningService = screeningService;
     }
 
-    // --- KUNDER ---
+    // === KUNDER ===
 
     @GetMapping("/customers")
     public ResponseEntity<List<AdminCustomerResponseDto>> customers() {
@@ -49,7 +51,7 @@ public class AdminController {
     @PostMapping("/customers")
     public ResponseEntity<AdminCustomerResponseDto> customer(@Valid @RequestBody AdminCustomerWithAccountRequestDto body) {
         AdminCustomerResponseDto response = customerService.createCustomer(body);
-        URI location = URI.create("/customers/" + response.customerId());
+        URI location = URI.create("/api/v1/customers/" + response.customerId());
         return ResponseEntity.created(location).body(response);
     }
 
@@ -67,7 +69,16 @@ public class AdminController {
         return ResponseEntity.notFound().build();
     }
 
-    // --- FILMER ---
+    // === ADRESSER ===
+
+    @PostMapping("/customers/{customerId}/addresses")
+    public ResponseEntity<AdminAddressResponseDto> address(@PathVariable Long customerId, @Valid @RequestBody AdminAddressRequestDto body) {
+        AdminAddressResponseDto response = customerService.addAddressToCustomer(customerId, body);
+        URI location = URI.create("/api/v1/customers/" + customerId + "/addresses/" + response.addressId());
+        return ResponseEntity.created(location).body(response);
+    }
+
+    // === FILMER ===
 
 //    @GetMapping("/movies")
 //    public List<?> movies(Authentication auth) {
@@ -83,7 +94,7 @@ public class AdminController {
     @PostMapping("/movies")
     public ResponseEntity<AdminMovieResponseDto> movie(@Valid @RequestBody AdminMovieRequestDto body) {
         AdminMovieResponseDto response = movieService.createMovie(body);
-        URI location = URI.create("/movies/" + response.movieId());
+        URI location = URI.create("/api/v1/movies/" + response.movieId());
         return ResponseEntity.created(location).body(response);
     }
 
@@ -95,7 +106,7 @@ public class AdminController {
         return ResponseEntity.notFound().build();
     }
 
-    // --- RUM ---
+    // === RUM ===
 
     @GetMapping("/rooms")
     public ResponseEntity<List<AdminRoomResponseDto>> rooms() {
@@ -111,7 +122,7 @@ public class AdminController {
     @PostMapping("/rooms")
     public ResponseEntity<AdminRoomResponseDto> room(@Valid @RequestBody AdminRoomRequestDto body) {
         AdminRoomResponseDto response = roomService.createRoom(body);
-        URI location = URI.create("/rooms/" + response.roomId());
+        URI location = URI.create("api/v1/rooms/" + response.roomId());
         return ResponseEntity.created(location).body(response);
     }
 
@@ -121,7 +132,7 @@ public class AdminController {
         return ResponseEntity.ok().body(response);
     }
 
-    // --- FÖRESTÄLLNINGAR ---
+    // === FÖRESTÄLLNINGAR ===
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/screenings")
@@ -134,7 +145,7 @@ public class AdminController {
     @PostMapping("/screenings")
     public ResponseEntity<AdminScreeningResponseDto> screening(@Valid @RequestBody AdminScreeningRequestDto body) {
         AdminScreeningResponseDto response = screeningService.createScreening(body);
-        URI location = URI.create("/screenings/" + response.screeningId());
+        URI location = URI.create("/api/v1/screenings/" + response.screeningId());
         return ResponseEntity.created(location).body(response);
     }
 
@@ -145,5 +156,4 @@ public class AdminController {
         }
         return ResponseEntity.notFound().build();
     }
-
 }

@@ -1,10 +1,10 @@
 package com.leander.cinema.controller;
 
-import com.leander.cinema.dto.AdminDto.bookingDto.AdminBookingResponseDto;
 import com.leander.cinema.dto.CustomerDto.bookingDto.BookingPatchRequestDto;
 import com.leander.cinema.dto.CustomerDto.bookingDto.BookingPostRequestDto;
 import com.leander.cinema.dto.CustomerDto.bookingDto.BookingResponseDto;
 import com.leander.cinema.service.BookingService;
+import com.leander.cinema.service.CustomerService;
 import com.leander.cinema.service.MovieService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -17,10 +17,14 @@ import java.net.URI;
 public class CustomerController {
     private final MovieService movieService;
     private final BookingService bookingService;
+    private final CustomerService customerService;
 
-    public CustomerController(MovieService movieService, BookingService bookingService) {
+    public CustomerController(MovieService movieService,
+                              BookingService bookingService,
+                              CustomerService customerService) {
         this.movieService = movieService;
         this.bookingService = bookingService;
+        this.customerService = customerService;
     }
 //
 //    @GetMapping("/movies")

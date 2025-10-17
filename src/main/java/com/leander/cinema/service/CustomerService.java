@@ -1,12 +1,15 @@
 package com.leander.cinema.service;
 
 import com.leander.cinema.dto.AdminDto.addressDto.AdminAddressRequestDto;
+import com.leander.cinema.dto.AdminDto.addressDto.AdminAddressResponseDto;
 import com.leander.cinema.dto.AdminDto.bookingDto.AdminBookingUpdateRequestDto;
 import com.leander.cinema.dto.AdminDto.customerDto.AdminCustomerResponseDto;
 import com.leander.cinema.dto.AdminDto.customerDto.AdminCustomerWithAccountRequestDto;
 import com.leander.cinema.dto.AdminDto.ticketDto.AdminTicketUpdateRequestDto;
 import com.leander.cinema.entity.*;
+import com.leander.cinema.exception.AddressAlreadyExistsException;
 import com.leander.cinema.exception.CustomerOwnershipException;
+import com.leander.cinema.mapper.AddressMapper;
 import com.leander.cinema.mapper.CustomerMapper;
 import com.leander.cinema.repository.*;
 import com.leander.cinema.security.AppUser;
@@ -211,7 +214,7 @@ public class CustomerService {
 
                 ticket.setCustomer(customer);
 
-                if(!updatedTickets.contains(ticket)) {
+                if (!updatedTickets.contains(ticket)) {
                     updatedTickets.add(ticket);
                 }
             }
@@ -286,7 +289,7 @@ public class CustomerService {
 
                 booking.setCustomer(customer);
 
-                if(!updatedBookings.contains(booking)) {
+                if (!updatedBookings.contains(booking)) {
                     updatedBookings.add(booking);
                 }
             }
@@ -337,4 +340,32 @@ public class CustomerService {
             return false;
         }
     }
+
+    // === Lägg till adress ===
+    @Transactional
+    public AdminAddressResponseDto addAddressToCustomer(Long customerId, AdminAddressRequestDto body) {
+        Customer customer = customerRepository.findById(customerId)
+                .orElseThrow(() -> new RuntimeException("Kunden hittades inte"));
+
+        String street = body.street().trim();
+        String postalCode = body.postalCode().trim();
+        String city = body.city().trim();
+
+        Address address = addressRepository.findByStreetAndPostalCodeAndCity(street, postalCode, city);
+
+        if (address == null) {
+            address = new Address(street, postalCode, city);
+            addressRepository.save(address);
+        }
+
+        if (customer.getAddresses().contains(address)) {
+            throw new AddressAlreadyExistsException("Kunden har redan denna adress");
+        }
+
+        customer.getAddresses().add(address);
+        customerRepository.save(customer);
+
+        return AddressMapper.toAdminAddressResponseDto(address);
+    }
+
 }
