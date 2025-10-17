@@ -8,6 +8,7 @@ import com.leander.cinema.dto.AdminDto.customerDto.AdminCustomerWithAccountReque
 import com.leander.cinema.dto.AdminDto.ticketDto.AdminTicketUpdateRequestDto;
 import com.leander.cinema.entity.*;
 import com.leander.cinema.exception.AddressAlreadyExistsException;
+import com.leander.cinema.exception.CustomerMustHaveAtLeastOneAddressException;
 import com.leander.cinema.exception.CustomerOwnershipException;
 import com.leander.cinema.mapper.AddressMapper;
 import com.leander.cinema.mapper.CustomerMapper;
@@ -15,9 +16,11 @@ import com.leander.cinema.repository.*;
 import com.leander.cinema.security.AppUser;
 import com.leander.cinema.security.Role;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -331,7 +334,7 @@ public class CustomerService {
             List<Address> allAddresses = addressRepository.findAll();
             for (Address address : allAddresses) {
                 // Tar bort alla adresser som saknar kopplade kunder
-                if (address.getCustomers() == null || address.getCustomers().isEmpty()) {
+                if (address.getCustomers().isEmpty()) {
                     addressRepository.delete(address);
                 }
             }
@@ -366,6 +369,42 @@ public class CustomerService {
         customerRepository.save(customer);
 
         return AddressMapper.toAdminAddressResponseDto(address);
+    }
+
+    // === Ta bort adress ===
+    @Transactional
+    public void removeAddressFromCustomer(Long customerId, Long addressId) {
+        Customer customer = customerRepository.findById(customerId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Kunden med id " + customerId + " hittades inte"));
+
+        Address address = addressRepository.findById(addressId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Adressen med id " + addressId + " hittades inte"));
+
+        // Kolla att kunden faktiskt har adressen
+        if (!customer.getAddresses().contains(address)) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Kunden har inte denna adress."
+            );
+        }
+
+        if (customer.getAddresses().size() <= 1) {
+            throw new CustomerMustHaveAtLeastOneAddressException("Kunden måste ha minst en adress.");
+        }
+
+        // Ta bort adressen från kundens lista
+        customer.getAddresses().remove(address);
+        // Ta bort kunden från adressens lista
+        address.getCustomers().remove(customer);
+
+        customer.getAddresses().remove(address);
+        customerRepository.save(customer);
+
+        // Tar bort alla adresser som saknar kopplade kunder
+        if (address.getCustomers().isEmpty()) {
+            addressRepository.delete(address);
+        }
     }
 
 }

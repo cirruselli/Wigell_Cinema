@@ -48,13 +48,14 @@ public class BookingService {
 
         Booking booking = BookingMapper.toBookingEntity(body);
         booking.setCustomer(currentUser.getCustomer());
-        booking.setReservationStartTime(body.reservationStartTime());
-        booking.setReservationEndTime(body.reservationEndTime());
 
         //Kontrollera att reservationens slut inte är före start
         if (body.reservationEndTime().isBefore(body.reservationStartTime())) {
             throw new BookingConflictException("Reservationens slutdatum/tid kan inte vara före startdatum/tid.");
         }
+
+        booking.setReservationStartTime(body.reservationStartTime());
+        booking.setReservationEndTime(body.reservationEndTime());
 
         // Val av rum
         Room room = roomRepository.findById(body.roomId())
@@ -65,16 +66,20 @@ public class BookingService {
             // Scenario: Screening
             Screening screening = screeningRepository.findById(body.screeningId())
                     .orElseThrow(() -> new EntityNotFoundException("Föreställningen med id " + body.screeningId() + " hittades inte"));
+
+            // Kontrollera att denna screening inte redan är bokad
+            if (bookingRepository.existsByScreeningId(screening.getId())) {
+                throw new BookingConflictException("Denna visning är redan bokad.");
+            }
+
             booking.setScreening(screening);
             booking.setSpeakerName(null); // speaker ignoreras
         } else {
             // Scenario: Rum + speaker
+            if (body.speakerName() == null || body.speakerName().isBlank()) {
+                throw new InvalidBookingException("Talarnamn måste anges vid rumsbokning utan visning.");
+            }
             booking.setSpeakerName(body.speakerName().trim());
-        }
-
-        // Validera att endast ett scenario används
-        if (body.screeningId() != null && body.speakerName() != null && !body.speakerName().isBlank()) {
-            throw new InvalidBookingException("En bokning kan antingen vara för ett rum med talare eller för en föreställning, inte båda.");
         }
 
         if (body.numberOfGuests() > room.getMaxGuests()) {
@@ -82,11 +87,10 @@ public class BookingService {
         }
 
         // Kontrollera krock med andra bokningar
-        boolean roomBookingConflict = bookingRepository.existsByRoomAndReservationStartTimeLessThanAndReservationEndTimeGreaterThan(
-                room, booking.getReservationEndTime(), booking.getReservationStartTime());
-        if (roomBookingConflict) {
+        if (bookingRepository.overlaps(room, body.reservationStartTime(), body.reservationEndTime())) {
             throw new BookingConflictException("Rummet är upptaget under den valda tiden.");
         }
+
 
         // Totalpris
         BigDecimal factor = new BigDecimal("0.11");
@@ -132,6 +136,10 @@ public class BookingService {
             booking.setReservationEndTime(body.reservationEndTime());
         }
 
+        if (booking.getReservationEndTime().isBefore(booking.getReservationStartTime())) {
+            throw new BookingConflictException("Slutdatum/tid kan inte vara före startdatum/tid.");
+        }
+
         if (body.equipment() != null) {
             booking.getRoom().setStandardEquipment(body.equipment());
         }
@@ -139,8 +147,14 @@ public class BookingService {
         Room room = booking.getRoom();
 
         //Rums-krock
-        if (bookingRepository.existsByRoomAndReservationStartTimeLessThanAndReservationEndTimeGreaterThanAndIdNot(
-                room, booking.getReservationEndTime(), booking.getReservationStartTime(), bookingId)) {
+        boolean conflict = bookingRepository.overlapsForUpdate(
+                room,
+                booking.getReservationStartTime(),
+                booking.getReservationEndTime(),
+                bookingId
+        );
+
+        if (conflict) {
             throw new BookingConflictException("Rummet är upptaget under den valda tiden.");
         }
 

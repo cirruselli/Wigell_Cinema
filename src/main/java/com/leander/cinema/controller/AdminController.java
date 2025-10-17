@@ -78,6 +78,13 @@ public class AdminController {
         return ResponseEntity.created(location).body(response);
     }
 
+    @DeleteMapping("/customers/{customerId}/addresses/{addressId}")
+    public ResponseEntity<Void> address(@PathVariable Long customerId, @PathVariable Long addressId) {
+        customerService.removeAddressFromCustomer(customerId, addressId);
+        return ResponseEntity.noContent().build();
+    }
+
+
     // === FILMER ===
 
 //    @GetMapping("/movies")
