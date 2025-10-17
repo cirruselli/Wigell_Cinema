@@ -128,13 +128,6 @@ public class CustomerService {
         return CustomerMapper.toAdminCustomerResponseDto(customer);
     }
 
-    /* UPDATE CUSTOMER EJ KLAAAAAAAAAAAAAAAAAAAAAAAAR
-    *
-    *
-    * Kontrollera mot ticket dto att alla fält uppdateras!
-    * Kontrollera mot booking dto att alla fält uppdateras!
-    *
-     */
 
     // === Uppdatera kund ===
     @Transactional

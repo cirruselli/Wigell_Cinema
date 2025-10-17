@@ -38,9 +38,75 @@ public class BookingService {
         this.appUserRepository = appUserRepository;
     }
 
-//    // EJ KLAR MED CREATE BOOKING DÅ???? UTIFRÅN NYTT ATTRIBUT MED SPEKAER I BOOKING OSV
-//
-//    //Kunden reserverar lokal -> bokning skapas
+
+    //Kunden reserverar lokal -> bokning skapas
+    @Transactional
+    public BookingResponseDto createBooking(BookingPostRequestDto body) {
+        String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+        AppUser currentUser = appUserRepository.findByUsername(currentUsername)
+                .orElseThrow(() -> new AccessDeniedException("Ingen användare hittades"));
+
+        Booking booking = BookingMapper.toBookingEntity(body);
+        booking.setCustomer(currentUser.getCustomer());
+        booking.setReservationStartTime(body.reservationStartTime());
+        booking.setReservationEndTime(body.reservationEndTime());
+
+        //Kontrollera att reservationens slut inte är före start
+        if (body.reservationEndTime().isBefore(body.reservationStartTime())) {
+            throw new BookingConflictException("Reservationens slutdatum/tid kan inte vara före startdatum/tid.");
+        }
+
+        // Val av rum
+        Room room = roomRepository.findById(body.roomId())
+                .orElseThrow(() -> new EntityNotFoundException("Rummet med id " + body.roomId() + " hittades inte"));
+        booking.setRoom(room);
+
+        if (body.screeningId() != null) {
+            // Scenario: Screening
+            Screening screening = screeningRepository.findById(body.screeningId())
+                    .orElseThrow(() -> new EntityNotFoundException("Föreställningen med id " + body.screeningId() + " hittades inte"));
+            booking.setScreening(screening);
+            booking.setSpeakerName(null); // speaker ignoreras
+        } else {
+            // Scenario: Rum + speaker
+            booking.setSpeakerName(body.speakerName().trim());
+        }
+
+        // Validera att endast ett scenario används
+        if (body.screeningId() != null && body.speakerName() != null && !body.speakerName().isBlank()) {
+            throw new InvalidBookingException("En bokning kan antingen vara för ett rum med talare eller för en föreställning, inte båda.");
+        }
+
+        if (body.numberOfGuests() > room.getMaxGuests()) {
+            throw new BookingCapacityExceededException("Antal gäster överstiger rummets kapacitet på " + room.getMaxGuests() + " gäster");
+        }
+
+        // Kontrollera krock med andra bokningar
+        boolean roomBookingConflict = bookingRepository.existsByRoomAndReservationStartTimeLessThanAndReservationEndTimeGreaterThan(
+                room, booking.getReservationEndTime(), booking.getReservationStartTime());
+        if (roomBookingConflict) {
+            throw new BookingConflictException("Rummet är upptaget under den valda tiden.");
+        }
+
+        // Totalpris
+        BigDecimal factor = new BigDecimal("0.11");
+        BigDecimal totalPriceSek = room.getPriceSek();
+        BigDecimal totalPriceUsd = totalPriceSek.multiply(factor);
+
+        if (booking.getScreening() != null) {
+            totalPriceSek = totalPriceSek.add(booking.getScreening().getPriceSek());
+            totalPriceUsd = totalPriceUsd.add(booking.getScreening().getPriceSek().multiply(factor));
+        }
+
+        booking.setTotalPriceSek(totalPriceSek);
+        booking.setTotalPriceUsd(totalPriceUsd);
+
+        bookingRepository.save(booking);
+
+        return BookingMapper.toBookingResponseDto(booking);
+    }
+
+
 //    @Transactional
 //    public BookingResponseDto createBooking(BookingPostRequestDto body) {
 //        //Hämta inloggad användare
@@ -127,6 +193,10 @@ public class BookingService {
 //        return BookingMapper.toBookingResponseDto(booking);
 //    }
 
+
+    //LÄGG TILL DATUM CHECK PÅ BÅDE ATT ENDDATUM INTE KAN VAR FÖRE OCH ATT DE INTE KROCKAR I RUMMET
+
+
     // Kunden uppdaterar bokning
     @Transactional
     public BookingResponseDto updateBooking(Long bookingId, BookingPatchRequestDto body) {
@@ -145,7 +215,7 @@ public class BookingService {
         if (body.reservationStartTime() != null) {
             booking.setReservationStartTime(body.reservationStartTime());
         }
-        if (body.reservationEndTime()!= null) {
+        if (body.reservationEndTime() != null) {
             booking.setReservationEndTime(body.reservationEndTime());
         }
 

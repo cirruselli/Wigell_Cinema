@@ -13,10 +13,18 @@ import java.util.List;
 public class BookingMapper {
     public static Booking toBookingEntity(BookingPostRequestDto body) {
         Booking booking = new Booking();
+
         booking.setReservationStartTime(body.reservationStartTime());
         booking.setReservationEndTime(body.reservationEndTime());
         booking.setNumberOfGuests(body.numberOfGuests());
-        booking.setSpeakerName(body.speakerName().trim());
+
+        // SpeakerName med null-säker trim
+        if (body.speakerName() != null) {
+            booking.setSpeakerName(body.speakerName().trim());
+        } else {
+            booking.setSpeakerName(null);
+        }
+
         return booking;
     }
 
