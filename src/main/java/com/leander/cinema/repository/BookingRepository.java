@@ -13,21 +13,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
-
-    boolean existsByRoomAndReservationStartTimeLessThanAndReservationEndTimeGreaterThan(
-            Room room, LocalDateTime reservationEndTime, LocalDateTime reservationStartTime);
-
-    boolean existsByRoomAndReservationStartTimeLessThanAndReservationEndTimeGreaterThanAndIdNot(
-            Room room,
-            LocalDateTime reservationEndTime,
-            LocalDateTime reservationStartTime,
-            Long bookingId
-    );
-
     List<Booking> findByRoomId(Long id);
-
-    boolean existsByScreeningId(Long aLong);
-
 
 
     @Query("""
@@ -56,4 +42,5 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                               @Param("newEnd") LocalDateTime newEnd,
                               @Param("bookingId") Long bookingId);
 
+    List<Booking> findByCustomerId(Long customerId);
 }

@@ -84,9 +84,12 @@ public class BookingMapper {
 
         return new BookingResponseDto(
                 booking.getId(),
+                booking.getStatus(),
                 booking.getReservationStartTime(),
                 booking.getReservationEndTime(),
                 booking.getNumberOfGuests(),
+                booking.getTotalPriceSek(),
+                booking.getTotalPriceUsd(),
                 roomName,
                 equipments,
                 maxGuests,
@@ -96,9 +99,7 @@ public class BookingMapper {
                 ageLimit,
                 duration,
                 customerFirstName,
-                customerLastName,
-                booking.getTotalPriceSek(),
-                booking.getTotalPriceUsd()
+                customerLastName
         );
     }
 
@@ -147,6 +148,7 @@ public class BookingMapper {
 
         return new AdminBookingResponseDto(
                 booking.getId(),
+                booking.getStatus(),
                 booking.getReservationStartTime(), // alltid bokningens tider
                 booking.getReservationEndTime(),   // alltid bokningens tider
                 booking.getNumberOfGuests(),

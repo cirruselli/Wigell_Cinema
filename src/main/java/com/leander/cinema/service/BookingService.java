@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -60,6 +61,37 @@ public class BookingService {
                 .orElseThrow(() -> new RuntimeException("Kunden kopplad till användare hittades inte"));
     }
 
+
+    // === Kunden ser tidigare och aktiva bokningar ===
+    @Transactional
+    public List<BookingResponseDto> getActiveAndCompletedBookings(Long customerId) {
+        Customer loggedInCustomer = getLoggedInCustomer();
+
+        List<Booking> bookings = bookingRepository.findByCustomerId((customerId));
+
+        if (!loggedInCustomer.getId().equals(customerId)) {
+            throw new AccessDeniedException("Du kan bara se dina egna bokningar.");
+        }
+
+        // Lista att lägga till bokningar att visa
+        List<Booking> filteredBookings = new ArrayList<>();
+
+        // Filtrera bort oönskade statusar
+        for (Booking booking : bookings) {
+            if (booking.getStatus() == BookingStatus.ACTIVE || booking.getStatus() == BookingStatus.COMPLETED) {
+                filteredBookings.add(booking);
+            }
+        }
+
+        List<BookingResponseDto> responseList = new ArrayList<>();
+
+        for (Booking booking : filteredBookings) {
+            BookingResponseDto bookingDto = BookingMapper.toBookingResponseDto(booking);
+            responseList.add(bookingDto);
+        }
+
+        return responseList;
+    }
 
     // === Kunden reserverar lokal -> bokning skapas ===
     @Transactional
@@ -147,6 +179,7 @@ public class BookingService {
 
         booking.setTotalPriceSek(totalPriceSek);
         booking.setTotalPriceUsd(totalPriceUsd);
+        booking.setStatus(BookingStatus.ACTIVE);
 
         bookingRepository.save(booking);
 
@@ -197,5 +230,4 @@ public class BookingService {
         bookingRepository.save(booking);
         return BookingMapper.toBookingResponseDto(booking);
     }
-
 }

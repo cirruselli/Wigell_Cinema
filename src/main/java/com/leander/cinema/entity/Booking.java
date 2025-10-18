@@ -1,5 +1,6 @@
 package com.leander.cinema.entity;
 
+import com.leander.cinema.service.BookingStatus;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -32,6 +33,10 @@ public class Booking {
     @Column(name = "total_price_USD", nullable = false, precision = 10, scale = 2)
     private BigDecimal totalPriceUsd;
 
+    @Column(name = "status", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private BookingStatus status;
+
     //RELATION
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_id", nullable = false)
@@ -53,23 +58,25 @@ public class Booking {
     public Booking() {
     }
 
-    public Booking(LocalDateTime reservationStartTime, LocalDateTime reservationEndTime, String speakerName, int numberOfGuests, BigDecimal totalPriceSek, BigDecimal totalPriceUsd, Room room, Customer customer) {
+    public Booking(LocalDateTime reservationStartTime, LocalDateTime reservationEndTime, String speakerName, int numberOfGuests, BigDecimal totalPriceSek, BigDecimal totalPriceUsd, BookingStatus status, Room room, Customer customer) {
         this.reservationStartTime = reservationStartTime;
         this.reservationEndTime = reservationEndTime;
         this.speakerName = speakerName;
         this.numberOfGuests = numberOfGuests;
         this.totalPriceSek = totalPriceSek;
         this.totalPriceUsd = totalPriceUsd;
+        this.status = status;
         this.room = room;
         this.customer = customer;
     }
 
-    public Booking(LocalDateTime reservationStartTime, LocalDateTime reservationEndTime, int numberOfGuests, BigDecimal totalPriceSek, BigDecimal totalPriceUsd, Room room, Screening screening, Customer customer) {
+    public Booking(LocalDateTime reservationStartTime, LocalDateTime reservationEndTime, int numberOfGuests, BigDecimal totalPriceSek, BigDecimal totalPriceUsd, BookingStatus status, Room room, Screening screening, Customer customer) {
         this.reservationStartTime = reservationStartTime;
         this.reservationEndTime = reservationEndTime;
         this.numberOfGuests = numberOfGuests;
         this.totalPriceSek = totalPriceSek;
         this.totalPriceUsd = totalPriceUsd;
+        this.status = status;
         this.room = room;
         this.screening = screening;
         this.customer = customer;
@@ -162,5 +169,13 @@ public class Booking {
 
     public void setTickets(List<Ticket> tickets) {
         this.tickets = tickets;
+    }
+
+    public BookingStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(BookingStatus status) {
+        this.status = status;
     }
 }

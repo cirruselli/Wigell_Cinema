@@ -16,7 +16,7 @@ public record BookingPostRequestDto(
         @NotNull(message = "Antal gäster måste anges")
         @Min(value = 1, message = "Antal gäster måste vara minst 1")
         Integer numberOfGuests,
-        @NotNull(message = "Rum måste anges")
+        @NotNull(message = "Lokal måste anges")
         Long roomId,
         String speakerName,
         Long screeningId

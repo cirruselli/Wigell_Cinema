@@ -24,10 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class CustomerService {
@@ -172,6 +169,7 @@ public class CustomerService {
                 updatedAddresses.add(newAddress);
             }
         }
+
         customer.setAddresses(updatedAddresses);
 
         // --- Uppdatera Tickets ---
@@ -324,6 +322,7 @@ public class CustomerService {
                             ") överstiger rummets maxkapacitet (" + maxGuests + ").");
                 }
 
+                booking.setStatus(bookingDto.bookingStatus());
                 booking.setCustomer(customer);
 
                 if (!updatedBookings.contains(booking)) {

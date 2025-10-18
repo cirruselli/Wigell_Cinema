@@ -4,6 +4,7 @@ import com.leander.cinema.entity.*;
 import com.leander.cinema.repository.*;
 import com.leander.cinema.security.AppUser;
 import com.leander.cinema.security.Role;
+import com.leander.cinema.service.BookingStatus;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -189,6 +190,7 @@ public class DataInitializer {
                         20,
                         new BigDecimal("12000.00"),
                         new BigDecimal("1200.00"),
+                        BookingStatus.ACTIVE,
                         room1,
                         customer1
                 );
@@ -200,6 +202,7 @@ public class DataInitializer {
                         150,
                         new BigDecimal("60000.00"),
                         new BigDecimal("6000.00"),
+                        BookingStatus.ACTIVE,
                         room2,
                         customer2
                 );

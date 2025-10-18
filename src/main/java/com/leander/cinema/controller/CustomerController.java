@@ -3,21 +3,18 @@ package com.leander.cinema.controller;
 import com.leander.cinema.dto.CustomerDto.bookingDto.BookingPatchRequestDto;
 import com.leander.cinema.dto.CustomerDto.bookingDto.BookingPostRequestDto;
 import com.leander.cinema.dto.CustomerDto.bookingDto.BookingResponseDto;
-import com.leander.cinema.dto.CustomerDto.screeningDto.ScreeningResponseDto;
 import com.leander.cinema.dto.CustomerDto.ticketDto.TicketRequestDto;
 import com.leander.cinema.dto.CustomerDto.ticketDto.TicketResponseDto;
+import com.leander.cinema.entity.Booking;
 import com.leander.cinema.service.BookingService;
 import com.leander.cinema.service.MovieService;
 import com.leander.cinema.service.ScreeningService;
 import com.leander.cinema.service.TicketService;
 import jakarta.validation.Valid;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -43,6 +40,13 @@ public class CustomerController {
 //        List<MovieResponseDto> response = movieService.getAllMoviesForCustomer();
 //        return ResponseEntity.ok(response);
 //    }
+
+    @GetMapping("/bookings")
+    public ResponseEntity<List<BookingResponseDto>> getBookings(@RequestParam Long customerId) {
+        List<BookingResponseDto> response = bookingService.getActiveAndCompletedBookings(customerId);
+        return ResponseEntity.ok(response);
+    }
+
 
     @PostMapping("/bookings")
     public ResponseEntity<BookingResponseDto> booking(@Valid @RequestBody BookingPostRequestDto body) {
