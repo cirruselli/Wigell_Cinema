@@ -5,10 +5,7 @@ import com.leander.cinema.dto.CustomerDto.bookingDto.BookingPostRequestDto;
 import com.leander.cinema.dto.CustomerDto.bookingDto.BookingResponseDto;
 import com.leander.cinema.dto.CustomerDto.ticketDto.TicketRequestDto;
 import com.leander.cinema.dto.CustomerDto.ticketDto.TicketResponseDto;
-import com.leander.cinema.entity.Booking;
 import com.leander.cinema.service.BookingService;
-import com.leander.cinema.service.MovieService;
-import com.leander.cinema.service.ScreeningService;
 import com.leander.cinema.service.TicketService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -20,26 +17,14 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1")
 public class CustomerController {
-    private final MovieService movieService;
     private final BookingService bookingService;
     private final TicketService ticketService;
-    private final ScreeningService screeningService;
 
-    public CustomerController(MovieService movieService,
-                              BookingService bookingService,
-                              TicketService ticketService,
-                              ScreeningService screeningService) {
-        this.movieService = movieService;
+    public CustomerController(BookingService bookingService,
+                              TicketService ticketService) {
         this.bookingService = bookingService;
         this.ticketService = ticketService;
-        this.screeningService = screeningService;
     }
-//
-//    @GetMapping("/movies")
-//    public ResponseEntity<List<MovieResponseDto>> movies() {
-//        List<MovieResponseDto> response = movieService.getAllMoviesForCustomer();
-//        return ResponseEntity.ok(response);
-//    }
 
     @GetMapping("/bookings")
     public ResponseEntity<List<BookingResponseDto>> getBookings(@RequestParam Long customerId) {

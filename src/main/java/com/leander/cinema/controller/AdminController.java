@@ -10,6 +10,7 @@ import com.leander.cinema.dto.AdminDto.roomDto.AdminRoomRequestDto;
 import com.leander.cinema.dto.AdminDto.roomDto.AdminRoomResponseDto;
 import com.leander.cinema.dto.AdminDto.screeningDto.AdminScreeningRequestDto;
 import com.leander.cinema.dto.AdminDto.screeningDto.AdminScreeningResponseDto;
+import com.leander.cinema.dto.CustomerDto.movieDto.MovieResponseDto;
 import com.leander.cinema.dto.CustomerDto.screeningDto.ScreeningResponseDto;
 import com.leander.cinema.service.CustomerService;
 import com.leander.cinema.service.MovieService;
@@ -46,7 +47,7 @@ public class AdminController {
         this.screeningService = screeningService;
     }
 
-    // === KUNDER ===
+    // === HANTERING AV KUNDER ===
 
     @GetMapping("/customers")
     public ResponseEntity<List<AdminCustomerResponseDto>> customers() {
@@ -93,11 +94,19 @@ public class AdminController {
 
     // === FILMER ===
 
-//    @GetMapping("/movies")
-//    public List<?> movies(Authentication auth) {
-//        List<AdminMovieResponseDto> response = movieService.getAllMoviesForAdmin();
-//        return ResponseEntity.ok(response);
-//    }
+    @GetMapping("/movies")
+    public ResponseEntity<?> getMovies(Authentication authentication) {
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
+
+        if (isAdmin) {
+            List<AdminMovieResponseDto> adminMovies = movieService.getAllMoviesForAdmin();
+            return ResponseEntity.ok(adminMovies);
+        } else {
+            List<MovieResponseDto> customerMovies = movieService.getAllMoviesForCustomer();
+            return ResponseEntity.ok(customerMovies);
+        }
+    }
 
     @GetMapping("/movies/{movieId}")
     public ResponseEntity<AdminMovieResponseDto> movie(@PathVariable Long movieId) {
