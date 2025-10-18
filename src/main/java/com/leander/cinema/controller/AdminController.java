@@ -10,16 +10,22 @@ import com.leander.cinema.dto.AdminDto.roomDto.AdminRoomRequestDto;
 import com.leander.cinema.dto.AdminDto.roomDto.AdminRoomResponseDto;
 import com.leander.cinema.dto.AdminDto.screeningDto.AdminScreeningRequestDto;
 import com.leander.cinema.dto.AdminDto.screeningDto.AdminScreeningResponseDto;
+import com.leander.cinema.dto.CustomerDto.screeningDto.ScreeningResponseDto;
 import com.leander.cinema.service.CustomerService;
 import com.leander.cinema.service.MovieService;
 import com.leander.cinema.service.RoomService;
 import com.leander.cinema.service.ScreeningService;
 import jakarta.validation.Valid;
+import org.apache.coyote.BadRequestException;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -141,11 +147,30 @@ public class AdminController {
 
     // === FÖRESTÄLLNINGAR ===
 
-    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/screenings")
-    public ResponseEntity<List<AdminScreeningResponseDto>> screenings() {
-        List<AdminScreeningResponseDto> response = screeningService.getAllScreenings();
-        return ResponseEntity.ok().body(response);
+    public ResponseEntity<List<?>> screenings(
+            @RequestParam(required = false) Long movieId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            Authentication authentication) throws BadRequestException {
+
+        boolean isAdmin = false;
+        for (GrantedAuthority authority : authentication.getAuthorities()) {
+            if (authority.getAuthority().equals("ROLE_ADMIN")) {
+                isAdmin = true;
+                break;
+            }
+        }
+
+        if (!isAdmin) {
+            if (movieId == null || date == null) {
+                throw new BadRequestException("movieId och date krävs för vanliga användare");
+            }
+            List<ScreeningResponseDto> response = screeningService.getScreeningsByMovieAndDate(movieId, date);
+            return ResponseEntity.ok(response);
+        }
+        else {
+            List<AdminScreeningResponseDto> response = screeningService.getAllScreeningsForAdmin();
+            return ResponseEntity.ok(response); }
     }
 
     @PreAuthorize("hasRole('ADMIN')")

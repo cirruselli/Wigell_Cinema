@@ -152,9 +152,9 @@ public class BookingMapper {
                 booking.getNumberOfGuests(),
                 booking.getTotalPriceSek(),
                 booking.getTotalPriceUsd(),
+                roomDto, // Kundens valda rum
                 booking.getSpeakerName(),
-                screeningDto,           // Screening utan screeningens egna rum
-                roomDto // Kundens valda rum
+                screeningDto      // Screening utan screeningens egna rum
         );
     }
 }

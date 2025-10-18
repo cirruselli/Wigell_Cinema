@@ -85,4 +85,32 @@ public class ScreeningMapper {
                 duration
         );
     }
+
+    public static ScreeningResponseDto toScreeningResponseDto(Screening screening) {
+        String movieTitle = "----";
+        String genre = "----";
+        int ageLimit = 0;
+        int duration = 0;
+
+        if (screening.getMovie() != null) {
+            if (screening.getMovie().getTitle() != null)
+            {
+                movieTitle = screening.getMovie().getTitle();
+            }
+            if (screening.getMovie().getGenre() != null){
+                genre = screening.getMovie().getGenre();
+            }
+            ageLimit = screening.getMovie().getAgeLimit();
+            duration = screening.getMovie().getDuration();
+        }
+
+        return new ScreeningResponseDto(
+                screening.getStartTime(),
+                screening.getEndTime(),
+                movieTitle,
+                genre,
+                ageLimit,
+                duration
+        );
+    }
 }

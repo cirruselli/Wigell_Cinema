@@ -18,9 +18,9 @@ public record AdminBookingUpdateRequestDto(
         @NotNull
         @Min(value = 1, message = "Antal gäster måste vara minst 1")
         int numberOfGuests,
-        String speakerName,
-        Long screeningId,
         @NotNull(message = "Rum måste anges på bokningen")
-        Long roomId)
+        Long roomId,
+        String speakerName,
+        Long screeningId)
     {
 }

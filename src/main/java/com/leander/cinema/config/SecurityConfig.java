@@ -34,11 +34,11 @@ public class SecurityConfig {
 
                         .requestMatchers(HttpMethod.POST, "/api/v1/screenings").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/screenings/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/movies").hasAnyRole("USER", "ADMIN") // GET både USER & ADMIN
+                        .requestMatchers(HttpMethod.GET, "/api/v1/screenings").hasAnyRole("USER", "ADMIN") // GET både USER & ADMIN
 
                         .requestMatchers("/actuator/**").hasRole("ADMIN")
 
-                        .requestMatchers(HttpMethod.GET, "/api/v1/movies").hasAnyRole("USER", "ADMIN") // GET både USER & ADMIN
-                        .requestMatchers(HttpMethod.GET, "/api/v1/screenings").hasAnyRole("USER", "ADMIN") // GET både USER & ADMIN
                         .requestMatchers(HttpMethod.POST, "/api/v1/bookings/**").hasRole("USER")
                         .requestMatchers(HttpMethod.PATCH, "/api/v1/bookings/**").hasRole("USER")
                         .requestMatchers(HttpMethod.GET, "/api/v1/bookings/**").hasRole("USER")

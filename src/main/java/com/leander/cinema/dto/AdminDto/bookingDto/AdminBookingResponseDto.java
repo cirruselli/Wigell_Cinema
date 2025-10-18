@@ -12,8 +12,7 @@ public record AdminBookingResponseDto(
         int numberOfGuests,
         BigDecimal totalPriceSek,
         BigDecimal totalPriceUsd,
+        AdminRoomResponseDto room,
         String speakerName,
-        AdminScreeningResponseDto screening,
-        AdminRoomResponseDto room
-) {
+        AdminScreeningResponseDto screening) {
 }

@@ -2,6 +2,7 @@ package com.leander.cinema.service;
 
 import com.leander.cinema.dto.AdminDto.screeningDto.AdminScreeningRequestDto;
 import com.leander.cinema.dto.AdminDto.screeningDto.AdminScreeningResponseDto;
+import com.leander.cinema.dto.CustomerDto.screeningDto.ScreeningResponseDto;
 import com.leander.cinema.entity.Movie;
 import com.leander.cinema.entity.Room;
 import com.leander.cinema.entity.Screening;
@@ -15,6 +16,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -32,8 +36,26 @@ public class ScreeningService {
         this.movieRepository = movieRepository;
     }
 
+    // === Kunden listar föreställningar ===
     @Transactional(readOnly = true)
-    public List<AdminScreeningResponseDto> getAllScreenings() {
+    public List<ScreeningResponseDto> getScreeningsByMovieAndDate(Long movieId, LocalDate date) {
+        LocalDateTime startOfDay = date.atStartOfDay();
+        LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
+
+        List<Screening> screenings = screeningRepository.findByMovieIdAndStartTimeBetween(movieId, startOfDay, endOfDay);
+        List<ScreeningResponseDto> responseList = new ArrayList<>();
+
+        for (Screening screening : screenings) {
+            ScreeningResponseDto screeningDto = ScreeningMapper.toScreeningResponseDto(screening);
+            responseList.add(screeningDto);
+        }
+
+        return responseList;
+    }
+
+
+    @Transactional(readOnly = true)
+    public List<AdminScreeningResponseDto> getAllScreeningsForAdmin() {
         List<Screening> screenings = screeningRepository.findAll();
 
         List<AdminScreeningResponseDto> responseList = new ArrayList<>();

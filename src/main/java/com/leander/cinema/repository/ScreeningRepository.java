@@ -38,4 +38,11 @@ public interface ScreeningRepository extends JpaRepository<Screening, Long> {
     );
 
     List<Screening> findByRoomId(Long roomId);
+
+
+    List<Screening> findByMovieIdAndStartTimeBetween(
+            Long movieId,
+            LocalDateTime startOfDay,
+            LocalDateTime endOfDay
+    );
 }
