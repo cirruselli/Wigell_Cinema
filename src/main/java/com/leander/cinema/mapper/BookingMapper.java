@@ -150,11 +150,11 @@ public class BookingMapper {
                 booking.getReservationStartTime(), // alltid bokningens tider
                 booking.getReservationEndTime(),   // alltid bokningens tider
                 booking.getNumberOfGuests(),
-                roomDto,                      // Kundens valda rum
                 booking.getTotalPriceSek(),
                 booking.getTotalPriceUsd(),
                 booking.getSpeakerName(),
-                screeningDto                  // Screening utan screeningens egna rum
+                screeningDto,           // Screening utan screeningens egna rum
+                roomDto // Kundens valda rum
         );
     }
 }

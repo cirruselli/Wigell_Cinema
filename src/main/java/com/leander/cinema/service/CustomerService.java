@@ -8,6 +8,7 @@ import com.leander.cinema.dto.AdminDto.customerDto.AdminCustomerWithAccountReque
 import com.leander.cinema.dto.AdminDto.ticketDto.AdminTicketUpdateRequestDto;
 import com.leander.cinema.entity.*;
 import com.leander.cinema.exception.AddressAlreadyExistsException;
+import com.leander.cinema.exception.BookingConflictException;
 import com.leander.cinema.exception.CustomerMustHaveAtLeastOneAddressException;
 import com.leander.cinema.exception.CustomerOwnershipException;
 import com.leander.cinema.mapper.AddressMapper;
@@ -202,7 +203,7 @@ public class CustomerService {
 
                 ticket.setNumberOfTickets(ticketDto.numberOfTickets());
 
-                //Beräknar bara om totalbeloppet då enhetspriset ska vara låst vid uppdatering!
+                //Räknar bara om totalbeloppet då enhetspriset ska vara låst vid uppdatering!
 
                 ticket.setTotalPriceSek(ticket.getPriceSek()
                         .multiply(BigDecimal.valueOf(ticket.getNumberOfTickets())));
@@ -235,28 +236,6 @@ public class CustomerService {
                             "Bokning med id " + bookingDto.bookingId() + " tillhör inte kunden med id " + customer.getId());
                 }
 
-                // Kontrollera att tiderna inte överlappar med andra bokningar i samma rum
-                if (booking.getRoom() != null) {
-                    List<Booking> roomBookings = bookingRepository.findByRoomId(booking.getRoom().getId());
-
-                    for (Booking otherBooking : roomBookings) {
-                        if (!otherBooking.getId().equals(booking.getId())) { // exkludera sig själv vid update
-                            boolean overlap = bookingDto.reservationStartTime().isBefore(otherBooking.getReservationEndTime())
-                                    && bookingDto.reservationEndTime().isAfter(otherBooking.getReservationStartTime());
-
-                            if (overlap) {
-                                throw new IllegalArgumentException("Tiderna för bokningen överlappar med en annan bokning i samma rum.");
-                            }
-                        }
-                    }
-                }
-
-                // Kontrollera att sluttid inte är före starttid
-                if (bookingDto.reservationEndTime() != null && bookingDto.reservationStartTime() != null
-                        && bookingDto.reservationEndTime().isBefore(bookingDto.reservationStartTime())) {
-                    throw new IllegalArgumentException("Sluttiden för bokningen kan inte vara före starttiden.");
-                }
-
                 // --- Uppdatera rum ---
                 if (bookingDto.roomId() != null) {
                     Room room = roomRepository.findById(bookingDto.roomId())
@@ -264,12 +243,63 @@ public class CustomerService {
                     booking.setRoom(room);
                 }
 
+                // --- Kontrollera överlapp med andra bokningar och screenings ---
+                Room roomToCheck;
+
+                // Bestäm vilket rum som faktiskt ska användas
+                if (bookingDto.roomId() != null) {
+                    roomToCheck = roomRepository.findById(bookingDto.roomId())
+                            .orElseThrow(() -> new EntityNotFoundException("Lokal hittades inte"));
+                } else if (bookingDto.screeningId() != null) {
+                    Screening screening = screeningRepository.findById(bookingDto.screeningId())
+                            .orElseThrow(() -> new EntityNotFoundException("Föreställning hittades inte"));
+                    roomToCheck = screening.getRoom();
+                } else {
+                    roomToCheck = booking.getRoom(); // fallback
+                }
+
+                if (roomToCheck != null) {
+
+                    // --- Kontrollera andra bokningar ---
+                    List<Booking> roomBookings = bookingRepository.findByRoomId(roomToCheck.getId());
+                    for (Booking otherBooking : roomBookings) {
+                        if (!otherBooking.getId().equals(booking.getId())) { // exkludera sig själv
+                            boolean overlap = bookingDto.reservationStartTime().isBefore(otherBooking.getReservationEndTime())
+                                    && bookingDto.reservationEndTime().isAfter(otherBooking.getReservationStartTime());
+                            if (overlap) {
+                                throw new BookingConflictException("Tiderna för bokningen överlappar med en annan bokning i samma rum.");
+                            }
+                        }
+                    }
+
+                    // --- Kontrollera screenings ---
+                    List<Screening> roomScreenings = screeningRepository.findByRoomId((roomToCheck.getId()));
+                    for (Screening screening : roomScreenings) {
+                        // Exkludera den screening som är kopplad till denna bokning, om någon
+                        if (booking.getScreening() != null && screening.getId().equals(booking.getScreening().getId())) {
+                            continue;
+                        }
+                        boolean overlap = bookingDto.reservationStartTime().isBefore(screening.getEndTime())
+                                && bookingDto.reservationEndTime().isAfter(screening.getStartTime());
+                        if (overlap) {
+                            throw new BookingConflictException("Tiderna för bokningen överlappar med en föreställning i samma rum.");
+                        }
+                    }
+                }
+
+
+                // Kontrollera att sluttid inte är före starttid
+                if (bookingDto.reservationEndTime() != null && bookingDto.reservationStartTime() != null
+                        && bookingDto.reservationEndTime().isBefore(bookingDto.reservationStartTime())) {
+                    throw new IllegalArgumentException("Sluttiden för bokningen kan inte vara före starttiden.");
+                }
+
                 // --- Hantera Screening vs Speaker ---
                 if (bookingDto.screeningId() != null && bookingDto.speakerName() != null && !bookingDto.speakerName().isBlank()) {
                     throw new IllegalArgumentException("Endast en av föreställning eller talare får sättas på samma bokning");
                 }
 
-                // --- Hantera Screening vs Speaker ---
+                // --- Hantera Screening vs Speaker om endast en är satt ---
                 if (bookingDto.screeningId() != null) {
                     Screening screening = screeningRepository.findById(bookingDto.screeningId())
                             .orElseThrow(() -> new EntityNotFoundException("Föreställning hittades inte"));

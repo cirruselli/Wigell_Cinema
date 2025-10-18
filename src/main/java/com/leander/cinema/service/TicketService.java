@@ -55,9 +55,7 @@ public class TicketService {
         } else if (ticket.getScreening() != null) {
             // Ticket direkt till screening (utan booking)
             BigDecimal screeningPrice = ticket.getScreening().getPriceSek();
-            BigDecimal roomShare = ticket.getScreening().getRoom().getPriceSek()
-                    .divide(BigDecimal.valueOf(ticket.getScreening().getRoom().getMaxGuests()), 2, RoundingMode.HALF_UP);
-            return screeningPrice.add(roomShare);
+            return ticket.getScreening().getPriceSek();
         }
         return BigDecimal.ZERO;
     }

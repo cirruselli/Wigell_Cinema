@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public record BookingResponseDto(
-        Long id,
+        Long bookingId,
         LocalDateTime reservationStartTime,
         LocalDateTime reservationEndTime,
         int numberOfGuests,

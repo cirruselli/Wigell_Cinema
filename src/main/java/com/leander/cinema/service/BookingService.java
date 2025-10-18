@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 
 @Service
@@ -65,6 +66,17 @@ public class BookingService {
     public BookingResponseDto createBooking(BookingPostRequestDto body) {
         Customer customer = getLoggedInCustomer();
 
+        // Säkerställ att endast ett av alternativen används
+        if (body.speakerName() != null && body.screeningId() != null) {
+            throw new InvalidBookingException("Ange antingen talarens namn ELLER föreställning, inte båda.");
+        }
+
+        // Säkerställ att minst ett av alternativen finns
+        if ((body.speakerName() == null || body.speakerName().isBlank()) && body.screeningId() == null) {
+            throw new InvalidBookingException("Du måste ange antingen talarens namn eller föreställning.");
+        }
+
+
         Booking booking = BookingMapper.toBookingEntity(body);
         booking.setCustomer(customer);
 
@@ -82,19 +94,24 @@ public class BookingService {
         booking.setRoom(room);
 
         if (body.screeningId() != null) {
-            // Scenario: Screening
+            // --- Scenario: Screening ---
             Screening screening = screeningRepository.findById(body.screeningId())
                     .orElseThrow(() -> new EntityNotFoundException("Föreställningen med id " + body.screeningId() + " hittades inte"));
 
-            // Kontrollera att denna screening inte redan är bokad
-            if (bookingRepository.existsByScreeningId(screening.getId())) {
-                throw new BookingConflictException("Denna visning är redan bokad.");
+            // Kontrollera att bokningens tid inte överlappar visningens tid
+            boolean overlapsScreening = body.reservationStartTime().isBefore(screening.getEndTime()) &&
+                    body.reservationEndTime().isAfter(screening.getStartTime());
+
+            if (overlapsScreening) {
+                throw new BookingConflictException("Bokningens tid överlappar föreställningens tid (" +
+                        screening.getStartTime() + " - " + screening.getEndTime() + ").");
             }
 
             booking.setScreening(screening);
-            booking.setSpeakerName(null); // speaker ignoreras
+            booking.setSpeakerName(null);
+
         } else {
-            // Scenario: Rum + speaker
+            // --- Scenario: Rum + speaker ---
             if (body.speakerName() == null || body.speakerName().isBlank()) {
                 throw new InvalidBookingException("Talarnamn måste anges vid rumsbokning utan visning.");
             }
@@ -105,10 +122,18 @@ public class BookingService {
             throw new BookingCapacityExceededException("Antal gäster överstiger rummets kapacitet på " + room.getMaxGuests() + " gäster");
         }
 
-        // Kontrollera krock med andra bokningar
         if (bookingRepository.overlaps(room, body.reservationStartTime(), body.reservationEndTime())) {
-            throw new BookingConflictException("Rummet är upptaget under den valda tiden.");
+            throw new BookingConflictException("Rummet är upptaget under den valda tiden av en annan bokning.");
         }
+
+        // Ny kontroll mot screenings
+        List<Screening> conflictingScreenings = screeningRepository
+                .findByRoomAndTimeOverlap(room, body.reservationStartTime(), body.reservationEndTime());
+
+        if (!conflictingScreenings.isEmpty()) {
+            throw new BookingConflictException("Rummet är upptaget av en föreställning under den valda tiden.");
+        }
+
 
         // Totalpris
         BigDecimal factor = new BigDecimal("0.11");

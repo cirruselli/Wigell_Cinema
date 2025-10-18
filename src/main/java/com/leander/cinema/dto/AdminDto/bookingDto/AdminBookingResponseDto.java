@@ -10,10 +10,10 @@ public record AdminBookingResponseDto(
         LocalDateTime reservationStartTime,
         LocalDateTime reservationEndTime,
         int numberOfGuests,
-        AdminRoomResponseDto room,
         BigDecimal totalPriceSek,
         BigDecimal totalPriceUsd,
         String speakerName,
-        AdminScreeningResponseDto screening
+        AdminScreeningResponseDto screening,
+        AdminRoomResponseDto room
 ) {
 }
