@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -53,6 +54,12 @@ public class CustomerController {
         TicketResponseDto response = ticketService.buyTicket(body);
         URI location = URI.create("/api/v1/tickets" + response.ticketId());
         return ResponseEntity.created(location).body(response);
+    }
+
+    @GetMapping("/tickets")
+    public ResponseEntity<List<TicketResponseDto>> tickets(@RequestParam Long customerId) {
+        List<TicketResponseDto> response = ticketService.getTicketsByCustomer(customerId);
+        return ResponseEntity.ok(response);
     }
 
 

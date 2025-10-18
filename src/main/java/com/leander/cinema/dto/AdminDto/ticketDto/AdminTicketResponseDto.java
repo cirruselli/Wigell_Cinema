@@ -6,9 +6,9 @@ import com.leander.cinema.dto.AdminDto.screeningDto.AdminScreeningResponseDto;
 import java.math.BigDecimal;
 
 public record AdminTicketResponseDto(
-        Long id,
+        Long ticketId,
         int numberOfTickets,
-        String customerFistName,
+        String customerFirstName,
         String customerLastName,
         BigDecimal priceSek,
         BigDecimal priceUsd,

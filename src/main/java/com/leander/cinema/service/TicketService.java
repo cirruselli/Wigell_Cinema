@@ -4,6 +4,7 @@ import com.leander.cinema.dto.CustomerDto.screeningDto.ScreeningResponseDto;
 import com.leander.cinema.dto.CustomerDto.ticketDto.TicketRequestDto;
 import com.leander.cinema.dto.CustomerDto.ticketDto.TicketResponseDto;
 import com.leander.cinema.entity.*;
+import com.leander.cinema.exception.ForbiddenTicketAccessException;
 import com.leander.cinema.mapper.ScreeningMapper;
 import com.leander.cinema.repository.*;
 import com.leander.cinema.security.AppUser;
@@ -16,6 +17,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class TicketService {
@@ -38,6 +41,7 @@ public class TicketService {
         this.screeningRepository = screeningRepository;
     }
 
+    //Hjälpmetod för beräkning av biljettpris
     public BigDecimal calculateTicketPrice(Ticket ticket) {
         if (ticket.getBooking() != null) {
             Booking booking = ticket.getBooking();
@@ -73,7 +77,7 @@ public class TicketService {
                 .orElseThrow(() -> new RuntimeException("Inloggad användare hittades inte"));
 
         return customerRepository.findByAppUser(appUser)
-                .orElseThrow(() -> new RuntimeException("Customer kopplad till användare hittades inte"));
+                .orElseThrow(() -> new RuntimeException("Kunden kopplad till användare hittades inte"));
     }
 
 
@@ -150,5 +154,51 @@ public class TicketService {
                 speakerName,
                 roomName
         );
+    }
+
+    @Transactional(readOnly = true)
+    public List<TicketResponseDto> getTicketsByCustomer(Long customerId) {
+        Customer loggedInCustomer = getLoggedInCustomer();
+
+        if (!loggedInCustomer.getId().equals(customerId)) {
+            throw new ForbiddenTicketAccessException("Du kan endast se dina egna biljetter");
+        }
+
+        List<Ticket> tickets = ticketRepository.findByCustomerId((customerId));
+        List<TicketResponseDto> responseList = new ArrayList<>();
+
+        for (Ticket ticket : tickets) {
+            ScreeningResponseDto screeningDto = null;
+            String roomName = null;
+            String speakerName = null;
+
+            if (ticket.getScreening() != null) {
+                // Om det finns screening, visa screening info
+                screeningDto = ScreeningMapper.toScreeningResponseDto(ticket);
+                // Rummet kommer från Screening
+                roomName = ticket.getScreening().getRoom().getName();
+
+            } else if (ticket.getBooking() != null) {
+                // Rummet kommer från Booking
+                roomName = ticket.getBooking().getRoom().getName();
+                speakerName = ticket.getBooking().getSpeakerName();
+            }
+
+            TicketResponseDto responseDto = new TicketResponseDto(
+                    ticket.getId(),
+                    ticket.getCustomer().getFirstName(),
+                    ticket.getCustomer().getLastName(),
+                    ticket.getNumberOfTickets(),
+                    ticket.getPriceSek(),
+                    ticket.getPriceUsd(),
+                    ticket.getTotalPriceSek(),
+                    ticket.getTotalPriceUsd(),
+                    screeningDto,
+                    speakerName,
+                    roomName
+            );
+            responseList.add(responseDto);
+        }
+        return responseList;
     }
 }

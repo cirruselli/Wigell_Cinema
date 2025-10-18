@@ -24,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -189,22 +188,26 @@ public class CustomerService {
                     throw new CustomerOwnershipException("Biljett med id " + ticketDto.ticketId() + " tillhör inte kunden");
                 }
 
+                // --- Hantera Screening vs Booking ---
+                if (ticketDto.screeningId() != null && ticketDto.bookingId() != null) {
+                    throw new IllegalArgumentException("Endast en av föreställning eller bokning får sättas på samma biljett");
+                }
+
                 if (ticketDto.screeningId() != null) {
                     Screening screening = screeningRepository.findById(ticketDto.screeningId())
                             .orElseThrow(() -> new EntityNotFoundException("Föreställning hittades inte"));
                     ticket.setScreening(screening);
-                }
-
-                if (ticketDto.bookingId() != null) {
+                    ticket.setBooking(null); // ta bort koppling till talar-bokning
+                } else if (ticketDto.bookingId() != null) {
                     Booking booking = bookingRepository.findById(ticketDto.bookingId())
                             .orElseThrow(() -> new EntityNotFoundException("Bokning hittades inte"));
                     ticket.setBooking(booking);
+                    ticket.setScreening(null); // ta bort koppling till film
                 }
 
                 ticket.setNumberOfTickets(ticketDto.numberOfTickets());
 
                 //Räknar bara om totalbeloppet då enhetspriset ska vara låst vid uppdatering!
-
                 ticket.setTotalPriceSek(ticket.getPriceSek()
                         .multiply(BigDecimal.valueOf(ticket.getNumberOfTickets())));
                 ticket.setTotalPriceUsd(ticket.getPriceUsd()
@@ -313,6 +316,13 @@ public class CustomerService {
                 booking.setReservationStartTime(bookingDto.reservationStartTime());
                 booking.setReservationEndTime(bookingDto.reservationEndTime());
                 booking.setNumberOfGuests(bookingDto.numberOfGuests());
+
+                // --- Kontrollera att antal gäster inte överstiger rummets kapacitet ---
+                int maxGuests = booking.getRoom().getMaxGuests();
+                if (bookingDto.numberOfGuests() > maxGuests) {
+                    throw new IllegalArgumentException("Antalet gäster (" + bookingDto.numberOfGuests() +
+                            ") överstiger rummets maxkapacitet (" + maxGuests + ").");
+                }
 
                 booking.setCustomer(customer);
 

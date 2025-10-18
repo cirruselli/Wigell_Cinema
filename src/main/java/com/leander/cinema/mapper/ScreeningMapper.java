@@ -60,14 +60,11 @@ public class ScreeningMapper {
     }
 
     public static ScreeningResponseDto toScreeningResponseDto(Ticket ticket) {
-        ScreeningResponseDto screeningDto = null;
-
         Screening screening = ticket.getScreening();
         String movieTitle = "----";
         String genre = "----";
         int ageLimit = 0;
         int duration = 0;
-        String roomNameScreening = "----";
 
         if (ticket.getScreening() != null) {
 
@@ -77,10 +74,6 @@ public class ScreeningMapper {
                 ageLimit = screening.getMovie().getAgeLimit();
                 duration = screening.getMovie().getDuration();
             }
-
-            if (screening.getRoom() != null && screening.getRoom().getName() != null) {
-                roomNameScreening = screening.getRoom().getName();
-            }
         }
 
         return new ScreeningResponseDto(
@@ -89,8 +82,7 @@ public class ScreeningMapper {
                 movieTitle,
                 genre,
                 ageLimit,
-                duration,
-                roomNameScreening
+                duration
         );
     }
 }

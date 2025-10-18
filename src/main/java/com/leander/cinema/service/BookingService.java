@@ -57,7 +57,7 @@ public class BookingService {
                 .orElseThrow(() -> new RuntimeException("Inloggad användare hittades inte"));
 
         return customerRepository.findByAppUser(appUser)
-                .orElseThrow(() -> new RuntimeException("Customer kopplad till användare hittades inte"));
+                .orElseThrow(() -> new RuntimeException("Kunden kopplad till användare hittades inte"));
     }
 
 

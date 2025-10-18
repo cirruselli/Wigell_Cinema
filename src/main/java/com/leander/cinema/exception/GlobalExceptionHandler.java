@@ -17,6 +17,11 @@ public class GlobalExceptionHandler {
 
     // === Egna exceptions ===
 
+    @ExceptionHandler(ForbiddenTicketAccessException.class)
+    public ResponseEntity<String> handleForbidden(ForbiddenTicketAccessException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
+    }
+
     @ExceptionHandler(CustomerMustHaveAtLeastOneAddressException.class)
     public ResponseEntity<String> handleCustomerMustHaveAddress(CustomerMustHaveAtLeastOneAddressException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
