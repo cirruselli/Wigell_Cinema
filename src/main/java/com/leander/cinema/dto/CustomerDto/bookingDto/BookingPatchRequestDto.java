@@ -9,6 +9,6 @@ public record BookingPatchRequestDto(
         LocalDateTime reservationStartTime,
         @FutureOrPresent(message = "Datum/tid kan inte vara bakåt i tiden")
         LocalDateTime reservationEndTime,
-        List<String> equipment
+        List<String> roomEquipment
 ) {
 }

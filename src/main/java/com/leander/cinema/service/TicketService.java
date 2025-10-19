@@ -138,8 +138,13 @@ public class TicketService {
 
         ScreeningResponseDto screeningDto = null;
         if (screening != null) {
+            // Ticket köpt direkt till en screening
             screeningDto = ScreeningMapper.toScreeningResponseDto(newTicket);
+        } else if (booking != null && booking.getScreening() != null) {
+            // Ticket köpt till en bokning som har en screening
+            screeningDto = ScreeningMapper.toScreeningResponseDto(booking.getScreening());
         }
+
 
         return new TicketResponseDto(
                 newTicket.getId(),

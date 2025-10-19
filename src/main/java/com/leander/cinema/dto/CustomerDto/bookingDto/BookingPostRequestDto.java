@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record BookingPostRequestDto(
         @NotNull(message = "Datum och tid måste anges")
@@ -16,6 +17,8 @@ public record BookingPostRequestDto(
         @NotNull(message = "Antal gäster måste anges")
         @Min(value = 1, message = "Antal gäster måste vara minst 1")
         Integer numberOfGuests,
+        @NotNull(message = "Utrustning för rummet måste anges")
+        List<String> roomEquipment,
         @NotNull(message = "Lokal måste anges")
         Long roomId,
         String speakerName,

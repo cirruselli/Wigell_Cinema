@@ -225,6 +225,7 @@ public class CustomerService {
 
                 ticket.setCustomer(customer);
 
+                //Hindrar att samma Ticket-objekt läggs till i listan igen
                 if (!updatedTickets.contains(ticket)) {
                     updatedTickets.add(ticket);
                 }
@@ -334,12 +335,25 @@ public class CustomerService {
                             ") överstiger rummets maxkapacitet (" + maxGuests + ").");
                 }
 
-                booking.setStatus(bookingDto.bookingStatus());
-                booking.setCustomer(customer);
+                // --- Hantera roomEquipment ---
+                if (bookingDto.roomEquipment() == null || bookingDto.roomEquipment().isEmpty()) {
+                    if (booking.getRoom() != null && booking.getRoom().getStandardEquipment() != null) {
+                        booking.setRoomEquipment(new ArrayList<>(booking.getRoom().getStandardEquipment()));
+                    } else {
+                        booking.setRoomEquipment(new ArrayList<>());
+                    }
+                } else {
+                    booking.setRoomEquipment(new ArrayList<>(bookingDto.roomEquipment()));
+                }
 
+                //Hindrar att samma Booking-objekt läggs till i listan igen
                 if (!updatedBookings.contains(booking)) {
                     updatedBookings.add(booking);
                 }
+
+                booking.setStatus(bookingDto.bookingStatus());
+                booking.setCustomer(customer);
+
             }
             customer.getBookings().clear();
             customer.getBookings().addAll(updatedBookings);

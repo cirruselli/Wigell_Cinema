@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -89,11 +90,11 @@ public class DataInitializer {
                 addressRepository.save(address3);
                 addressRepository.save(address4);
 
-                Customer customer1 = new Customer("Elli", "Malmström", "example@gmail.com", "0754345432", List.of(address1, address3));
-                Customer customer2 = new Customer("Max", "Levin", "maxis@gmail.com", "0723456765", List.of(address2, address4));
-                Customer customer3 = new Customer("Åsa", "Wallmark", "asa.wallis@gmail.com", "0743234543", List.of(address2));
-                Customer customer4 = new Customer("Kajsa", "Ström", "kajsans@example.com", "0734543212", List.of(address3));
-                Customer customer5 = new Customer("Emil", "Levin", "emil@example.com", "0778695043", List.of(address4));
+                Customer customer1 = new Customer("Elli", "Malmström", "example@gmail.com", "0754345432", new ArrayList<>(List.of(address1, address3)));
+                Customer customer2 = new Customer("Max", "Levin", "maxis@gmail.com", "0723456765", new ArrayList<>(List.of(address2, address4)));
+                Customer customer3 = new Customer("Åsa", "Wallmark", "asa.wallis@gmail.com", "0743234543", new ArrayList<>(List.of(address2)));
+                Customer customer4 = new Customer("Kajsa", "Ström", "kajsans@example.com", "0734543212", new ArrayList<>(List.of(address3)));
+                Customer customer5 = new Customer("Emil", "Levin", "emil@example.com", "0778695043", new ArrayList<>(List.of(address4)));
 
 
                 appUser1.setCustomer(customer1);
@@ -129,11 +130,11 @@ public class DataInitializer {
                 movieRepository.save(movie4);
                 movieRepository.save(movie5);
 
-                Room room1 = new Room("Salong A", 200, new BigDecimal("5000.00"), new BigDecimal("500.00"), List.of("Ljudanläggning", "Screen"));
-                Room room2 = new Room("Salong B", 150, new BigDecimal("2000.00"), new BigDecimal("200.00"), List.of("Ljudanläggning", "Screen"));
-                Room room3 = new Room("Stora konferensrummet", 50, new BigDecimal("1500.00"), new BigDecimal("150.00"), List.of("Whiteboard", "Projektor"));
-                Room room4 = new Room("Naturscenen", 1000, new BigDecimal("20000.00"), new BigDecimal("2000.00"), List.of("Naturscen", "Projektor"));
-                Room room5 = new Room("Hörnan", 500, new BigDecimal("15000.00"), new BigDecimal("1500.00"), List.of("Högtalare", "Scen", "Scenbelysning", "Mikrofon", "Projektor"));
+                Room room1 = new Room("Salong A", 200, new BigDecimal("5000.00"), new BigDecimal("500.00"), new ArrayList<>(List.of("Ljudanläggning", "Screen")));
+                Room room2 = new Room("Salong B", 150, new BigDecimal("2000.00"), new BigDecimal("200.00"), new ArrayList<>(List.of("Ljudanläggning", "Screen")));
+                Room room3 = new Room("Stora konferensrummet", 50, new BigDecimal("1500.00"), new BigDecimal("150.00"), new ArrayList<>(List.of("Whiteboard", "Projektor")));
+                Room room4 = new Room("Naturscenen", 1000, new BigDecimal("20000.00"), new BigDecimal("2000.00"), new ArrayList<>(List.of("Naturscen", "Projektor")));
+                Room room5 = new Room("Hörnan", 500, new BigDecimal("15000.00"), new BigDecimal("1500.00"), new ArrayList<>(List.of("Högtalare", "Scen", "Scenbelysning", "Mikrofon", "Projektor")));
 
                 roomRepository.save(room1);
                 roomRepository.save(room2);
@@ -188,6 +189,7 @@ public class DataInitializer {
                         LocalDateTime.of(2025, 10, 25, 20, 30),
                         "Sara Karlsson",
                         20,
+                        new ArrayList<>(List.of("Mikrofon", "Mikrofon", "Scenbelysning", "Projektor", "Dator", "Högtalare")),
                         new BigDecimal("12000.00"),
                         new BigDecimal("1200.00"),
                         BookingStatus.ACTIVE,
@@ -200,6 +202,7 @@ public class DataInitializer {
                         LocalDateTime.of(2025, 10, 26, 17, 0),
                         "Johan Glans",
                         150,
+                        new ArrayList<>(List.of("Mikrofon", "Scenbelysning", "Högtalare")),
                         new BigDecimal("60000.00"),
                         new BigDecimal("6000.00"),
                         BookingStatus.ACTIVE,

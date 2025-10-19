@@ -15,7 +15,7 @@ public record BookingResponseDto(
         BigDecimal totalPriceSek,
         BigDecimal totalPriceUsd,
         String roomName,
-        List<String> equipment,
+        List<String> roomEquipment,
         int maxGuests,
         String speakerName,
         String movieTitle,

@@ -8,6 +8,7 @@ import com.leander.cinema.dto.CustomerDto.bookingDto.BookingPostRequestDto;
 import com.leander.cinema.dto.CustomerDto.bookingDto.BookingResponseDto;
 import com.leander.cinema.entity.Booking;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class BookingMapper {
@@ -29,21 +30,25 @@ public class BookingMapper {
     }
 
     public static BookingResponseDto toBookingResponseDto(Booking booking) {
-        //Kontrollerar att inga null-värden sätts
+        // Kontrollerar att inga null-värden sätts
         // Room
         String roomName = "----";
         int maxGuests = 0;
-        List<String> equipments = List.of();
-        if (booking.getRoom() != null) {
-            if (booking.getRoom().getName() != null) {
-                roomName = booking.getRoom().getName();
-            }
-            maxGuests = booking.getRoom().getMaxGuests();
 
-            if (booking.getRoom().getStandardEquipment() != null) {
-                equipments = booking.getRoom().getStandardEquipment();
-            }
+        roomName = booking.getRoom().getName();
+        maxGuests = booking.getRoom().getMaxGuests();
+
+        // Kopiera standardutrustningen från rummet (om den finns)
+        List<String> equipments = new ArrayList<>();
+        if (booking.getRoom() != null && booking.getRoom().getStandardEquipment() != null) {
+            equipments.addAll(booking.getRoom().getStandardEquipment());
         }
+
+        // Om bokningen har egen utrustning, använd den istället (överlagrar rummet)
+        if (booking.getRoomEquipment() != null) {
+            equipments = new ArrayList<>(booking.getRoomEquipment()); // kopiera så att vi inte ändrar ursprungsrummet
+        }
+
 
         // Speaker
         String speakerName = "----";
@@ -152,6 +157,7 @@ public class BookingMapper {
                 booking.getReservationStartTime(), // alltid bokningens tider
                 booking.getReservationEndTime(),   // alltid bokningens tider
                 booking.getNumberOfGuests(),
+                booking.getRoomEquipment(),
                 booking.getTotalPriceSek(),
                 booking.getTotalPriceUsd(),
                 roomDto, // Kundens valda rum

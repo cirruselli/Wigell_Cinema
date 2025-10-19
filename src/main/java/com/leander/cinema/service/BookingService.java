@@ -23,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 
@@ -72,7 +71,7 @@ public class BookingService {
         List<Booking> bookings = bookingRepository.findByCustomerId((customerId));
 
         if (!loggedInCustomer.getId().equals(customerId)) {
-            throw new AccessDeniedException("Du kan bara se dina egna bokningar.");
+            throw new CustomerOwnershipException("Du kan bara se dina egna bokningar.");
         }
 
         // Lista att lägga till bokningar att visa
@@ -109,7 +108,6 @@ public class BookingService {
         if ((body.speakerName() == null || body.speakerName().isBlank()) && body.screeningId() == null) {
             throw new InvalidBookingException("Du måste ange antingen talarens namn eller föreställning.");
         }
-
 
         Booking booking = BookingMapper.toBookingEntity(body);
         booking.setCustomer(customer);
@@ -211,14 +209,8 @@ public class BookingService {
             throw new BookingConflictException("Slutdatum/tid kan inte vara före startdatum/tid.");
         }
 
-        if (body.equipment() == null) {
-            booking.getRoom().setStandardEquipment(Arrays.asList("Mikrofon", "Högtalare", "Projektor"));
-        }
-        else if (body.equipment().isEmpty()) {
-            booking.getRoom().setStandardEquipment(body.equipment());
-        }
-        else {
-            booking.getRoom().setStandardEquipment(body.equipment());
+        if (body.roomEquipment() != null) {
+            booking.setRoomEquipment(new ArrayList<>(body.roomEquipment()));
         }
 
         Room room = booking.getRoom();

@@ -27,6 +27,11 @@ public class Booking {
     @Column(name = "number_of_guests", nullable = false)
     private int numberOfGuests;
 
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "room_equipments", joinColumns = @JoinColumn(name = "booking_id"))
+    @Column(name = "equipment")
+    private List<String> roomEquipment = new ArrayList<>();
+
     @Column(name = "total_price_SEK", nullable = false, precision = 10, scale = 2)
     private BigDecimal totalPriceSek;
 
@@ -58,29 +63,17 @@ public class Booking {
     public Booking() {
     }
 
-    public Booking(LocalDateTime reservationStartTime, LocalDateTime reservationEndTime, String speakerName, int numberOfGuests, BigDecimal totalPriceSek, BigDecimal totalPriceUsd, BookingStatus status, Room room, Customer customer) {
+    public Booking(LocalDateTime reservationStartTime, LocalDateTime reservationEndTime, String speakerName, int numberOfGuests, List<String> roomEquipment, BigDecimal totalPriceSek, BigDecimal totalPriceUsd, BookingStatus status, Room room, Customer customer) {
         this.reservationStartTime = reservationStartTime;
         this.reservationEndTime = reservationEndTime;
         this.speakerName = speakerName;
         this.numberOfGuests = numberOfGuests;
+        this.roomEquipment = roomEquipment;
         this.totalPriceSek = totalPriceSek;
         this.totalPriceUsd = totalPriceUsd;
         this.status = status;
         this.room = room;
         this.customer = customer;
-    }
-
-    public Booking(LocalDateTime reservationStartTime, LocalDateTime reservationEndTime, int numberOfGuests, BigDecimal totalPriceSek, BigDecimal totalPriceUsd, BookingStatus status, Room room, Screening screening, Customer customer) {
-        this.reservationStartTime = reservationStartTime;
-        this.reservationEndTime = reservationEndTime;
-        this.numberOfGuests = numberOfGuests;
-        this.totalPriceSek = totalPriceSek;
-        this.totalPriceUsd = totalPriceUsd;
-        this.status = status;
-        this.room = room;
-        this.screening = screening;
-        this.customer = customer;
-
     }
 
     public Long getId() {
@@ -121,6 +114,14 @@ public class Booking {
 
     public void setNumberOfGuests(int numberOfGuests) {
         this.numberOfGuests = numberOfGuests;
+    }
+
+    public List<String> getRoomEquipment() {
+        return roomEquipment;
+    }
+
+    public void setRoomEquipment(List<String> bookingEquipment) {
+        this.roomEquipment = bookingEquipment;
     }
 
     public BigDecimal getTotalPriceSek() {
