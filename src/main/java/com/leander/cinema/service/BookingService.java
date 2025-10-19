@@ -9,6 +9,7 @@ import com.leander.cinema.entity.Room;
 import com.leander.cinema.entity.Screening;
 import com.leander.cinema.exception.BookingCapacityExceededException;
 import com.leander.cinema.exception.BookingConflictException;
+import com.leander.cinema.exception.CustomerOwnershipException;
 import com.leander.cinema.exception.InvalidBookingException;
 import com.leander.cinema.mapper.BookingMapper;
 import com.leander.cinema.repository.*;
@@ -22,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -195,7 +197,7 @@ public class BookingService {
                 .orElseThrow(() -> new EntityNotFoundException("Bokningen hittades inte"));
 
         if (!booking.getCustomer().getId().equals(customer.getId())) {
-            throw new AccessDeniedException("Du kan bara uppdatera dina egna bokningar.");
+            throw new CustomerOwnershipException("Du kan bara uppdatera dina egna bokningar.");
         }
 
         if (body.reservationStartTime() != null) {
@@ -209,7 +211,13 @@ public class BookingService {
             throw new BookingConflictException("Slutdatum/tid kan inte vara före startdatum/tid.");
         }
 
-        if (body.equipment() != null) {
+        if (body.equipment() == null) {
+            booking.getRoom().setStandardEquipment(Arrays.asList("Mikrofon", "Högtalare", "Projektor"));
+        }
+        else if (body.equipment().isEmpty()) {
+            booking.getRoom().setStandardEquipment(body.equipment());
+        }
+        else {
             booking.getRoom().setStandardEquipment(body.equipment());
         }
 
