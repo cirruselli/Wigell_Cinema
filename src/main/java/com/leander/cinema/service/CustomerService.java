@@ -140,13 +140,18 @@ public class CustomerService {
         Customer customer = customerRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Kund med id " + id + " hittades inte"));
 
-        // --- Uppdatera kundens primitiva fält
+        // --- Uppdatera kundens primitiva fält ---
         CustomerMapper.updateCustomer(customer, requestDto);
 
-        // --- Uppdatera adresser ---
+
+        // --- UPPDATERA ADRESSER ---
+
+        // --- Spara undan gamla adresser innan uppdatering ---
+        List<Address> oldAddresses = new ArrayList<>(customer.getAddresses());
+
+        // --- Skapa lista med nya adresser ---
         List<Address> updatedAddresses = new ArrayList<>();
         for (AdminAddressRequestDto addressDto : requestDto.addresses()) {
-
             String street = addressDto.street().trim();
             String postalCode = addressDto.postalCode().trim();
             String city = addressDto.city().trim();
@@ -154,25 +159,32 @@ public class CustomerService {
             Address existingAddress = addressRepository.findByStreetAndPostalCodeAndCity(street, postalCode, city);
 
             if (existingAddress != null) {
-                /*Kontrollera om kunden har adressen ->
-                 om inte så sätt till existerande adress från databasen
-               */
                 if (!updatedAddresses.contains(existingAddress)) {
                     updatedAddresses.add(existingAddress);
                 }
             } else {
                 Address newAddress = new Address();
-                newAddress.setStreet(addressDto.street());
-                newAddress.setPostalCode(addressDto.postalCode());
-                newAddress.setCity(addressDto.city());
+                newAddress.setStreet(street);
+                newAddress.setPostalCode(postalCode);
+                newAddress.setCity(city);
                 addressRepository.save(newAddress);
                 updatedAddresses.add(newAddress);
             }
         }
 
+        // --- Uppdatera kundens adresser ---
         customer.setAddresses(updatedAddresses);
+        customerRepository.save(customer);
+        customerRepository.flush();
 
-        // --- Uppdatera Tickets ---
+        // --- Kolla om gamla adresser nu blivit orphans ---
+        for (Address oldAddress : oldAddresses) {
+            if (!oldAddress.getCustomers().isEmpty()) continue; // fortfarande kopplad till någon kund
+            addressRepository.delete(oldAddress);
+        }
+
+
+        // --- UPPDATERA TICKETS ---
 
         if (requestDto.tickets() != null) {
             List<Ticket> updatedTickets = new ArrayList<>();
@@ -222,7 +234,7 @@ public class CustomerService {
             customer.getTickets().addAll(updatedTickets);
         }
 
-        // --- Uppdatera Booking ---
+        // --- UPPDATERA BOOKING ---
 
         if (requestDto.bookings() != null) {
             List<Booking> updatedBookings = new ArrayList<>();
@@ -333,7 +345,7 @@ public class CustomerService {
             customer.getBookings().addAll(updatedBookings);
         }
 
-        // --- Uppdatera AppUser ---
+        // --- UPPDATERA APPUSER ---
         AppUser appUser = customer.getAppUser();
         if (appUser != null) {
             if (requestDto.username() != null && !requestDto.username().isBlank()) {
