@@ -3,11 +3,13 @@ package com.leander.cinema.service;
 import com.leander.cinema.dto.AdminDto.screeningDto.AdminScreeningRequestDto;
 import com.leander.cinema.dto.AdminDto.screeningDto.AdminScreeningResponseDto;
 import com.leander.cinema.dto.CustomerDto.screeningDto.ScreeningResponseDto;
+import com.leander.cinema.entity.Booking;
 import com.leander.cinema.entity.Movie;
 import com.leander.cinema.entity.Room;
 import com.leander.cinema.entity.Screening;
 import com.leander.cinema.exception.InvalidScreeningException;
 import com.leander.cinema.mapper.ScreeningMapper;
+import com.leander.cinema.repository.BookingRepository;
 import com.leander.cinema.repository.MovieRepository;
 import com.leander.cinema.repository.RoomRepository;
 import com.leander.cinema.repository.ScreeningRepository;
@@ -28,12 +30,16 @@ public class ScreeningService {
     private final ScreeningRepository screeningRepository;
     private final RoomRepository roomRepository;
     private final MovieRepository movieRepository;
+    private final BookingRepository bookingRepository;
 
     public ScreeningService(ScreeningRepository screeningRepository,
-                            RoomRepository roomRepository, MovieRepository movieRepository) {
+                            RoomRepository roomRepository,
+                            MovieRepository movieRepository,
+                            BookingRepository bookingRepository) {
         this.screeningRepository = screeningRepository;
         this.roomRepository = roomRepository;
         this.movieRepository = movieRepository;
+        this.bookingRepository = bookingRepository;
     }
 
     // === Kunden listar föreställningar ===
@@ -81,7 +87,20 @@ public class ScreeningService {
         Movie movie = movieRepository.findById(body.movieId())
                     .orElseThrow(() -> new EntityNotFoundException("Film med id " + body.movieId() + " hittades inte."));
 
-        //Förhindrar att två visningar sker i samma salong samtidigt
+        // Kontrollera överlappning med bokningar
+        List<Booking> overlappingBookings = bookingRepository.findByRoomAndTimeOverlap(
+                room,
+                body.startTime(),
+                body.endTime()
+        );
+
+        if (!overlappingBookings.isEmpty()) {
+            throw new InvalidScreeningException(
+                    "Rummet är redan bokat av en bokning under denna tid."
+            );
+        }
+
+        // Kontrollera överlappning med andra screenings
         boolean conflict = screeningRepository.existsOverlappingScreening(
                 body.roomId(),
                 body.startTime(),
@@ -89,7 +108,7 @@ public class ScreeningService {
         );
 
         if (conflict) {
-            throw new InvalidScreeningException("Rummet är redan bokat under denna tid.");
+            throw new InvalidScreeningException("Rummet är redan bokat av en annan screening under denna tid.");
         }
 
         Screening screening = ScreeningMapper.toScreeningEntity(body);

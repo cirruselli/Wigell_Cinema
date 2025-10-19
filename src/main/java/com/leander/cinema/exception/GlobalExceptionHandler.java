@@ -27,13 +27,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 
-    @ExceptionHandler(ResponseStatusException.class)
-    public ResponseEntity<Map<String, String>> handleResponseStatusException(ResponseStatusException ex) {
-        Map<String, String> body = new HashMap<>();
-        body.put("message", ex.getReason());
-        return new ResponseEntity<>(body, ex.getStatusCode());
-    }
-
     @ExceptionHandler(AddressAlreadyExistsException.class)
     public ResponseEntity<String> handleAddressAlreadyExists(AddressAlreadyExistsException ex) {
         return ResponseEntity.badRequest().body(ex.getMessage());
@@ -88,6 +81,13 @@ public class GlobalExceptionHandler {
 
 
     // === Färdiga exceptions ===
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<Map<String, String>> handleResponseStatusException(ResponseStatusException ex) {
+        Map<String, String> body = new HashMap<>();
+        body.put("message", ex.getReason());
+        return new ResponseEntity<>(body, ex.getStatusCode());
+    }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<String> handleIllegalArgument(IllegalArgumentException ex) {

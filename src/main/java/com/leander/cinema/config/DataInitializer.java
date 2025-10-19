@@ -43,16 +43,9 @@ public class DataInitializer {
                         Set.of(Role.ADMIN)
                 );
 
-                AppUser superAdmin = new AppUser(
-                        "superadmin",
-                        passwordEncoder.encode("superadmin"),
-                        Set.of(Role.ADMIN, Role.USER)
-                );
-
                 appUserRepository.save(admin1);
                 appUserRepository.save(admin2);
-                appUserRepository.save(superAdmin);
-                System.out.println("Skapat adminkonto admin1, admin2, superadmin. Password samma som username");
+                System.out.println("Skapat adminkonto admin1, admin2. Password samma som username");
 
 
                 AppUser appUser1 = new AppUser(

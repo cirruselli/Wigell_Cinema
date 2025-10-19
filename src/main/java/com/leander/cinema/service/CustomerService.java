@@ -7,10 +7,7 @@ import com.leander.cinema.dto.AdminDto.customerDto.AdminCustomerResponseDto;
 import com.leander.cinema.dto.AdminDto.customerDto.AdminCustomerWithAccountRequestDto;
 import com.leander.cinema.dto.AdminDto.ticketDto.AdminTicketUpdateRequestDto;
 import com.leander.cinema.entity.*;
-import com.leander.cinema.exception.AddressAlreadyExistsException;
-import com.leander.cinema.exception.BookingConflictException;
-import com.leander.cinema.exception.CustomerMustHaveAtLeastOneAddressException;
-import com.leander.cinema.exception.CustomerOwnershipException;
+import com.leander.cinema.exception.*;
 import com.leander.cinema.mapper.AddressMapper;
 import com.leander.cinema.mapper.CustomerMapper;
 import com.leander.cinema.repository.*;
@@ -33,6 +30,7 @@ public class CustomerService {
     private final TicketRepository ticketRepository;
     private final ScreeningRepository screeningRepository;
     private final BookingRepository bookingRepository;
+    private final MovieRepository movieRepository;
     private final RoomRepository roomRepository;
     private final AppUserRepository appUserRepository;
     private final PasswordEncoder passwordEncoder;
@@ -42,6 +40,7 @@ public class CustomerService {
                            TicketRepository ticketRepository,
                            ScreeningRepository screeningRepository,
                            BookingRepository bookingRepository,
+                           MovieRepository movieRepository,
                            RoomRepository roomRepository,
                            AppUserRepository appUserRepository,
                            PasswordEncoder passwordEncoder) {
@@ -50,6 +49,7 @@ public class CustomerService {
         this.ticketRepository = ticketRepository;
         this.screeningRepository = screeningRepository;
         this.bookingRepository = bookingRepository;
+        this.movieRepository = movieRepository;
         this.roomRepository = roomRepository;
         this.appUserRepository = appUserRepository;
         this.passwordEncoder = passwordEncoder;
@@ -184,7 +184,7 @@ public class CustomerService {
         }
 
 
-        // --- UPPDATERA TICKETS ---
+        // --- UPPDATERA BILJETTER ---
 
         if (requestDto.tickets() != null) {
             List<Ticket> updatedTickets = new ArrayList<>();
@@ -198,7 +198,7 @@ public class CustomerService {
                     throw new CustomerOwnershipException("Biljett med id " + ticketDto.ticketId() + " tillhör inte kunden");
                 }
 
-                // --- Hantera Screening vs Booking ---
+                // --- Hantera Föreställning och bokning ---
                 if (ticketDto.screeningId() != null && ticketDto.bookingId() != null) {
                     throw new IllegalArgumentException("Endast en av föreställning eller bokning får sättas på samma biljett");
                 }
@@ -207,7 +207,7 @@ public class CustomerService {
                     Screening screening = screeningRepository.findById(ticketDto.screeningId())
                             .orElseThrow(() -> new EntityNotFoundException("Föreställning hittades inte"));
                     ticket.setScreening(screening);
-                    ticket.setBooking(null); // ta bort koppling till talar-bokning
+                    ticket.setBooking(null); // ta bort koppling till bokning
                 } else if (ticketDto.bookingId() != null) {
                     Booking booking = bookingRepository.findById(ticketDto.bookingId())
                             .orElseThrow(() -> new EntityNotFoundException("Bokning hittades inte"));
@@ -225,7 +225,7 @@ public class CustomerService {
 
                 ticket.setCustomer(customer);
 
-                //Hindrar att samma Ticket-objekt läggs till i listan igen
+                // Hindrar att samma Ticket-objekt läggs till i listan igen
                 if (!updatedTickets.contains(ticket)) {
                     updatedTickets.add(ticket);
                 }
@@ -235,7 +235,7 @@ public class CustomerService {
             customer.getTickets().addAll(updatedTickets);
         }
 
-        // --- UPPDATERA BOOKING ---
+        // --- UPPDATERA BOKNING ---
 
         if (requestDto.bookings() != null) {
             List<Booking> updatedBookings = new ArrayList<>();
@@ -250,57 +250,30 @@ public class CustomerService {
                             "Bokning med id " + bookingDto.bookingId() + " tillhör inte kunden med id " + customer.getId());
                 }
 
-                // --- Uppdatera rum ---
-                if (bookingDto.roomId() != null) {
-                    Room room = roomRepository.findById(bookingDto.roomId())
-                            .orElseThrow(() -> new EntityNotFoundException("Lokal hittades inte"));
-                    booking.setRoom(room);
+                // Uppdatera rum
+                Room room = roomRepository.findById(bookingDto.roomId())
+                        .orElseThrow(() -> new EntityNotFoundException("Lokal hittades inte"));
+                booking.setRoom(room);
+
+                // Kontrollera överlappning med pågående screenings
+                List<Screening> overlappingScreenings = screeningRepository.findByRoomAndTimeOverlap(
+                        room, bookingDto.reservationStartTime(), bookingDto.reservationEndTime());
+
+                if (!overlappingScreenings.isEmpty()) {
+                    throw new BookingConflictException("Tiderna för bokningen överlappar med en föreställning i samma rum.");
                 }
 
-                // --- Kontrollera överlapp med andra bokningar och screenings ---
-                Room roomToCheck;
-
-                // Bestäm vilket rum som faktiskt ska användas
-                if (bookingDto.roomId() != null) {
-                    roomToCheck = roomRepository.findById(bookingDto.roomId())
-                            .orElseThrow(() -> new EntityNotFoundException("Lokal hittades inte"));
-                } else if (bookingDto.screeningId() != null) {
-                    Screening screening = screeningRepository.findById(bookingDto.screeningId())
-                            .orElseThrow(() -> new EntityNotFoundException("Föreställning hittades inte"));
-                    roomToCheck = screening.getRoom();
-                } else {
-                    roomToCheck = booking.getRoom(); // fallback
-                }
-
-                if (roomToCheck != null) {
-
-                    // --- Kontrollera andra bokningar ---
-                    List<Booking> roomBookings = bookingRepository.findByRoomId(roomToCheck.getId());
-                    for (Booking otherBooking : roomBookings) {
-                        if (!otherBooking.getId().equals(booking.getId())) { // exkludera sig själv
-                            boolean overlap = bookingDto.reservationStartTime().isBefore(otherBooking.getReservationEndTime())
-                                    && bookingDto.reservationEndTime().isAfter(otherBooking.getReservationStartTime());
-                            if (overlap) {
-                                throw new BookingConflictException("Tiderna för bokningen överlappar med en annan bokning i samma rum.");
-                            }
-                        }
-                    }
-
-                    // --- Kontrollera screenings ---
-                    List<Screening> roomScreenings = screeningRepository.findByRoomId((roomToCheck.getId()));
-                    for (Screening screening : roomScreenings) {
-                        // Exkludera den screening som är kopplad till denna bokning, om någon
-                        if (booking.getScreening() != null && screening.getId().equals(booking.getScreening().getId())) {
-                            continue;
-                        }
-                        boolean overlap = bookingDto.reservationStartTime().isBefore(screening.getEndTime())
-                                && bookingDto.reservationEndTime().isAfter(screening.getStartTime());
+                // Kontrollera överlappning med andra bokningar i samma rum
+                List<Booking> otherBookings = bookingRepository.findByRoomId(room.getId());
+                for (Booking otherBooking : otherBookings) {
+                    if (!otherBooking.getId().equals(booking.getId())) { // exkludera sig själv
+                        boolean overlap = bookingDto.reservationStartTime().isBefore(otherBooking.getReservationEndTime())
+                                && bookingDto.reservationEndTime().isAfter(otherBooking.getReservationStartTime());
                         if (overlap) {
-                            throw new BookingConflictException("Tiderna för bokningen överlappar med en föreställning i samma rum.");
+                            throw new BookingConflictException("Tiderna för bokningen överlappar med en annan bokning i samma rum.");
                         }
                     }
                 }
-
 
                 // Kontrollera att sluttid inte är före starttid
                 if (bookingDto.reservationEndTime() != null && bookingDto.reservationStartTime() != null
@@ -308,20 +281,19 @@ public class CustomerService {
                     throw new IllegalArgumentException("Sluttiden för bokningen kan inte vara före starttiden.");
                 }
 
-                // --- Hantera Screening vs Speaker ---
-                if (bookingDto.screeningId() != null && bookingDto.speakerName() != null && !bookingDto.speakerName().isBlank()) {
-                    throw new IllegalArgumentException("Endast en av föreställning eller talare får sättas på samma bokning");
+                if (bookingDto.movieId() != null && bookingDto.speakerName() != null && !bookingDto.speakerName().isBlank()) {
+                    throw new InvalidBookingException("Bokning kan bara ha antingen film eller talare, inte båda.");
                 }
 
-                // --- Hantera Screening vs Speaker om endast en är satt ---
-                if (bookingDto.screeningId() != null) {
-                    Screening screening = screeningRepository.findById(bookingDto.screeningId())
-                            .orElseThrow(() -> new EntityNotFoundException("Föreställning hittades inte"));
-                    booking.setScreening(screening);
-                    booking.setSpeakerName(null); // Ta bort talare
+                // Hantera film vs talare
+                if (bookingDto.movieId() != null) {
+                    Movie movie = movieRepository.findById(bookingDto.movieId())
+                            .orElseThrow(() -> new EntityNotFoundException("Filmen hittades inte"));
+                    booking.setMovie(movie);
+                    booking.setSpeakerName(null); // ta bort talare
                 } else if (bookingDto.speakerName() != null && !bookingDto.speakerName().isBlank()) {
                     booking.setSpeakerName(bookingDto.speakerName());
-                    booking.setScreening(null); // Ta bort film
+                    booking.setMovie(null); // ta bort film
                 }
 
                 booking.setReservationStartTime(bookingDto.reservationStartTime());
@@ -346,7 +318,7 @@ public class CustomerService {
                     booking.setRoomEquipment(new ArrayList<>(bookingDto.roomEquipment()));
                 }
 
-                //Hindrar att samma Booking-objekt läggs till i listan igen
+                // Hindrar att samma Booking-objekt läggs till i listan igen
                 if (!updatedBookings.contains(booking)) {
                     updatedBookings.add(booking);
                 }

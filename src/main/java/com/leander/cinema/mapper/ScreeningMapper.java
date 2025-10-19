@@ -60,57 +60,26 @@ public class ScreeningMapper {
     }
 
     public static ScreeningResponseDto toScreeningResponseDto(Ticket ticket) {
-        Screening screening = ticket.getScreening();
-        String movieTitle = "----";
-        String genre = "----";
-        int ageLimit = 0;
-        int duration = 0;
-
-        if (ticket.getScreening() != null) {
-
-            if (screening.getMovie() != null) {
-                if (screening.getMovie().getTitle() != null) movieTitle = screening.getMovie().getTitle();
-                if (screening.getMovie().getGenre() != null) genre = screening.getMovie().getGenre();
-                ageLimit = screening.getMovie().getAgeLimit();
-                duration = screening.getMovie().getDuration();
-            }
-        }
-
         return new ScreeningResponseDto(
-                screening.getStartTime(),
-                screening.getEndTime(),
-                movieTitle,
-                genre,
-                ageLimit,
-                duration
+                ticket.getScreening().getStartTime(),
+                ticket.getScreening().getEndTime(),
+                ticket.getScreening().getMovie().getTitle(),
+                ticket.getScreening().getMovie().getGenre(),
+                ticket.getScreening().getMovie().getAgeLimit(),
+                ticket.getScreening().getMovie().getDuration(),
+                ticket.getScreening().getRoom().getName()
         );
     }
 
     public static ScreeningResponseDto toScreeningResponseDto(Screening screening) {
-        String movieTitle = "----";
-        String genre = "----";
-        int ageLimit = 0;
-        int duration = 0;
-
-        if (screening.getMovie() != null) {
-            if (screening.getMovie().getTitle() != null)
-            {
-                movieTitle = screening.getMovie().getTitle();
-            }
-            if (screening.getMovie().getGenre() != null){
-                genre = screening.getMovie().getGenre();
-            }
-            ageLimit = screening.getMovie().getAgeLimit();
-            duration = screening.getMovie().getDuration();
-        }
-
         return new ScreeningResponseDto(
                 screening.getStartTime(),
                 screening.getEndTime(),
-                movieTitle,
-                genre,
-                ageLimit,
-                duration
+                screening.getMovie().getTitle(),
+                screening.getMovie().getGenre(),
+                screening.getMovie().getAgeLimit(),
+                screening.getMovie().getDuration(),
+                screening.getRoom().getName()
         );
     }
 }

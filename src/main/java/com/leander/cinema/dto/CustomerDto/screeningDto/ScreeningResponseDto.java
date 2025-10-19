@@ -8,6 +8,7 @@ public record ScreeningResponseDto(
         String movieTitle,
         String genre,
         int ageLimit,
-        int duration
+        int duration,
+        String roomName
 ) {
 }

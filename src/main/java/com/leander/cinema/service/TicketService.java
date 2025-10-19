@@ -1,10 +1,14 @@
 package com.leander.cinema.service;
 
+import com.leander.cinema.dto.CustomerDto.bookingDto.BookingTicketResponseDto;
+import com.leander.cinema.dto.CustomerDto.movieDto.MovieResponseDto;
 import com.leander.cinema.dto.CustomerDto.screeningDto.ScreeningResponseDto;
 import com.leander.cinema.dto.CustomerDto.ticketDto.TicketRequestDto;
 import com.leander.cinema.dto.CustomerDto.ticketDto.TicketResponseDto;
 import com.leander.cinema.entity.*;
 import com.leander.cinema.exception.ForbiddenTicketAccessException;
+import com.leander.cinema.mapper.BookingMapper;
+import com.leander.cinema.mapper.MovieMapper;
 import com.leander.cinema.mapper.ScreeningMapper;
 import com.leander.cinema.repository.*;
 import com.leander.cinema.security.AppUser;
@@ -17,6 +21,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,25 +46,24 @@ public class TicketService {
         this.screeningRepository = screeningRepository;
     }
 
-    //Hjälpmetod för beräkning av biljettpris
-    public BigDecimal calculateTicketPrice(Ticket ticket) {
+    //Hjälpmetod för att beräkna biljettpris
+    public static BigDecimal calculateTicketPrice(Ticket ticket) {
         if (ticket.getBooking() != null) {
             Booking booking = ticket.getBooking();
-            if (booking.getSpeakerName() != null) {
-                // Bokning med egen talare + room
+
+            // Bokning med egen talare + rum
+            if (booking.getSpeakerName() != null && !booking.getSpeakerName().isBlank()) {
                 return booking.getTotalPriceSek()
                         .divide(BigDecimal.valueOf(booking.getNumberOfGuests()), 2, RoundingMode.HALF_UP);
-            } else if (booking.getScreening() != null) {
-                // Bokning med screening + room
-                BigDecimal screeningPrice = booking.getScreening().getPriceSek();
-                BigDecimal roomShare = booking.getRoom().getPriceSek()
-                        .divide(BigDecimal.valueOf(booking.getRoom().getMaxGuests()), 2, RoundingMode.HALF_UP);
-                return screeningPrice.add(roomShare);
             }
-        } else if (ticket.getScreening() != null) {
-            // Ticket direkt till screening (utan booking)
-            BigDecimal screeningPrice = ticket.getScreening().getPriceSek();
-            return ticket.getScreening().getPriceSek();
+
+            // Bokning med film + rum
+            if (booking.getMovie() != null) {
+                BigDecimal roomPricePerGuest = booking.getRoom().getPriceSek()
+                        .divide(BigDecimal.valueOf(booking.getNumberOfGuests()), 2, RoundingMode.HALF_UP);
+
+                return roomPricePerGuest;
+            }
         }
         return BigDecimal.ZERO;
     }
@@ -124,27 +128,22 @@ public class TicketService {
 
         ticketRepository.save(newTicket);
 
-        String speakerName = null;
-        if (booking != null) {
-            speakerName = booking.getSpeakerName();
-        }
-
-        String roomName = null;
-        if (booking != null && booking.getRoom() != null) {
-            roomName = booking.getRoom().getName();
-        } else if (screening != null && screening.getRoom() != null) {
-            roomName = screening.getRoom().getName();
-        }
-
+        // --- Skapa föreställning/film DTO ---
         ScreeningResponseDto screeningDto = null;
-        if (screening != null) {
-            // Ticket köpt direkt till en screening
-            screeningDto = ScreeningMapper.toScreeningResponseDto(newTicket);
-        } else if (booking != null && booking.getScreening() != null) {
-            // Ticket köpt till en bokning som har en screening
-            screeningDto = ScreeningMapper.toScreeningResponseDto(booking.getScreening());
-        }
+        BookingTicketResponseDto bookingDto = null;
 
+        if (screening != null) {
+            // Ticket direkt till föreställning
+            screeningDto = ScreeningMapper.toScreeningResponseDto(newTicket);
+        } else if (booking != null) {
+            // Ticket kopplad till bokning
+            bookingDto = new BookingTicketResponseDto(
+                    newTicket.getBooking().getReservationStartTime(),
+                    newTicket.getBooking().getReservationEndTime(),
+                    newTicket.getBooking().getRoom().getName(),
+                    newTicket.getBooking().getSpeakerName()
+            );
+        }
 
         return new TicketResponseDto(
                 newTicket.getId(),
@@ -156,8 +155,7 @@ public class TicketService {
                 newTicket.getTotalPriceSek(),
                 newTicket.getTotalPriceUsd(),
                 screeningDto,
-                speakerName,
-                roomName
+                bookingDto
         );
     }
 
@@ -174,19 +172,18 @@ public class TicketService {
 
         for (Ticket ticket : tickets) {
             ScreeningResponseDto screeningDto = null;
-            String roomName = null;
-            String speakerName = null;
+            BookingTicketResponseDto bookingDto = null;
 
             if (ticket.getScreening() != null) {
-                // Om det finns screening, visa screening info
                 screeningDto = ScreeningMapper.toScreeningResponseDto(ticket);
-                // Rummet kommer från Screening
-                roomName = ticket.getScreening().getRoom().getName();
 
             } else if (ticket.getBooking() != null) {
-                // Rummet kommer från Booking
-                roomName = ticket.getBooking().getRoom().getName();
-                speakerName = ticket.getBooking().getSpeakerName();
+                bookingDto = new BookingTicketResponseDto(
+                        ticket.getBooking().getReservationStartTime(),
+                        ticket.getBooking().getReservationEndTime(),
+                        ticket.getBooking().getRoom().getName(),
+                        ticket.getBooking().getSpeakerName()
+                );
             }
 
             TicketResponseDto responseDto = new TicketResponseDto(
@@ -199,8 +196,7 @@ public class TicketService {
                     ticket.getTotalPriceSek(),
                     ticket.getTotalPriceUsd(),
                     screeningDto,
-                    speakerName,
-                    roomName
+                    bookingDto
             );
             responseList.add(responseDto);
         }

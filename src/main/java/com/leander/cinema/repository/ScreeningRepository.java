@@ -37,8 +37,6 @@ public interface ScreeningRepository extends JpaRepository<Screening, Long> {
             @Param("endTime") LocalDateTime endTime
     );
 
-    List<Screening> findByRoomId(Long roomId);
-
 
     List<Screening> findByMovieIdAndStartTimeBetween(
             Long movieId,

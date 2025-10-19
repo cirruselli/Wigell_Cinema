@@ -3,10 +3,7 @@ package com.leander.cinema.service;
 import com.leander.cinema.dto.CustomerDto.bookingDto.BookingPatchRequestDto;
 import com.leander.cinema.dto.CustomerDto.bookingDto.BookingPostRequestDto;
 import com.leander.cinema.dto.CustomerDto.bookingDto.BookingResponseDto;
-import com.leander.cinema.entity.Booking;
-import com.leander.cinema.entity.Customer;
-import com.leander.cinema.entity.Room;
-import com.leander.cinema.entity.Screening;
+import com.leander.cinema.entity.*;
 import com.leander.cinema.exception.BookingCapacityExceededException;
 import com.leander.cinema.exception.BookingConflictException;
 import com.leander.cinema.exception.CustomerOwnershipException;
@@ -15,7 +12,6 @@ import com.leander.cinema.mapper.BookingMapper;
 import com.leander.cinema.repository.*;
 import com.leander.cinema.security.AppUser;
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -33,17 +29,20 @@ public class BookingService {
     private final ScreeningRepository screeningRepository;
     private final AppUserRepository appUserRepository;
     private final CustomerRepository customerRepository;
+    private final MovieRepository movieRepository;
 
     public BookingService(BookingRepository bookingRepository,
                           RoomRepository roomRepository,
                           ScreeningRepository screeningRepository,
                           AppUserRepository appUserRepository,
-                          CustomerRepository customerRepository) {
+                          CustomerRepository customerRepository,
+                          MovieRepository movieRepository) {
         this.bookingRepository = bookingRepository;
         this.roomRepository = roomRepository;
         this.screeningRepository = screeningRepository;
         this.appUserRepository = appUserRepository;
         this.customerRepository = customerRepository;
+        this.movieRepository = movieRepository;
     }
 
     //Hjälpmetod för inlogg
@@ -100,13 +99,13 @@ public class BookingService {
         Customer customer = getLoggedInCustomer();
 
         // Säkerställ att endast ett av alternativen används
-        if (body.speakerName() != null && body.screeningId() != null) {
-            throw new InvalidBookingException("Ange antingen talarens namn ELLER föreställning, inte båda.");
+        if (body.speakerName() != null && body.movieId() != null) {
+            throw new InvalidBookingException("Ange antingen talarens namn ELLER film, inte båda.");
         }
 
         // Säkerställ att minst ett av alternativen finns
-        if ((body.speakerName() == null || body.speakerName().isBlank()) && body.screeningId() == null) {
-            throw new InvalidBookingException("Du måste ange antingen talarens namn eller föreställning.");
+        if ((body.speakerName() == null || body.speakerName().isBlank()) && body.movieId() == null) {
+            throw new InvalidBookingException("Du måste ange antingen talarens namn eller film.");
         }
 
         Booking booking = BookingMapper.toBookingEntity(body);
@@ -120,62 +119,40 @@ public class BookingService {
         booking.setReservationStartTime(body.reservationStartTime());
         booking.setReservationEndTime(body.reservationEndTime());
 
-        // Val av rum
         Room room = roomRepository.findById(body.roomId())
                 .orElseThrow(() -> new EntityNotFoundException("Rummet med id " + body.roomId() + " hittades inte"));
         booking.setRoom(room);
 
-        if (body.screeningId() != null) {
-            // --- Scenario: Screening ---
-            Screening screening = screeningRepository.findById(body.screeningId())
-                    .orElseThrow(() -> new EntityNotFoundException("Föreställningen med id " + body.screeningId() + " hittades inte"));
-
-            // Kontrollera att bokningens tid inte överlappar visningens tid
-            boolean overlapsScreening = body.reservationStartTime().isBefore(screening.getEndTime()) &&
-                    body.reservationEndTime().isAfter(screening.getStartTime());
-
-            if (overlapsScreening) {
-                throw new BookingConflictException("Bokningens tid överlappar föreställningens tid (" +
-                        screening.getStartTime() + " - " + screening.getEndTime() + ").");
-            }
-
-            booking.setScreening(screening);
+        // --- Talare eller film ---
+        if (body.movieId() != null) {
+            Movie movie = movieRepository.findById(body.movieId())
+                    .orElseThrow(() -> new EntityNotFoundException("Filmen med id " + body.movieId() + " hittades inte"));
+            booking.setMovie(movie);
             booking.setSpeakerName(null);
-
         } else {
-            // --- Scenario: Rum + speaker ---
-            if (body.speakerName() == null || body.speakerName().isBlank()) {
-                throw new InvalidBookingException("Talarnamn måste anges vid rumsbokning utan visning.");
-            }
             booking.setSpeakerName(body.speakerName().trim());
         }
 
+        // --- Kontroller ---
         if (body.numberOfGuests() > room.getMaxGuests()) {
-            throw new BookingCapacityExceededException("Antal gäster överstiger rummets kapacitet på " + room.getMaxGuests() + " gäster");
+            throw new BookingCapacityExceededException("Antal gäster överstiger rummets kapacitet på " + room.getMaxGuests());
         }
 
         if (bookingRepository.overlaps(room, body.reservationStartTime(), body.reservationEndTime())) {
             throw new BookingConflictException("Rummet är upptaget under den valda tiden av en annan bokning.");
         }
 
-        // Ny kontroll mot screenings
+        // Kontroll mot pågående screenings
         List<Screening> conflictingScreenings = screeningRepository
                 .findByRoomAndTimeOverlap(room, body.reservationStartTime(), body.reservationEndTime());
-
         if (!conflictingScreenings.isEmpty()) {
             throw new BookingConflictException("Rummet är upptaget av en föreställning under den valda tiden.");
         }
 
-
-        // Totalpris
+        // --- Totalpris ---
         BigDecimal factor = new BigDecimal("0.11");
         BigDecimal totalPriceSek = room.getPriceSek();
         BigDecimal totalPriceUsd = totalPriceSek.multiply(factor);
-
-        if (booking.getScreening() != null) {
-            totalPriceSek = totalPriceSek.add(booking.getScreening().getPriceSek());
-            totalPriceUsd = totalPriceUsd.add(booking.getScreening().getPriceSek().multiply(factor));
-        }
 
         booking.setTotalPriceSek(totalPriceSek);
         booking.setTotalPriceUsd(totalPriceUsd);

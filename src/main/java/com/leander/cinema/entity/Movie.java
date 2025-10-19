@@ -9,7 +9,7 @@ public class Movie {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "title", nullable = false, length = 150)
+    @Column(name = "title", unique = true, nullable = false, length = 150)
     private String title;
 
     @Column(name = "genre", nullable = false, length = 150)

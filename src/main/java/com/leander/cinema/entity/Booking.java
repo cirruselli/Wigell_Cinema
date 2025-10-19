@@ -48,8 +48,8 @@ public class Booking {
     private Room room;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "screening_id")
-    private Screening screening;
+    @JoinColumn(name = "movie_id")
+    private Movie movie;
 
     //RELATION
     @ManyToOne(fetch = FetchType.LAZY)
@@ -148,12 +148,12 @@ public class Booking {
         this.room = room;
     }
 
-    public Screening getScreening() {
-        return screening;
+    public Movie getMovie() {
+        return movie;
     }
 
-    public void setScreening(Screening screening) {
-        this.screening = screening;
+    public void setMovie(Movie movie) {
+        this.movie = movie;
     }
 
     public Customer getCustomer() {

@@ -108,6 +108,7 @@ public class AdminController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/movies/{movieId}")
     public ResponseEntity<AdminMovieResponseDto> movie(@PathVariable Long movieId) {
         return ResponseEntity.ok().body(movieService.getMovieById(movieId));

@@ -1,7 +1,7 @@
 package com.leander.cinema.dto.AdminDto.bookingDto;
 
+import com.leander.cinema.dto.AdminDto.movieDto.AdminMovieResponseDto;
 import com.leander.cinema.dto.AdminDto.roomDto.AdminRoomResponseDto;
-import com.leander.cinema.dto.AdminDto.screeningDto.AdminScreeningResponseDto;
 import com.leander.cinema.service.BookingStatus;
 
 import java.math.BigDecimal;
@@ -10,14 +10,14 @@ import java.util.List;
 
 public record AdminBookingResponseDto(
         Long bookingId,
-        BookingStatus status,
         LocalDateTime reservationStartTime,
         LocalDateTime reservationEndTime,
         int numberOfGuests,
         List<String> roomEquipment,
+        AdminRoomResponseDto room,
         BigDecimal totalPriceSek,
         BigDecimal totalPriceUsd,
-        AdminRoomResponseDto room,
         String speakerName,
-        AdminScreeningResponseDto screening) {
+        AdminMovieResponseDto movie,
+        BookingStatus bookingStatus) {
 }

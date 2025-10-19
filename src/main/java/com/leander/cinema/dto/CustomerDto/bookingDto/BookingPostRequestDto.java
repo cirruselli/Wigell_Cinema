@@ -22,6 +22,6 @@ public record BookingPostRequestDto(
         @NotNull(message = "Lokal måste anges")
         Long roomId,
         String speakerName,
-        Long screeningId
+        Long movieId
 ) {
 }

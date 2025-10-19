@@ -110,24 +110,21 @@ public class CustomerMapper {
     public static BigDecimal calculateTicketPrice(Ticket ticket) {
         if (ticket.getBooking() != null) {
             Booking booking = ticket.getBooking();
-            if (booking.getSpeakerName() != null) {
-                // Bokning med egen talare + room
+
+            // Bokning med egen talare + rum
+            if (booking.getSpeakerName() != null && !booking.getSpeakerName().isBlank()) {
                 return booking.getTotalPriceSek()
                         .divide(BigDecimal.valueOf(booking.getNumberOfGuests()), 2, RoundingMode.HALF_UP);
-            } else if (booking.getScreening() != null) {
-                // Bokning med screening + room
-                BigDecimal screeningPrice = booking.getScreening().getPriceSek();
-                BigDecimal roomShare = booking.getRoom().getPriceSek()
-                        .divide(BigDecimal.valueOf(booking.getRoom().getMaxGuests()), 2, RoundingMode.HALF_UP);
-                return screeningPrice.add(roomShare);
             }
-        } else if (ticket.getScreening() != null) {
-            // Ticket direkt till screening (utan booking)
-            BigDecimal screeningPrice = ticket.getScreening().getPriceSek();
-            return ticket.getScreening().getPriceSek();
+
+            // Bokning med film + rum
+            if (booking.getMovie() != null) {
+                BigDecimal roomPricePerGuest = booking.getRoom().getPriceSek()
+                        .divide(BigDecimal.valueOf(booking.getNumberOfGuests()), 2, RoundingMode.HALF_UP);
+
+                return roomPricePerGuest;
+            }
         }
         return BigDecimal.ZERO;
     }
-
 }
-
