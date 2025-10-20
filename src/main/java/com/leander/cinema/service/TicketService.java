@@ -1,14 +1,11 @@
 package com.leander.cinema.service;
 
 import com.leander.cinema.dto.CustomerDto.bookingDto.BookingTicketResponseDto;
-import com.leander.cinema.dto.CustomerDto.movieDto.MovieResponseDto;
 import com.leander.cinema.dto.CustomerDto.screeningDto.ScreeningResponseDto;
 import com.leander.cinema.dto.CustomerDto.ticketDto.TicketRequestDto;
 import com.leander.cinema.dto.CustomerDto.ticketDto.TicketResponseDto;
 import com.leander.cinema.entity.*;
 import com.leander.cinema.exception.ForbiddenTicketAccessException;
-import com.leander.cinema.mapper.BookingMapper;
-import com.leander.cinema.mapper.MovieMapper;
 import com.leander.cinema.mapper.ScreeningMapper;
 import com.leander.cinema.repository.*;
 import com.leander.cinema.security.AppUser;
@@ -21,7 +18,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -92,7 +88,7 @@ public class TicketService {
 
         // Säkerställ att endast ett ID är angivet
         if (body.bookingId() != null && body.screeningId() != null) {
-            throw new IllegalArgumentException("Ange endast en bokning eller en föreställning, aldrig båda");
+            throw new IllegalArgumentException("Ange endast en bokad föreställning eller en filmvisning, aldrig båda");
         }
 
         Booking booking = null;
@@ -105,10 +101,10 @@ public class TicketService {
         } else if (body.screeningId() != null) {
             screening = screeningRepository.findById(body.screeningId())
                     .orElseThrow(() -> new ResponseStatusException(
-                            HttpStatus.NOT_FOUND, "Föreställning hittades inte"));
+                            HttpStatus.NOT_FOUND, "Föreställningen hittades inte"));
         } else {
             throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, "Du måste ange antingen en bokning eller en föreställning");
+                    HttpStatus.BAD_REQUEST, "Du måste ange antingen en bokad föreställning eller en filmvisning");
         }
 
         Ticket newTicket = new Ticket();

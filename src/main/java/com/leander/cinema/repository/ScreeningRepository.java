@@ -10,19 +10,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface ScreeningRepository extends JpaRepository<Screening, Long> {
-    //Kontrollera om en screening krockar med någon annan screening i samma rum (i createScreening).
-    @Query("""
-    SELECT COUNT(s) > 0
-    FROM Screening s
-    WHERE s.room.id = :roomId
-      AND (:startTime < s.endTime AND :endTime > s.startTime)
-""")
-    boolean existsOverlappingScreening(
-            @Param("roomId") Long roomId,
-            @Param("startTime") LocalDateTime startTime,
-            @Param("endTime") LocalDateTime endTime
-    );
-
 
     // Kontrollera om screening krockar med annan screening i samma rum (i createBooking)
     @Query("""
@@ -43,4 +30,6 @@ public interface ScreeningRepository extends JpaRepository<Screening, Long> {
             LocalDateTime startOfDay,
             LocalDateTime endOfDay
     );
+
+    List<Screening> findByRoom(Room room);
 }

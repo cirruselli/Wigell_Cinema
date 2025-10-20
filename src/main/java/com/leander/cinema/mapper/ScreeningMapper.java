@@ -11,12 +11,12 @@ import com.leander.cinema.entity.Ticket;
 
 public class ScreeningMapper {
     public static Screening toScreeningEntity(AdminScreeningRequestDto body) {
-        return new Screening(
-                body.startTime(),
-                body.endTime(),
-                body.priceSek()
-        );
+        Screening screening = new Screening();
+        screening.setStartTime(body.startTime());
+        screening.setPriceSek(body.priceSek());
+        return screening;
     }
+
 
     public static AdminScreeningResponseDto toAdminScreeningResponseDto(Screening screening) {
 
@@ -52,6 +52,7 @@ public class ScreeningMapper {
                 screening.getId(),
                 screening.getStartTime(),
                 screening.getEndTime(),
+                screening.getTotalEndTime(),
                 screening.getPriceSek(),
                 screening.getPriceUsd(),
                 roomDto,

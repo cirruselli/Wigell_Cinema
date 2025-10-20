@@ -9,6 +9,7 @@ public record AdminScreeningResponseDto(
         Long screeningId,
         LocalDateTime startTime,
         LocalDateTime endTime,
+        LocalDateTime totalTime,
         BigDecimal priceSek,
         BigDecimal priceUsd,
         AdminRoomResponseDto roomDto,

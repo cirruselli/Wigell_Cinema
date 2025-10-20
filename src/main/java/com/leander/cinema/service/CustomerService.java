@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -256,11 +257,15 @@ public class CustomerService {
                 booking.setRoom(room);
 
                 // Kontrollera överlappning med pågående screenings
-                List<Screening> overlappingScreenings = screeningRepository.findByRoomAndTimeOverlap(
-                        room, bookingDto.reservationStartTime(), bookingDto.reservationEndTime());
-
-                if (!overlappingScreenings.isEmpty()) {
-                    throw new BookingConflictException("Tiderna för bokningen överlappar med en föreställning i samma rum.");
+                List<Screening> screenings = screeningRepository.findByRoom(room);
+                for (Screening screening : screenings) {
+                    LocalDateTime totalEndTime = screening.getTotalEndTime(); // film + städning
+                    if (screening.getStartTime().isBefore(bookingDto.reservationEndTime())
+                            && totalEndTime.isAfter(bookingDto.reservationStartTime())) {
+                        throw new BookingConflictException(
+                                "Tiderna för bokningen överlappar med en föreställning i samma rum."
+                        );
+                    }
                 }
 
                 // Kontrollera överlappning med andra bokningar i samma rum
@@ -295,6 +300,9 @@ public class CustomerService {
                     booking.setSpeakerName(bookingDto.speakerName());
                     booking.setMovie(null); // ta bort film
                 }
+                else{
+                    throw new InvalidBookingException("En bokning måste ha antingen en talare eller en film");
+                }
 
                 booking.setReservationStartTime(bookingDto.reservationStartTime());
                 booking.setReservationEndTime(bookingDto.reservationEndTime());
@@ -308,15 +316,14 @@ public class CustomerService {
                 }
 
                 // --- Hantera roomEquipment ---
-                if (bookingDto.roomEquipment() == null || bookingDto.roomEquipment().isEmpty()) {
-                    if (booking.getRoom() != null && booking.getRoom().getStandardEquipment() != null) {
-                        booking.setRoomEquipment(new ArrayList<>(booking.getRoom().getStandardEquipment()));
-                    } else {
-                        booking.setRoomEquipment(new ArrayList<>());
-                    }
+                if (bookingDto.roomEquipment() == null) {
+                    booking.setRoomEquipment(new ArrayList<>(booking.getRoom().getStandardEquipment()));
+                } else if (bookingDto.roomEquipment().isEmpty()) {
+                    booking.setRoomEquipment(new ArrayList<>());
                 } else {
                     booking.setRoomEquipment(new ArrayList<>(bookingDto.roomEquipment()));
                 }
+
 
                 // Hindrar att samma Booking-objekt läggs till i listan igen
                 if (!updatedBookings.contains(booking)) {

@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -142,11 +143,22 @@ public class BookingService {
             throw new BookingConflictException("Rummet är upptaget under den valda tiden av en annan bokning.");
         }
 
-        // Kontroll mot pågående screenings
-        List<Screening> conflictingScreenings = screeningRepository
-                .findByRoomAndTimeOverlap(room, body.reservationStartTime(), body.reservationEndTime());
+        // --- Kontrollera överlapp med screenings ---
+        List<Screening> screenings = screeningRepository.findByRoom(room);
+        List<Screening> conflictingScreenings = new ArrayList<>();
+
+        for (Screening screening : screenings) {
+            LocalDateTime totalEndTime = screening.getTotalEndTime();
+
+            if (screening.getStartTime().isBefore(body.reservationEndTime())
+                    && totalEndTime.isAfter(body.reservationStartTime())) {
+                conflictingScreenings.add(screening);
+            }
+        }
         if (!conflictingScreenings.isEmpty()) {
-            throw new BookingConflictException("Rummet är upptaget av en föreställning under den valda tiden.");
+            throw new BookingConflictException(
+                    "Rummet är upptaget av en föreställning under den valda tiden."
+            );
         }
 
         // --- Totalpris ---
@@ -199,9 +211,20 @@ public class BookingService {
                 booking.getReservationEndTime(),
                 bookingId
         );
-
         if (conflict) {
             throw new BookingConflictException("Rummet är upptaget under den valda tiden.");
+        }
+
+        //Screening-krock
+        List<Screening> screenings = screeningRepository.findByRoom(room);
+        for (Screening screening : screenings) {
+            LocalDateTime totalEndTime = screening.getTotalEndTime();
+            if (screening.getStartTime().isBefore(booking.getReservationEndTime())
+                    && totalEndTime.isAfter(booking.getReservationStartTime())) {
+                throw new BookingConflictException(
+                        "Rummet är upptaget av en föreställning under den valda tiden."
+                );
+            }
         }
 
         bookingRepository.save(booking);

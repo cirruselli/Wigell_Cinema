@@ -9,8 +9,6 @@ import java.time.LocalDateTime;
 public record AdminScreeningRequestDto(
         @NotNull(message = "Starttid måste anges")
         LocalDateTime startTime,
-        @NotNull(message = "Sluttid måste anges")
-        LocalDateTime endTime,
         @NotNull(message = "Pris i SEK måste anges")
         @DecimalMin(value = "0.01", message = "Pris måste vara minst 0.01")
         BigDecimal priceSek,

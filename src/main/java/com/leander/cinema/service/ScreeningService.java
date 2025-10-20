@@ -3,10 +3,10 @@ package com.leander.cinema.service;
 import com.leander.cinema.dto.AdminDto.screeningDto.AdminScreeningRequestDto;
 import com.leander.cinema.dto.AdminDto.screeningDto.AdminScreeningResponseDto;
 import com.leander.cinema.dto.CustomerDto.screeningDto.ScreeningResponseDto;
-import com.leander.cinema.entity.Booking;
 import com.leander.cinema.entity.Movie;
 import com.leander.cinema.entity.Room;
 import com.leander.cinema.entity.Screening;
+import com.leander.cinema.exception.BookingConflictException;
 import com.leander.cinema.exception.InvalidScreeningException;
 import com.leander.cinema.mapper.ScreeningMapper;
 import com.leander.cinema.repository.BookingRepository;
@@ -75,11 +75,6 @@ public class ScreeningService {
     @Transactional
     public AdminScreeningResponseDto createScreening(AdminScreeningRequestDto body) {
 
-        //Kontroller av tiderna
-        if (body.endTime().isBefore(body.startTime())) {
-            throw new InvalidScreeningException("Sluttiden kan inte vara före starttiden.");
-        }
-
         Room room = roomRepository.findById(body.roomId())
                 .orElseThrow(() -> new EntityNotFoundException("Rummet med id " + body.roomId() + " hittades inte."));
 
@@ -87,33 +82,39 @@ public class ScreeningService {
         Movie movie = movieRepository.findById(body.movieId())
                     .orElseThrow(() -> new EntityNotFoundException("Film med id " + body.movieId() + " hittades inte."));
 
-        // Kontrollera överlappning med bokningar
-        List<Booking> overlappingBookings = bookingRepository.findByRoomAndTimeOverlap(
-                room,
-                body.startTime(),
-                body.endTime()
-        );
-
-        if (!overlappingBookings.isEmpty()) {
-            throw new InvalidScreeningException(
-                    "Rummet är redan bokat av en bokning under denna tid."
-            );
-        }
-
-        // Kontrollera överlappning med andra screenings
-        boolean conflict = screeningRepository.existsOverlappingScreening(
-                body.roomId(),
-                body.startTime(),
-                body.endTime()
-        );
-
-        if (conflict) {
-            throw new InvalidScreeningException("Rummet är redan bokat av en annan screening under denna tid.");
-        }
-
         Screening screening = ScreeningMapper.toScreeningEntity(body);
         screening.setRoom(room);
         screening.setMovie(movie);
+        screening.setEndTime(body.startTime().plusMinutes(movie.getDuration()));
+
+        // Filmens längd + 30 minuter
+        screening.setTotalEndTime(screening.getEndTime().plusMinutes(30));
+
+        //Kontroller av tiderna
+        if (screening.getEndTime().isBefore(body.startTime())) {
+            throw new InvalidScreeningException("Sluttiden kan inte vara före starttiden.");
+        }
+
+        // Kontrollera om det finns någon bokning i samma rum som krockar med föreställningens totala tid
+        boolean conflictWithBooking = bookingRepository.overlaps(
+                room,
+                body.startTime(),
+                screening.getTotalEndTime()
+        );
+        if (conflictWithBooking) {
+            throw new BookingConflictException(
+                    "Föreställningen krockar med en bokning i samma rum."
+            );
+        }
+
+        // Kontrollera överlappningar mot andra visningar baserat på totalEndTime
+        List<Screening> overlapping = screeningRepository.findByRoomAndTimeOverlap(
+                room, screening.getStartTime(), screening.getTotalEndTime());
+
+        if (!overlapping.isEmpty()) {
+            throw new BookingConflictException("Föreställningen krockar med en annan visning/bokning i samma sal.");
+        }
+
 
         BigDecimal factor = new BigDecimal("0.11");
         BigDecimal priceUsd = screening.getPriceSek().multiply(factor);

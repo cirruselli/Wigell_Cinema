@@ -18,6 +18,9 @@ public class Screening {
     @Column(name = "end_time", nullable = false)
     private LocalDateTime endTime;
 
+    @Column(name = "total_end_time", nullable = false)
+    private LocalDateTime totalEndTime;
+
     @Column(name = "price_sek", nullable = false)
     private BigDecimal priceSek;
 
@@ -37,15 +40,15 @@ public class Screening {
     public Screening() {
     }
 
-    public Screening(LocalDateTime startTime, LocalDateTime endTime, BigDecimal priceSek) {
+    public Screening(LocalDateTime startTime, BigDecimal priceSek) {
         this.startTime = startTime;
-        this.endTime = endTime;
         this.priceSek = priceSek;
     }
 
-    public Screening(LocalDateTime startTime, LocalDateTime endTime, BigDecimal priceSek, BigDecimal priceUsd, Room room, Movie movie) {
+    public Screening(LocalDateTime startTime, LocalDateTime endTime, LocalDateTime totalEndTime, BigDecimal priceSek, BigDecimal priceUsd, Room room, Movie movie) {
         this.startTime = startTime;
         this.endTime = endTime;
+        this.totalEndTime = totalEndTime;
         this.priceSek = priceSek;
         this.priceUsd = priceUsd;
         this.room = room;
@@ -74,6 +77,14 @@ public class Screening {
 
     public void setEndTime(LocalDateTime endTime) {
         this.endTime = endTime;
+    }
+
+    public LocalDateTime getTotalEndTime() {
+        return totalEndTime;
+    }
+
+    public void setTotalEndTime(LocalDateTime totalEndTime) {
+        this.totalEndTime = totalEndTime;
     }
 
     public BigDecimal getPriceSek() {
