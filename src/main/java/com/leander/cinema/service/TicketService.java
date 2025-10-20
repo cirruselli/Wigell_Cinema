@@ -1,6 +1,6 @@
 package com.leander.cinema.service;
 
-import com.leander.cinema.dto.CustomerDto.bookingDto.BookingTicketResponseDto;
+import com.leander.cinema.dto.CustomerDto.ticketDto.TicketBookingResponseDto;
 import com.leander.cinema.dto.CustomerDto.screeningDto.ScreeningResponseDto;
 import com.leander.cinema.dto.CustomerDto.ticketDto.TicketRequestDto;
 import com.leander.cinema.dto.CustomerDto.ticketDto.TicketResponseDto;
@@ -9,6 +9,8 @@ import com.leander.cinema.exception.ForbiddenTicketAccessException;
 import com.leander.cinema.mapper.ScreeningMapper;
 import com.leander.cinema.repository.*;
 import com.leander.cinema.security.AppUser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -23,6 +25,7 @@ import java.util.List;
 
 @Service
 public class TicketService {
+    Logger logger = LoggerFactory.getLogger(TicketService.class);
 
     private final TicketRepository ticketRepository;
     private final CustomerRepository customerRepository;
@@ -86,7 +89,6 @@ public class TicketService {
 
         Customer customer = getLoggedInCustomer();
 
-        // Säkerställ att endast ett ID är angivet
         if (body.bookingId() != null && body.screeningId() != null) {
             throw new IllegalArgumentException("Ange endast en bokad föreställning eller en filmvisning, aldrig båda");
         }
@@ -123,17 +125,18 @@ public class TicketService {
         newTicket.setTotalPriceUsd(priceUsd.multiply(BigDecimal.valueOf(newTicket.getNumberOfTickets())));
 
         ticketRepository.save(newTicket);
+        logger.info("Användare {} köpte biljett {}", newTicket.getId());
 
         // --- Skapa föreställning/film DTO ---
         ScreeningResponseDto screeningDto = null;
-        BookingTicketResponseDto bookingDto = null;
+        TicketBookingResponseDto bookingDto = null;
 
         if (screening != null) {
             // Ticket direkt till föreställning
             screeningDto = ScreeningMapper.toScreeningResponseDto(newTicket);
         } else if (booking != null) {
             // Ticket kopplad till bokning
-            bookingDto = new BookingTicketResponseDto(
+            bookingDto = new TicketBookingResponseDto(
                     newTicket.getBooking().getReservationStartTime(),
                     newTicket.getBooking().getReservationEndTime(),
                     newTicket.getBooking().getRoom().getName(),
@@ -168,13 +171,13 @@ public class TicketService {
 
         for (Ticket ticket : tickets) {
             ScreeningResponseDto screeningDto = null;
-            BookingTicketResponseDto bookingDto = null;
+            TicketBookingResponseDto bookingDto = null;
 
             if (ticket.getScreening() != null) {
                 screeningDto = ScreeningMapper.toScreeningResponseDto(ticket);
 
             } else if (ticket.getBooking() != null) {
-                bookingDto = new BookingTicketResponseDto(
+                bookingDto = new TicketBookingResponseDto(
                         ticket.getBooking().getReservationStartTime(),
                         ticket.getBooking().getReservationEndTime(),
                         ticket.getBooking().getRoom().getName(),

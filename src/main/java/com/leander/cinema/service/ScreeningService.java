@@ -14,6 +14,8 @@ import com.leander.cinema.repository.MovieRepository;
 import com.leander.cinema.repository.RoomRepository;
 import com.leander.cinema.repository.ScreeningRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +29,8 @@ import java.util.Optional;
 
 @Service
 public class ScreeningService {
+    Logger logger = LoggerFactory.getLogger(ScreeningService.class);
+
     private final ScreeningRepository screeningRepository;
     private final RoomRepository roomRepository;
     private final MovieRepository movieRepository;
@@ -122,6 +126,8 @@ public class ScreeningService {
 
         screeningRepository.save(screening);
 
+        logger.info("Admin skapade föreställning {}", screening.getId());
+
         return ScreeningMapper.toAdminScreeningResponseDto(screening);
     }
 
@@ -131,6 +137,7 @@ public class ScreeningService {
 
         if (screening.isPresent()) {
             screeningRepository.delete(screening.get());
+            logger.info("Admin tog bort föreställning {}", screening.get().getId());
             return true;
         }
         return false;

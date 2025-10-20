@@ -1,5 +1,6 @@
 package com.leander.cinema.repository;
 
+import com.leander.cinema.entity.Movie;
 import com.leander.cinema.entity.Room;
 import com.leander.cinema.entity.Screening;
 import org.springframework.data.jpa.repository.JpaRepository;

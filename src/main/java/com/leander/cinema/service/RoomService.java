@@ -7,6 +7,8 @@ import com.leander.cinema.exception.RoomAlreadyExistsException;
 import com.leander.cinema.mapper.RoomMapper;
 import com.leander.cinema.repository.RoomRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +19,8 @@ import java.util.List;
 
 @Service
 public class RoomService {
+    Logger logger = LoggerFactory.getLogger(RoomService.class);
+
     private final RoomRepository roomRepository;
 
     public RoomService(RoomRepository roomRepository) {
@@ -61,6 +65,9 @@ public class RoomService {
         }
 
         roomRepository.save(room);
+
+        logger.info("Admin skapade lokal {}", room.getId());
+
         return RoomMapper.toAdminRoomResponseDto(room);
     }
 
@@ -82,6 +89,8 @@ public class RoomService {
         }
 
         roomRepository.save(room);
+
+        logger.info("Admin uppdaterade lokal {}", room.getId());
 
         return RoomMapper.toAdminRoomResponseDto(room);
     }

@@ -14,6 +14,8 @@ import com.leander.cinema.repository.*;
 import com.leander.cinema.security.AppUser;
 import com.leander.cinema.security.Role;
 import jakarta.persistence.EntityNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,8 @@ import java.util.*;
 
 @Service
 public class CustomerService {
+    Logger logger = LoggerFactory.getLogger(CustomerService.class);
+
     private final CustomerRepository customerRepository;
     private final AddressRepository addressRepository;
     private final TicketRepository ticketRepository;
@@ -131,6 +135,9 @@ public class CustomerService {
         customer.setAppUser(appUser);
 
         customerRepository.save(customer);
+
+        logger.info("Admin skapade kund {}", customer.getId());
+
         return CustomerMapper.toAdminCustomerResponseDto(customer);
     }
 
@@ -169,6 +176,7 @@ public class CustomerService {
                 newAddress.setPostalCode(postalCode);
                 newAddress.setCity(city);
                 addressRepository.save(newAddress);
+                logger.info("Admin skapade adress {} vid uppdatering av kund {}", newAddress.getId(), customer.getId());
                 updatedAddresses.add(newAddress);
             }
         }
@@ -176,12 +184,14 @@ public class CustomerService {
         // --- Uppdatera kundens adresser ---
         customer.setAddresses(updatedAddresses);
         customerRepository.save(customer);
+        logger.info("Admin uppdaterade {} adress/er på kund {}", customer.getAddresses().size(), customer.getId());
         customerRepository.flush();
 
         // --- Kolla om gamla adresser nu blivit orphans ---
         for (Address oldAddress : oldAddresses) {
             if (!oldAddress.getCustomers().isEmpty()) continue; // fortfarande kopplad till någon kund
             addressRepository.delete(oldAddress);
+            logger.info("Admin tog bort adress {} vid uppdatering av kund {}", oldAddress.getId(), customer.getId());
         }
 
 
@@ -350,6 +360,7 @@ public class CustomerService {
         }
 
         customerRepository.save(customer);
+        logger.info("Admin uppdaterade kund {}", customer.getId());
 
         return CustomerMapper.toAdminCustomerResponseDto(customer);
     }
@@ -365,6 +376,7 @@ public class CustomerService {
             customerEntity.getAddresses().clear();
             // Tar bort kunden från tabellen customers
             customerRepository.delete(customerEntity);
+            logger.info("Admin tog bort kund {}", customerEntity.getId());
 
             // Skickar delete av relationerna till DB innan rensning av adresserna i adress-tabellen
             customerRepository.flush();
@@ -374,6 +386,7 @@ public class CustomerService {
                 // Tar bort alla adresser som saknar kopplade kunder
                 if (address.getCustomers().isEmpty()) {
                     addressRepository.delete(address);
+                    logger.info("Admin tog bort adress {}", address.getId());
                 }
             }
             return true;
@@ -397,6 +410,7 @@ public class CustomerService {
         if (address == null) {
             address = new Address(street, postalCode, city);
             addressRepository.save(address);
+            logger.info("Admin lade till adress {} på kund {}", address.getId(), customerId);
         }
 
         if (customer.getAddresses().contains(address)) {
@@ -405,6 +419,8 @@ public class CustomerService {
 
         customer.getAddresses().add(address);
         customerRepository.save(customer);
+
+        logger.info("Admin uppdaterade användaren {}", customer.getId());
 
         return AddressMapper.toAdminAddressResponseDto(address);
     }
@@ -439,9 +455,12 @@ public class CustomerService {
         customer.getAddresses().remove(address);
         customerRepository.save(customer);
 
-        // Tar bort alla adresser som saknar kopplade kunder
+        logger.info("Admin tog bort adress {} på kund {}", address.getId(), customer.getId());
+
+        // Tar bort adressen om den saknar kopplade kunder
         if (address.getCustomers().isEmpty()) {
             addressRepository.delete(address);
+            logger.info("Admin tog bort adress {}", address.getId());
         }
     }
 

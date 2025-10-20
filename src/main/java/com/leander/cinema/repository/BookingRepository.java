@@ -1,6 +1,7 @@
 package com.leander.cinema.repository;
 
 import com.leander.cinema.entity.Booking;
+import com.leander.cinema.entity.Movie;
 import com.leander.cinema.entity.Room;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -39,17 +40,4 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                               @Param("bookingId") Long bookingId);
 
     List<Booking> findByCustomerId(Long customerId);
-
-
-    @Query("""
-    SELECT b FROM Booking b
-    WHERE b.room = :room
-    AND b.reservationStartTime < :endTime
-    AND b.reservationEndTime > :startTime
-""")
-    List<Booking> findByRoomAndTimeOverlap(
-            @Param("room") Room room,
-            @Param("startTime") LocalDateTime startTime,
-            @Param("endTime") LocalDateTime endTime
-    );
 }

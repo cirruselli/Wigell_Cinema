@@ -1,6 +1,5 @@
 package com.leander.cinema.dto.CustomerDto.ticketDto;
 
-import com.leander.cinema.dto.CustomerDto.bookingDto.BookingTicketResponseDto;
 import com.leander.cinema.dto.CustomerDto.screeningDto.ScreeningResponseDto;
 
 import java.math.BigDecimal;
@@ -15,6 +14,6 @@ public record TicketResponseDto(
         BigDecimal totalPriceSek,
         BigDecimal totalPriceUsd,
         ScreeningResponseDto screeningDto,
-        BookingTicketResponseDto bookingDto
+        TicketBookingResponseDto bookingDto
 ) {
 }

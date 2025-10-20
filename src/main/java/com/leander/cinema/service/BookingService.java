@@ -12,6 +12,8 @@ import com.leander.cinema.mapper.BookingMapper;
 import com.leander.cinema.repository.*;
 import com.leander.cinema.security.AppUser;
 import jakarta.persistence.EntityNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -25,6 +27,8 @@ import java.util.List;
 
 @Service
 public class BookingService {
+    Logger logger = LoggerFactory.getLogger(BookingService.class);
+
     private final BookingRepository bookingRepository;
     private final RoomRepository roomRepository;
     private final ScreeningRepository screeningRepository;
@@ -64,7 +68,7 @@ public class BookingService {
 
 
     // === Kunden ser tidigare och aktiva bokningar ===
-    @Transactional
+    @Transactional(readOnly = true)
     public List<BookingResponseDto> getActiveAndCompletedBookings(Long customerId) {
         Customer loggedInCustomer = getLoggedInCustomer();
 
@@ -172,6 +176,8 @@ public class BookingService {
 
         bookingRepository.save(booking);
 
+        logger.info("Kund {} skapade bokning {}", getLoggedInCustomer().getId(), booking.getId());
+
         return BookingMapper.toBookingResponseDto(booking);
     }
 
@@ -228,6 +234,9 @@ public class BookingService {
         }
 
         bookingRepository.save(booking);
+
+        logger.info("Kund {} uppdaterade bokning {}", getLoggedInCustomer().getId(), booking.getId());
+
         return BookingMapper.toBookingResponseDto(booking);
     }
 }

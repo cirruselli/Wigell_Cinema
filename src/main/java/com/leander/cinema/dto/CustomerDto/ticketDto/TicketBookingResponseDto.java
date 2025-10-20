@@ -1,8 +1,8 @@
-package com.leander.cinema.dto.CustomerDto.bookingDto;
+package com.leander.cinema.dto.CustomerDto.ticketDto;
 
 import java.time.LocalDateTime;
 
-public record BookingTicketResponseDto(
+public record TicketBookingResponseDto(
         LocalDateTime startTime,
         LocalDateTime endTime,
         String roomName,

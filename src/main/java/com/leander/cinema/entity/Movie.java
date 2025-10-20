@@ -2,6 +2,9 @@ package com.leander.cinema.entity;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "movies")
 public class Movie {
@@ -20,6 +23,12 @@ public class Movie {
 
     @Column(name = "duration", nullable = false)
     private int duration;
+
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Screening> screenings = new ArrayList<>();
+
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Booking> bookings = new ArrayList<>();
 
     public Movie() {
     }
@@ -69,5 +78,21 @@ public class Movie {
 
     public void setDuration(int duration) {
         this.duration = duration;
+    }
+
+    public List<Screening> getScreenings() {
+        return screenings;
+    }
+
+    public void setScreenings(List<Screening> screenings) {
+        this.screenings = screenings;
+    }
+
+    public List<Booking> getBookings() {
+        return bookings;
+    }
+
+    public void setBookings(List<Booking> bookings) {
+        this.bookings = bookings;
     }
 }

@@ -5,6 +5,8 @@ import com.leander.cinema.repository.*;
 import com.leander.cinema.security.AppUser;
 import com.leander.cinema.security.Role;
 import com.leander.cinema.service.BookingStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,6 +21,8 @@ import java.util.Set;
 
 @Configuration
 public class DataInitializer {
+    Logger logger = LoggerFactory.getLogger(DataInitializer.class);
+
     @Bean
     @Transactional
     CommandLineRunner initData(AppUserRepository appUserRepository,
@@ -44,8 +48,9 @@ public class DataInitializer {
                 );
 
                 appUserRepository.save(admin1);
+                logger.info("admin1 skapades");
                 appUserRepository.save(admin2);
-                System.out.println("Skapat adminkonto admin1, admin2. Password samma som username");
+                logger.info("admin2 skapades");
 
 
                 AppUser appUser1 = new AppUser(
@@ -79,9 +84,13 @@ public class DataInitializer {
                 Address address3 = new Address("Arontorpsvägen 33B", "76483", "Färjestaden");
                 Address address4 = new Address("Hästhovsvägen 22B", "77653", "Luleå");
                 addressRepository.save(address1);
+                logger.info("Address 1 skapades");
                 addressRepository.save(address2);
+                logger.info("Address 2 skapades");
                 addressRepository.save(address3);
+                logger.info("Address 3 skapades");
                 addressRepository.save(address4);
+                logger.info("Address 4 skapades");
 
                 Customer customer1 = new Customer("Elli", "Malmström", "example@gmail.com", "0754345432", new ArrayList<>(List.of(address1, address3)));
                 Customer customer2 = new Customer("Max", "Levin", "maxis@gmail.com", "0723456765", new ArrayList<>(List.of(address2, address4)));
@@ -106,10 +115,15 @@ public class DataInitializer {
                 customer5.setAppUser(appUser5);
 
                 customerRepository.save(customer1);
+                logger.info("Kund och user1 skapades");
                 customerRepository.save(customer2);
+                logger.info("Kund och user2 skapades");
                 customerRepository.save(customer3);
+                logger.info("Kund och user3 skapades");
                 customerRepository.save(customer4);
+                logger.info("Kund och user4 skapades");
                 customerRepository.save(customer5);
+                logger.info("Kund och user5 skapades");
 
                 Movie movie1 = new Movie("Inception", "Sci-Fi", 15, 148);
                 Movie movie2 = new Movie("The Lion King", "Animation", 7, 88);
@@ -118,10 +132,15 @@ public class DataInitializer {
                 Movie movie5 = new Movie("Frozen", "Animation", 7, 102);
 
                 movieRepository.save(movie1);
+                logger.info("Film 1 skapades");
                 movieRepository.save(movie2);
+                logger.info("Film 2 skapades");
                 movieRepository.save(movie3);
+                logger.info("Film 3 skapades");
                 movieRepository.save(movie4);
+                logger.info("Film 4 skapades");
                 movieRepository.save(movie5);
+                logger.info("Film 5 skapades");
 
                 Room room1 = new Room("Salong A", 200, new BigDecimal("5000.00"), new BigDecimal("500.00"), new ArrayList<>(List.of("Ljudanläggning", "Screen")));
                 Room room2 = new Room("Salong B", 150, new BigDecimal("2000.00"), new BigDecimal("200.00"), new ArrayList<>(List.of("Ljudanläggning", "Screen")));
@@ -130,10 +149,15 @@ public class DataInitializer {
                 Room room5 = new Room("Hörnan", 500, new BigDecimal("15000.00"), new BigDecimal("1500.00"), new ArrayList<>(List.of("Högtalare", "Scen", "Scenbelysning", "Mikrofon", "Projektor")));
 
                 roomRepository.save(room1);
+                logger.info("Lokal 1 skapades");
                 roomRepository.save(room2);
+                logger.info("Lokal 2 skapades");
                 roomRepository.save(room3);
+                logger.info("Lokal 3 skapades");
                 roomRepository.save(room4);
+                logger.info("Lokal 4 skapades");
                 roomRepository.save(room5);
+                logger.info("Lokal 5 skapades");
 
                 Screening screening1 = new Screening(
                         LocalDateTime.of(2025, 10, 20, 18, 0),
@@ -176,9 +200,13 @@ public class DataInitializer {
                 );
 
                 screeningRepository.save(screening1);
+                logger.info("Föreställning 1 skapades");
                 screeningRepository.save(screening2);
+                logger.info("Föreställning 2 skapades");
                 screeningRepository.save(screening3);
+                logger.info("Föreställning 3 skapades");
                 screeningRepository.save(screening4);
+                logger.info("Föreställning 4 skapades");
 
 
                 Booking booking1 = new Booking(
@@ -208,9 +236,9 @@ public class DataInitializer {
                 );
 
                 bookingRepository.save(booking1);
+                logger.info("Bokning 1 skapades");
                 bookingRepository.save(booking2);
-
-
+                logger.info("Bokning 2 skapades");
             }
         };
     }

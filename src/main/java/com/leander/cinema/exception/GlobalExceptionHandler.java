@@ -106,7 +106,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<String> handleDataIntegrityViolation() {
         return ResponseEntity
-                .status(HttpStatus.CONFLICT).build();
+                .status(HttpStatus.CONFLICT)
+                .body("En konflikt uppstod");
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

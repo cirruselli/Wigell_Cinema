@@ -5,6 +5,10 @@ spring:
   profiles:
     active: dev
 
+logging:
+  level:
+    root: info
+
 management:
   server:
     port: 6081
