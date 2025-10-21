@@ -378,7 +378,7 @@ public class CustomerService {
         // --- Säkerhetskontroll ---
         boolean hasActiveBookings = false;
         for (Booking booking : customerEntity.getBookings()) {
-            if (booking.getStatus() == BookingStatus.ACTIVE || (booking.getReservationEndTime() != null && booking.getReservationEndTime().isAfter(LocalDateTime.now()))) {
+            if (booking.getStatus() == BookingStatus.ACTIVE) {
                 hasActiveBookings = true;
                 break;
             }
@@ -481,5 +481,4 @@ public class CustomerService {
             logger.info("Admin tog bort adress {}", address.getId());
         }
     }
-
 }
