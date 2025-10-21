@@ -6,6 +6,7 @@ import com.leander.cinema.entity.Room;
 import com.leander.cinema.exception.RoomAlreadyExistsException;
 import com.leander.cinema.mapper.RoomMapper;
 import com.leander.cinema.repository.RoomRepository;
+import com.wigell.grupp4.currencyconverter.CurrencyConverter;
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +21,8 @@ import java.util.List;
 @Service
 public class RoomService {
     Logger logger = LoggerFactory.getLogger(RoomService.class);
+
+    CurrencyConverter converter = new CurrencyConverter();
 
     private final RoomRepository roomRepository;
 
@@ -55,8 +58,7 @@ public class RoomService {
         Room room = RoomMapper.toRoomEntity(body);
 
         BigDecimal priceSek = body.priceSek();
-        BigDecimal factor = new BigDecimal("0.11");
-        BigDecimal priceUsd = priceSek.multiply(factor);
+        BigDecimal priceUsd = converter.toUSD(priceSek);
 
         room.setPriceUsd(priceUsd);
 
@@ -80,8 +82,7 @@ public class RoomService {
 
         // --- Beräkna USD ---
         BigDecimal priceSek = body.priceSek();
-        BigDecimal factor = new BigDecimal("0.11");
-        BigDecimal priceUsd = priceSek.multiply(factor);
+        BigDecimal priceUsd = converter.toUSD(priceSek);
         room.setPriceUsd(priceUsd);
 
         if (body.standardEquipment() == null) {

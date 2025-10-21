@@ -11,6 +11,7 @@ import com.leander.cinema.exception.BookingConflictException;
 import com.leander.cinema.exception.InvalidScreeningException;
 import com.leander.cinema.mapper.ScreeningMapper;
 import com.leander.cinema.repository.*;
+import com.wigell.grupp4.currencyconverter.CurrencyConverter;
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +29,8 @@ import java.util.Optional;
 @Service
 public class ScreeningService {
     Logger logger = LoggerFactory.getLogger(ScreeningService.class);
+
+    CurrencyConverter converter = new CurrencyConverter();
 
     private final ScreeningRepository screeningRepository;
     private final RoomRepository roomRepository;
@@ -120,9 +123,8 @@ public class ScreeningService {
             throw new BookingConflictException("Föreställningen krockar med en annan visning/bokning i samma sal.");
         }
 
-
-        BigDecimal factor = new BigDecimal("0.11");
-        BigDecimal priceUsd = screening.getPriceSek().multiply(factor);
+        BigDecimal priceSek = screening.getPriceSek();
+        BigDecimal priceUsd = converter.toUSD(priceSek);
         screening.setPriceUsd(priceUsd);
 
         screeningRepository.save(screening);
