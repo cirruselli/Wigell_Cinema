@@ -6,19 +6,21 @@ import com.leander.cinema.dto.CustomerDto.movieDto.MovieResponseDto;
 import com.leander.cinema.entity.Booking;
 import com.leander.cinema.entity.Movie;
 import com.leander.cinema.entity.Screening;
+import com.leander.cinema.entity.Ticket;
 import com.leander.cinema.mapper.MovieMapper;
 import com.leander.cinema.repository.BookingRepository;
 import com.leander.cinema.repository.MovieRepository;
 import com.leander.cinema.repository.ScreeningRepository;
+import com.leander.cinema.repository.TicketRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class MovieService {
@@ -26,13 +28,16 @@ public class MovieService {
 
     private final MovieRepository movieRepository;
     private final ScreeningRepository screeningRepository;
+    private final TicketRepository ticketRepository;
     private final BookingRepository bookingRepository;
 
     public MovieService(MovieRepository movieRepository,
                         ScreeningRepository screeningRepository,
+                        TicketRepository ticketRepository,
                         BookingRepository bookingRepository) {
         this.movieRepository = movieRepository;
         this.screeningRepository = screeningRepository;
+        this.ticketRepository = ticketRepository;
         this.bookingRepository = bookingRepository;
     }
 
@@ -76,15 +81,54 @@ public class MovieService {
     }
 
     @Transactional
-    public boolean deleteMovie(Long id) {
-        Optional<Movie> movie = movieRepository.findById(id);
+    public void deleteMovie(Long id) {
+        Movie movie = movieRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Filmen hittades inte"));
 
-        if (movie.isPresent()) {
-            movieRepository.delete(movie.get());
-            logger.info("Admin tog bort film {}", id);
-            return true;
+        // Ta bort alla screenings kopplade till filmen
+        List<Screening> screenings = screeningRepository.findByMovie(movie);
+        for (Screening screening : screenings) {
+            List<Ticket> tickets = ticketRepository.findByScreening(screening);
+
+            // Frikoppla tickets från screeningen
+            for (Ticket ticket : tickets) {
+                ticket.setScreening(null);
+            }
+            ticketRepository.saveAll(tickets);
+
+            // Ta bort screeningen
+            screeningRepository.delete(screening);
+            logger.info("Admin tog bort föreställning {} kopplad till film {}", screening.getId(), movie.getId());
         }
-        return false;
-    }
 
+        // Hantera bokningar kopplade till filmen
+        List<Booking> bookings = bookingRepository.findByMovie(movie);
+        for (Booking booking : bookings) {
+            if (booking.getReservationStartTime() != null && booking.getReservationStartTime().isAfter(LocalDateTime.now())) {
+                throw new IllegalStateException(
+                        "Filmen används fortfarande i aktiva och/eller framtida bokningar och kan inte tas bort"
+                );
+            }
+
+            // Om bokningen är completed ELLER har starttid passerad
+            if (booking.getStatus() == BookingStatus.COMPLETED ||
+                    (booking.getReservationStartTime() != null &&
+                            booking.getReservationStartTime().isBefore(LocalDateTime.now()))) {
+
+                // Snapshot av filmdata
+                booking.setMovie(null);
+                booking.setMovieTitle(movie.getTitle());
+                booking.setMovieGenre(movie.getGenre());
+                booking.setMovieAgeLimit(movie.getAgeLimit());
+                booking.setMovieDuration(movie.getDuration());
+            }
+            // Framtida/pågående bokningar behåller FK
+        }
+        bookingRepository.saveAll(bookings);
+        logger.info("Admin frikopplade gamla/completed bokningar från film {}", movie.getId());
+
+        // Ta bort filmen
+        movieRepository.delete(movie);
+        logger.info("Admin tog bort film {}", id);
+    }
 }

@@ -13,7 +13,7 @@ public record TicketResponseDto(
         BigDecimal priceUsd,
         BigDecimal totalPriceSek,
         BigDecimal totalPriceUsd,
-        ScreeningResponseDto screeningDto,
-        TicketBookingResponseDto bookingDto
+        ScreeningResponseDto screening,
+        TicketBookingResponseDto booking
 ) {
 }

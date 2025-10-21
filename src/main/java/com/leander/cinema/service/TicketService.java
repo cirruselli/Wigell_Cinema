@@ -49,23 +49,25 @@ public class TicketService {
     public static BigDecimal calculateTicketPrice(Ticket ticket) {
         if (ticket.getBooking() != null) {
             Booking booking = ticket.getBooking();
-
-            // Bokning med egen talare + rum
             if (booking.getSpeakerName() != null && !booking.getSpeakerName().isBlank()) {
                 return booking.getTotalPriceSek()
                         .divide(BigDecimal.valueOf(booking.getNumberOfGuests()), 2, RoundingMode.HALF_UP);
             }
-
-            // Bokning med film + rum
             if (booking.getMovie() != null) {
                 BigDecimal roomPricePerGuest = booking.getRoom().getPriceSek()
                         .divide(BigDecimal.valueOf(booking.getNumberOfGuests()), 2, RoundingMode.HALF_UP);
-
                 return roomPricePerGuest;
             }
         }
+        if (ticket.getScreening() != null) {
+            Screening screening = ticket.getScreening();
+            BigDecimal roomPricePerGuest = screening.getPriceSek();
+            return roomPricePerGuest;
+        }
         return BigDecimal.ZERO;
     }
+
+
 
     //Hjälpmetod för inlogg
     public Customer getLoggedInCustomer() {
@@ -125,7 +127,7 @@ public class TicketService {
         newTicket.setTotalPriceUsd(priceUsd.multiply(BigDecimal.valueOf(newTicket.getNumberOfTickets())));
 
         ticketRepository.save(newTicket);
-        logger.info("Användare {} köpte biljett {}", newTicket.getId());
+        logger.info("Användare {} köpte biljett {}", customer.getId(), newTicket.getId());
 
         // --- Skapa föreställning/film DTO ---
         ScreeningResponseDto screeningDto = null;
@@ -176,7 +178,8 @@ public class TicketService {
             if (ticket.getScreening() != null) {
                 screeningDto = ScreeningMapper.toScreeningResponseDto(ticket);
 
-            } else if (ticket.getBooking() != null) {
+            }
+            if (ticket.getBooking() != null) {
                 bookingDto = new TicketBookingResponseDto(
                         ticket.getBooking().getReservationStartTime(),
                         ticket.getBooking().getReservationEndTime(),

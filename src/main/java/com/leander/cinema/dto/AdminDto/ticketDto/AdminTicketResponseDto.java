@@ -14,7 +14,7 @@ public record AdminTicketResponseDto(
         BigDecimal priceUsd,
         BigDecimal totalPriceSek,
         BigDecimal totalPriceUsd,
-        AdminScreeningResponseDto screeningDto,
-        AdminBookingResponseDto bookingDto
+        AdminScreeningResponseDto screening,
+        AdminBookingResponseDto booking
 ) {
 }

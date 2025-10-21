@@ -9,9 +9,9 @@ public record AdminScreeningResponseDto(
         Long screeningId,
         LocalDateTime startTime,
         LocalDateTime endTime,
-        LocalDateTime totalTime,
+        LocalDateTime totalEndTime,
         BigDecimal priceSek,
         BigDecimal priceUsd,
-        AdminRoomResponseDto roomDto,
-        AdminMovieResponseDto movieDto){
+        AdminRoomResponseDto room,
+        AdminMovieResponseDto movie){
 }

@@ -210,22 +210,22 @@ public class DataInitializer {
 
 
                 Booking booking1 = new Booking(
-                        LocalDateTime.of(2025, 10, 25, 18, 0),
-                        LocalDateTime.of(2025, 10, 25, 20, 30),
-                        "Sara Karlsson",
-                        20,
+                        LocalDateTime.of(2025, 10, 30, 18, 0),
+                        LocalDateTime.of(2025, 10, 30, 20, 30),
+                        "Johan Glans",
+                        500,
                         new ArrayList<>(List.of("Mikrofon", "Mikrofon", "Scenbelysning", "Projektor", "Dator", "Högtalare")),
                         new BigDecimal("12000.00"),
                         new BigDecimal("1200.00"),
                         BookingStatus.ACTIVE,
-                        room1,
+                        room5,
                         customer1
                 );
 
                 Booking booking2 = new Booking(
-                        LocalDateTime.of(2025, 10, 26, 15, 0),
-                        LocalDateTime.of(2025, 10, 26, 17, 0),
-                        "Johan Glans",
+                        LocalDateTime.of(2025, 10, 30, 15, 0),
+                        LocalDateTime.of(2025, 10, 30, 17, 0),
+                        movie4,
                         150,
                         new ArrayList<>(List.of("Mikrofon", "Scenbelysning", "Högtalare")),
                         new BigDecimal("60000.00"),
@@ -235,10 +235,25 @@ public class DataInitializer {
                         customer2
                 );
 
+                Booking booking3 = new Booking(
+                        LocalDateTime.of(2025, 10, 20, 15, 0),
+                        LocalDateTime.of(2025, 10, 20, 17, 0),
+                        movie4,
+                        150,
+                        new ArrayList<>(List.of("Mikrofon", "Scenbelysning", "Högtalare")),
+                        new BigDecimal("60000.00"),
+                        new BigDecimal("6000.00"),
+                        BookingStatus.COMPLETED,
+                        room2,
+                        customer3
+                );
+
                 bookingRepository.save(booking1);
                 logger.info("Bokning 1 skapades");
                 bookingRepository.save(booking2);
                 logger.info("Bokning 2 skapades");
+                bookingRepository.save(booking3);
+                logger.info("Bokning 3 skapades");
             }
         };
     }

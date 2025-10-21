@@ -61,7 +61,7 @@ public class AdminController {
     @PostMapping("/customers")
     public ResponseEntity<AdminCustomerResponseDto> customer(@Valid @RequestBody AdminCustomerWithAccountRequestDto body) {
         AdminCustomerResponseDto response = customerService.createCustomer(body);
-        logger.info("POST /api/v1/customers admin skapade kunden {}", response.toString());
+        logger.info("POST /api/v1/customers admin skapade kunden {}", response.customerId());
         URI location = URI.create("/api/v1/customers/" + response.customerId());
         return ResponseEntity.created(location).body(response);
     }
@@ -69,18 +69,15 @@ public class AdminController {
     @PutMapping("/customers/{customerId}")
     public ResponseEntity<AdminCustomerResponseDto> customer(@PathVariable Long customerId, @Valid @RequestBody AdminCustomerWithAccountRequestDto body) {
         AdminCustomerResponseDto response = customerService.updateCustomer(customerId, body);
-        logger.info("PUT /api/v1/customers/{customerId} admin uppdaterade kunden {} {}", customerId, response);
+        logger.info("PUT /api/v1/customers/{customerId} admin uppdaterade kunden {}", customerId);
         return ResponseEntity.ok().body(response);
     }
 
     @DeleteMapping("/customers/{customerId}")
     public ResponseEntity<Void> customer(@PathVariable Long customerId) {
-        if (customerService.deleteCustomer(customerId)) {
-            logger.info("DELETE /api/v1/customers/{customerId} admin tog bort kund {}", customerId);
-            return ResponseEntity.noContent().build();
-        }
-        logger.info("DELETE /api/v1/customers/{customerId} admin försökte ta bort kund {} men den fanns inte", customerId);
-        return ResponseEntity.notFound().build();
+        customerService.deleteCustomer(customerId);
+        logger.info("DELETE /api/v1/customers/{customerId} admin tog bort kund {}", customerId);
+        return ResponseEntity.noContent().build();
     }
 
     // === ADRESSER ===
@@ -88,7 +85,7 @@ public class AdminController {
     @PostMapping("/customers/{customerId}/addresses")
     public ResponseEntity<AdminAddressResponseDto> address(@PathVariable Long customerId, @Valid @RequestBody AdminAddressRequestDto body) {
         AdminAddressResponseDto response = customerService.addAddressToCustomer(customerId, body);
-        logger.info("POST /api/v1/customers/{customerId}/addresses admin skapade adressen {} på kund {}", response.toString(), customerId);
+        logger.info("POST /api/v1/customers/{customerId}/addresses admin skapade adress {} på kund {}", response.addressId(), customerId);
         URI location = URI.create("/api/v1/customers/" + customerId + "/addresses/" + response.addressId());
         return ResponseEntity.created(location).body(response);
     }
@@ -120,26 +117,22 @@ public class AdminController {
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/movies/{movieId}")
     public ResponseEntity<AdminMovieResponseDto> movie(@PathVariable Long movieId) {
-        logger.info("Admin hämtade film {}", movieId);
         return ResponseEntity.ok().body(movieService.getMovieById(movieId));
     }
 
     @PostMapping("/movies")
     public ResponseEntity<AdminMovieResponseDto> movie(@Valid @RequestBody AdminMovieRequestDto body) {
         AdminMovieResponseDto response = movieService.createMovie(body);
-        logger.info("POST /api/v1/movies admin skapade filmen {}", response.toString());
+        logger.info("POST /api/v1/movies admin skapade filmen {}", response.movieId());
         URI location = URI.create("/api/v1/movies/" + response.movieId());
         return ResponseEntity.created(location).body(response);
     }
 
     @DeleteMapping("/movies/{movieId}")
     public ResponseEntity<Void> movie(@PathVariable Long movieId, @RequestParam(required = false) String ignore) {
-        if (movieService.deleteMovie(movieId)) {
-            logger.info("DELETE /api/v1/movies admin tog bort film {}", movieId);
-            return ResponseEntity.noContent().build();
-        }
-        logger.info("DELETE /api/v1/movies admin försökte ta bort film {} men den fanns inte", movieId);
-        return ResponseEntity.notFound().build();
+        movieService.deleteMovie(movieId);
+        logger.info("DELETE /api/v1/movies admin tog bort film {}", movieId);
+        return ResponseEntity.noContent().build();
     }
 
     // === RUM ===
@@ -166,7 +159,7 @@ public class AdminController {
     @PutMapping("/rooms/{roomId}")
     public ResponseEntity<AdminRoomResponseDto> room(@PathVariable Long roomId, @Valid @RequestBody AdminRoomRequestDto body) {
         AdminRoomResponseDto response = roomService.updateRoom(roomId, body);
-        logger.info("PUT /api/v1/rooms/{roomId} admin uppdaterade lokal {} {}", roomId, response.toString());
+        logger.info("PUT /api/v1/rooms/{roomId} admin uppdaterade lokal {}", roomId);
         return ResponseEntity.ok().body(response);
     }
 
@@ -176,7 +169,7 @@ public class AdminController {
     public ResponseEntity<List<?>> screenings(
             @RequestParam(required = false) Long movieId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-            Authentication authentication){
+            Authentication authentication) {
 
         boolean isAdmin = false;
         for (GrantedAuthority authority : authentication.getAuthorities()) {
@@ -203,18 +196,15 @@ public class AdminController {
     @PostMapping("/screenings")
     public ResponseEntity<AdminScreeningResponseDto> screening(@Valid @RequestBody AdminScreeningRequestDto body) {
         AdminScreeningResponseDto response = screeningService.createScreening(body);
-        logger.info("POST /api/v1/screenings admin skapade föreställningen {}", response.toString());
+        logger.info("POST /api/v1/screenings admin skapade föreställningen {}", response.screeningId());
         URI location = URI.create("/api/v1/screenings/" + response.screeningId());
         return ResponseEntity.created(location).body(response);
     }
 
     @DeleteMapping("/screenings/{screeningId}")
     public ResponseEntity<Void> screening(@PathVariable Long screeningId) {
-        if (screeningService.deleteScreening(screeningId)) {
-            logger.info("DELETE /api/v1/screenings admin tog bort film {}", screeningId);
-            return ResponseEntity.noContent().build();
-        }
-        logger.info("DELETE /api/v1/screenings admin försökte ta bort film {} men den fanns inte", screeningId);
-        return ResponseEntity.notFound().build();
+        screeningService.deleteScreening(screeningId);
+        logger.info("DELETE /api/v1/screenings admin tog bort film {}", screeningId);
+        return ResponseEntity.noContent().build();
     }
 }

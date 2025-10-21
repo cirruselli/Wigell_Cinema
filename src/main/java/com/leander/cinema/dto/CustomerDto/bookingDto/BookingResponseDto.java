@@ -19,7 +19,7 @@ public record BookingResponseDto(
         List<String> roomEquipment,
         int maxGuests,
         String speakerName,
-        MovieResponseDto movieDto,
+        MovieResponseDto movie,
         String customerFirstName,
         String customerLastName
 ) {

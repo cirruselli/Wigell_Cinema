@@ -24,11 +24,11 @@ public class Movie {
     @Column(name = "duration", nullable = false)
     private int duration;
 
-    @OneToMany(mappedBy = "movie", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private List<Screening> screenings = new ArrayList<>();
-
-    @OneToMany(mappedBy = "movie", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private List<Booking> bookings = new ArrayList<>();
+//    @OneToMany(mappedBy = "movie")
+//    private List<Screening> screenings = new ArrayList<>();
+//
+//    @OneToMany(mappedBy = "movie")
+//    private List<Booking> bookings = new ArrayList<>();
 
     public Movie() {
     }
@@ -80,19 +80,19 @@ public class Movie {
         this.duration = duration;
     }
 
-    public List<Screening> getScreenings() {
-        return screenings;
-    }
-
-    public void setScreenings(List<Screening> screenings) {
-        this.screenings = screenings;
-    }
-
-    public List<Booking> getBookings() {
-        return bookings;
-    }
-
-    public void setBookings(List<Booking> bookings) {
-        this.bookings = bookings;
-    }
+//    public List<Screening> getScreenings() {
+//        return screenings;
+//    }
+//
+//    public void setScreenings(List<Screening> screenings) {
+//        this.screenings = screenings;
+//    }
+//
+//    public List<Booking> getBookings() {
+//        return bookings;
+//    }
+//
+//    public void setBookings(List<Booking> bookings) {
+//        this.bookings = bookings;
+//    }
 }

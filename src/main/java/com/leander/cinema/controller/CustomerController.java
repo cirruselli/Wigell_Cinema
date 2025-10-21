@@ -40,7 +40,7 @@ public class CustomerController {
     @PostMapping("/bookings")
     public ResponseEntity<BookingResponseDto> booking(@Valid @RequestBody BookingPostRequestDto body) {
         BookingResponseDto response = bookingService.createBooking(body);
-        logger.info("POST /api/v1/bookings/ kunden reserverade lokal {}", response.toString());
+        logger.info("POST /api/v1/bookings/ kunden reserverade lokal/skapade bokning {}", response.bookingId());
         URI location = URI.create("/api/v1/bookings" + response.bookingId());
         return ResponseEntity.created(location).body(response);
     }
@@ -48,7 +48,7 @@ public class CustomerController {
     @PatchMapping("/bookings/{bookingId}")
     public ResponseEntity<BookingResponseDto> booking(@PathVariable Long bookingId, @Valid @RequestBody BookingPatchRequestDto body) {
         BookingResponseDto response = bookingService.updateBooking(bookingId, body);
-        logger.info("PATCH /api/v1/bookings/{bookingId} kunden uppdaterade bokning {} {}",bookingId, response.toString());
+        logger.info("PATCH /api/v1/bookings/{bookingId} kunden uppdaterade bokning {}",bookingId);
         return ResponseEntity.ok(response);
     }
 

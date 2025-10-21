@@ -6,10 +6,7 @@ import com.leander.cinema.dto.AdminDto.customerDto.AdminCustomerResponseDto;
 import com.leander.cinema.dto.AdminDto.customerDto.AdminCustomerWithAccountRequestDto;
 import com.leander.cinema.dto.AdminDto.screeningDto.AdminScreeningResponseDto;
 import com.leander.cinema.dto.AdminDto.ticketDto.AdminTicketResponseDto;
-import com.leander.cinema.entity.Address;
-import com.leander.cinema.entity.Booking;
-import com.leander.cinema.entity.Customer;
-import com.leander.cinema.entity.Ticket;
+import com.leander.cinema.entity.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -110,21 +107,22 @@ public class CustomerMapper {
     public static BigDecimal calculateTicketPrice(Ticket ticket) {
         if (ticket.getBooking() != null) {
             Booking booking = ticket.getBooking();
-
-            // Bokning med egen talare + rum
             if (booking.getSpeakerName() != null && !booking.getSpeakerName().isBlank()) {
                 return booking.getTotalPriceSek()
                         .divide(BigDecimal.valueOf(booking.getNumberOfGuests()), 2, RoundingMode.HALF_UP);
             }
-
-            // Bokning med film + rum
             if (booking.getMovie() != null) {
                 BigDecimal roomPricePerGuest = booking.getRoom().getPriceSek()
                         .divide(BigDecimal.valueOf(booking.getNumberOfGuests()), 2, RoundingMode.HALF_UP);
-
                 return roomPricePerGuest;
             }
         }
+        if (ticket.getScreening() != null) {
+            Screening screening = ticket.getScreening();
+            BigDecimal roomPricePerGuest = screening.getPriceSek();
+            return roomPricePerGuest;
+        }
         return BigDecimal.ZERO;
     }
+
 }

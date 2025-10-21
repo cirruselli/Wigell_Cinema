@@ -40,4 +40,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                               @Param("bookingId") Long bookingId);
 
     List<Booking> findByCustomerId(Long customerId);
+
+    List<Booking> findByMovie(Movie movie);
+
 }

@@ -6,13 +6,11 @@ import com.leander.cinema.dto.CustomerDto.screeningDto.ScreeningResponseDto;
 import com.leander.cinema.entity.Movie;
 import com.leander.cinema.entity.Room;
 import com.leander.cinema.entity.Screening;
+import com.leander.cinema.entity.Ticket;
 import com.leander.cinema.exception.BookingConflictException;
 import com.leander.cinema.exception.InvalidScreeningException;
 import com.leander.cinema.mapper.ScreeningMapper;
-import com.leander.cinema.repository.BookingRepository;
-import com.leander.cinema.repository.MovieRepository;
-import com.leander.cinema.repository.RoomRepository;
-import com.leander.cinema.repository.ScreeningRepository;
+import com.leander.cinema.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,15 +33,18 @@ public class ScreeningService {
     private final RoomRepository roomRepository;
     private final MovieRepository movieRepository;
     private final BookingRepository bookingRepository;
+    private final TicketRepository ticketRepository;
 
     public ScreeningService(ScreeningRepository screeningRepository,
                             RoomRepository roomRepository,
                             MovieRepository movieRepository,
-                            BookingRepository bookingRepository) {
+                            BookingRepository bookingRepository,
+                            TicketRepository ticketRepository) {
         this.screeningRepository = screeningRepository;
         this.roomRepository = roomRepository;
         this.movieRepository = movieRepository;
         this.bookingRepository = bookingRepository;
+        this.ticketRepository = ticketRepository;
     }
 
     // === Kunden listar föreställningar ===
@@ -132,14 +133,37 @@ public class ScreeningService {
     }
 
     @Transactional
-    public boolean deleteScreening(Long id) {
-        Optional<Screening> screening = screeningRepository.findById(id);
+    public void deleteScreening(Long id) {
+        Screening screening = screeningRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Föreställning hittades inte"));
 
-        if (screening.isPresent()) {
-            screeningRepository.delete(screening.get());
-            logger.info("Admin tog bort föreställning {}", screening.get().getId());
-            return true;
+        Movie movie = screening.getMovie(); // kan vara null
+
+        // Hämta biljetter kopplade till screeningen
+        List<Ticket> tickets = ticketRepository.findByScreening(screening);
+
+        // Kontrollera om det finns biljetter utan booking
+        boolean hasTicketsWithoutBooking = tickets.stream()
+                .anyMatch(ticket -> ticket.getBooking() == null);
+
+        if (hasTicketsWithoutBooking) {
+            throw new IllegalStateException("Föreställningen kan inte tas bort eftersom det finns biljetter utan bokning kopplade till den");
         }
-        return false;
+
+        // Om vi kommer hit → inga "fria" biljetter, ta bort screeningen
+        for (Ticket ticket : tickets) {
+            ticket.setScreening(null); // frikoppla från screeningen
+            ticketRepository.save(ticket);
+        }
+
+        screeningRepository.delete(screening);
+
+        if (movie != null) {
+            logger.info("Admin tog bort föreställning {} kopplad till film '{}'", id, movie.getId());
+        } else {
+            logger.info("Admin tog bort föreställning {} (utan kopplad film)", id);
+        }
+
+        logger.info("Frikopplade {} biljetter från föreställning {}", tickets.size(), id);
     }
 }

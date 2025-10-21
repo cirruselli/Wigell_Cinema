@@ -42,6 +42,21 @@ public class Booking {
     @Enumerated(EnumType.STRING)
     private BookingStatus status;
 
+    // ----- Snapshot av filmdata som sätts vid borttagning av film -----
+    @Column(name = "movie_title")
+    private String movieTitle;
+
+    @Column(name = "movie_genre")
+    private String movieGenre;
+
+    @Column(name = "movie_age_limit")
+    private int movieAgeLimit;
+
+    @Column(name = "movie_duration")
+    private int movieDuration;
+
+    // -------------------------------
+
     //RELATION
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_id", nullable = false)
@@ -67,6 +82,19 @@ public class Booking {
         this.reservationStartTime = reservationStartTime;
         this.reservationEndTime = reservationEndTime;
         this.speakerName = speakerName;
+        this.numberOfGuests = numberOfGuests;
+        this.roomEquipment = roomEquipment;
+        this.totalPriceSek = totalPriceSek;
+        this.totalPriceUsd = totalPriceUsd;
+        this.status = status;
+        this.room = room;
+        this.customer = customer;
+    }
+
+    public Booking(LocalDateTime reservationStartTime, LocalDateTime reservationEndTime, Movie movie, int numberOfGuests, List<String> roomEquipment, BigDecimal totalPriceSek, BigDecimal totalPriceUsd, BookingStatus status, Room room, Customer customer) {
+        this.reservationStartTime = reservationStartTime;
+        this.reservationEndTime = reservationEndTime;
+        this.movie = movie;
         this.numberOfGuests = numberOfGuests;
         this.roomEquipment = roomEquipment;
         this.totalPriceSek = totalPriceSek;
@@ -140,6 +168,46 @@ public class Booking {
         this.totalPriceUsd = totalPriceUsd;
     }
 
+    public BookingStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(BookingStatus status) {
+        this.status = status;
+    }
+
+    public String getMovieTitle() {
+        return movieTitle;
+    }
+
+    public void setMovieTitle(String movieTitle) {
+        this.movieTitle = movieTitle;
+    }
+
+    public String getMovieGenre() {
+        return movieGenre;
+    }
+
+    public void setMovieGenre(String movieGenre) {
+        this.movieGenre = movieGenre;
+    }
+
+    public int getMovieAgeLimit() {
+        return movieAgeLimit;
+    }
+
+    public void setMovieAgeLimit(int movieAgeLimit) {
+        this.movieAgeLimit = movieAgeLimit;
+    }
+
+    public int getMovieDuration() {
+        return movieDuration;
+    }
+
+    public void setMovieDuration(int movieDuration) {
+        this.movieDuration = movieDuration;
+    }
+
     public Room getRoom() {
         return room;
     }
@@ -170,13 +238,5 @@ public class Booking {
 
     public void setTickets(List<Ticket> tickets) {
         this.tickets = tickets;
-    }
-
-    public BookingStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(BookingStatus status) {
-        this.status = status;
     }
 }
