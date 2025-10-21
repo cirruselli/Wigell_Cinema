@@ -3,7 +3,7 @@ spring:
   application:
     name: Wigell Cinema mikrotjänst
   profiles:
-    active: dev
+    active: prod
 
 logging:
   level:
