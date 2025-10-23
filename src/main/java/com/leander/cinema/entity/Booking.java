@@ -50,10 +50,10 @@ public class Booking {
     private String movieGenre;
 
     @Column(name = "movie_age_limit")
-    private int movieAgeLimit;
+    private Integer movieAgeLimit;
 
     @Column(name = "movie_duration")
-    private int movieDuration;
+    private Integer movieDuration;
 
     // -------------------------------
 

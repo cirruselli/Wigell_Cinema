@@ -148,7 +148,7 @@ public class ScreeningService {
                 .anyMatch(ticket -> ticket.getBooking() == null);
 
         if (hasTicketsWithoutBooking) {
-            throw new IllegalStateException("Föreställningen kan inte tas bort eftersom det finns biljetter utan bokning kopplade till den");
+            throw new IllegalStateException("Föreställningen kan inte tas bort eftersom det finns biljetter kopplade till den");
         }
 
         // Om vi kommer hit → inga "fria" biljetter, ta bort screeningen
