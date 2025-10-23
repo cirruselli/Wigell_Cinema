@@ -7,6 +7,7 @@ import com.leander.cinema.dto.AdminDto.customerDto.AdminCustomerWithAccountReque
 import com.leander.cinema.dto.AdminDto.screeningDto.AdminScreeningResponseDto;
 import com.leander.cinema.dto.AdminDto.ticketDto.AdminTicketResponseDto;
 import com.leander.cinema.entity.*;
+import com.wigell.grupp4.currencyconverter.CurrencyConverter;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -15,6 +16,8 @@ import java.util.List;
 
 
 public class CustomerMapper {
+
+    static CurrencyConverter currencyConverter = new CurrencyConverter();
 
     public static Customer toCustomerEntity(AdminCustomerWithAccountRequestDto body) {
         return new Customer(
@@ -64,10 +67,10 @@ public class CustomerMapper {
 
             // Dynamisk beräkning av pris per biljett och totalpris
             BigDecimal priceSek = calculateTicketPrice(ticket);
+
             BigDecimal totalPriceSek = priceSek.multiply(BigDecimal.valueOf(ticket.getNumberOfTickets()));
-            BigDecimal factor = new BigDecimal("0.11");
-            BigDecimal priceUsd = priceSek.multiply(factor);
-            BigDecimal totalPriceUsd = totalPriceSek.multiply(factor);
+            BigDecimal priceUsd = currencyConverter.toUSD(totalPriceSek);
+            BigDecimal totalPriceUsd = currencyConverter.toUSD(totalPriceSek);
 
 
             ticketDtos.add(new AdminTicketResponseDto(
@@ -109,7 +112,7 @@ public class CustomerMapper {
             Booking booking = ticket.getBooking();
             if (booking.getSpeakerName() != null && !booking.getSpeakerName().isBlank()) {
                 return booking.getTotalPriceSek()
-                        .divide(BigDecimal.valueOf(booking.getNumberOfGuests()), 2, RoundingMode.HALF_UP);
+                        .divide(BigDecimal.valueOf(booking.getNumberOfGuests()).add(BigDecimal.valueOf(100)), 2, RoundingMode.HALF_UP);
             }
             if (booking.getMovie() != null) {
                 BigDecimal roomPricePerGuest = booking.getRoom().getPriceSek()

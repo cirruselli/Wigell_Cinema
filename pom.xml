@@ -80,7 +80,13 @@
 			<artifactId>spring-security-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.wigell.grupp4</groupId>
+			<artifactId>CurrencyConverter</artifactId>
+			<version>1.0.0</version>
+		</dependency>
 	</dependencies>
+
 	<dependencyManagement>
 		<dependencies>
 			<dependency>

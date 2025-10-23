@@ -11,6 +11,7 @@ import com.leander.cinema.exception.InvalidBookingException;
 import com.leander.cinema.mapper.BookingMapper;
 import com.leander.cinema.repository.*;
 import com.leander.cinema.security.AppUser;
+import com.wigell.grupp4.currencyconverter.CurrencyConverter;
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +29,8 @@ import java.util.List;
 @Service
 public class BookingService {
     Logger logger = LoggerFactory.getLogger(BookingService.class);
+
+    CurrencyConverter currencyConverter = new CurrencyConverter();
 
     private final BookingRepository bookingRepository;
     private final RoomRepository roomRepository;
@@ -166,9 +169,8 @@ public class BookingService {
         }
 
         // --- Totalpris ---
-        BigDecimal factor = new BigDecimal("0.11");
         BigDecimal totalPriceSek = room.getPriceSek();
-        BigDecimal totalPriceUsd = totalPriceSek.multiply(factor);
+        BigDecimal totalPriceUsd = currencyConverter.toUSD(totalPriceSek);
 
         booking.setTotalPriceSek(totalPriceSek);
         booking.setTotalPriceUsd(totalPriceUsd);

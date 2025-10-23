@@ -9,6 +9,7 @@ import com.leander.cinema.exception.ForbiddenTicketAccessException;
 import com.leander.cinema.mapper.ScreeningMapper;
 import com.leander.cinema.repository.*;
 import com.leander.cinema.security.AppUser;
+import com.wigell.grupp4.currencyconverter.CurrencyConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -26,6 +27,8 @@ import java.util.List;
 @Service
 public class TicketService {
     Logger logger = LoggerFactory.getLogger(TicketService.class);
+
+    CurrencyConverter currencyConverter = new CurrencyConverter();
 
     private final TicketRepository ticketRepository;
     private final CustomerRepository customerRepository;
@@ -50,12 +53,12 @@ public class TicketService {
         if (ticket.getBooking() != null) {
             Booking booking = ticket.getBooking();
             if (booking.getSpeakerName() != null && !booking.getSpeakerName().isBlank()) {
-                return booking.getTotalPriceSek()
-                        .divide(BigDecimal.valueOf(booking.getNumberOfGuests()), 2, RoundingMode.HALF_UP);
+                return (booking.getTotalPriceSek()
+                        .divide(BigDecimal.valueOf(booking.getNumberOfGuests()).add(BigDecimal.valueOf(100)), 2, RoundingMode.HALF_UP));
             }
             if (booking.getMovie() != null) {
                 BigDecimal roomPricePerGuest = booking.getRoom().getPriceSek()
-                        .divide(BigDecimal.valueOf(booking.getNumberOfGuests()), 2, RoundingMode.HALF_UP);
+                        .divide(BigDecimal.valueOf(booking.getNumberOfGuests()), 2, RoundingMode.HALF_UP).add(booking.getRoom().getPriceSek());
                 return roomPricePerGuest;
             }
         }
@@ -120,14 +123,14 @@ public class TicketService {
 
         // --- Sätt pris per biljett och totalpris ---
         BigDecimal priceSek = calculateTicketPrice(newTicket); // SEK
-        BigDecimal priceUsd = priceSek.multiply(BigDecimal.valueOf(0.11)).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal priceUsd = currencyConverter.toUSD(priceSek);
         newTicket.setPriceSek(priceSek);
         newTicket.setPriceUsd(priceUsd);
         newTicket.setTotalPriceSek(priceSek.multiply(BigDecimal.valueOf(newTicket.getNumberOfTickets())));
         newTicket.setTotalPriceUsd(priceUsd.multiply(BigDecimal.valueOf(newTicket.getNumberOfTickets())));
 
         ticketRepository.save(newTicket);
-        logger.info("Användare {} köpte biljett {}", customer.getId(), newTicket.getId());
+        logger.info("Kund {} köpte biljett {}", customer.getId(), newTicket.getId());
 
         // --- Skapa föreställning/film DTO ---
         ScreeningResponseDto screeningDto = null;
