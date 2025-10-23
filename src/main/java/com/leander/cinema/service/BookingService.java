@@ -11,7 +11,6 @@ import com.leander.cinema.exception.InvalidBookingException;
 import com.leander.cinema.mapper.BookingMapper;
 import com.leander.cinema.repository.*;
 import com.leander.cinema.security.AppUser;
-import com.wigell.grupp4.currencyconverter.CurrencyConverter;
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +29,6 @@ import java.util.List;
 public class BookingService {
     Logger logger = LoggerFactory.getLogger(BookingService.class);
 
-    CurrencyConverter converter = new CurrencyConverter();
 
     private final BookingRepository bookingRepository;
     private final RoomRepository roomRepository;
@@ -38,19 +36,22 @@ public class BookingService {
     private final AppUserRepository appUserRepository;
     private final CustomerRepository customerRepository;
     private final MovieRepository movieRepository;
+    private final CurrencyConverterClient currencyConverter;
 
     public BookingService(BookingRepository bookingRepository,
                           RoomRepository roomRepository,
                           ScreeningRepository screeningRepository,
                           AppUserRepository appUserRepository,
                           CustomerRepository customerRepository,
-                          MovieRepository movieRepository) {
+                          MovieRepository movieRepository,
+                          CurrencyConverterClient currencyConverter) {
         this.bookingRepository = bookingRepository;
         this.roomRepository = roomRepository;
         this.screeningRepository = screeningRepository;
         this.appUserRepository = appUserRepository;
         this.customerRepository = customerRepository;
         this.movieRepository = movieRepository;
+        this.currencyConverter = currencyConverter;
     }
 
     //Hjälpmetod för inlogg
@@ -170,7 +171,7 @@ public class BookingService {
 
         // --- Totalpris ---
         BigDecimal totalPriceSek = room.getPriceSek();
-        BigDecimal totalPriceUsd = converter.toUSD(totalPriceSek);
+        BigDecimal totalPriceUsd = currencyConverter.convertSekToUsd(totalPriceSek);
 
         booking.setTotalPriceSek(totalPriceSek);
         booking.setTotalPriceUsd(totalPriceUsd);

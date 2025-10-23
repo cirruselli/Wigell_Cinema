@@ -9,7 +9,6 @@ import com.leander.cinema.exception.ForbiddenTicketAccessException;
 import com.leander.cinema.mapper.ScreeningMapper;
 import com.leander.cinema.repository.*;
 import com.leander.cinema.security.AppUser;
-import com.wigell.grupp4.currencyconverter.CurrencyConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -22,30 +21,33 @@ import org.springframework.web.server.ResponseStatusException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Currency;
 import java.util.List;
 
 @Service
 public class TicketService {
     Logger logger = LoggerFactory.getLogger(TicketService.class);
 
-    CurrencyConverter converter = new CurrencyConverter();
 
     private final TicketRepository ticketRepository;
     private final CustomerRepository customerRepository;
     private final AppUserRepository appUserRepository;
     private final BookingRepository bookingRepository;
     private final ScreeningRepository screeningRepository;
+    private final CurrencyConverterClient currencyConverter;
 
     public TicketService(TicketRepository ticketRepository,
                          CustomerRepository customerRepository,
                          AppUserRepository appUserRepository,
                          BookingRepository bookingRepository,
-                         ScreeningRepository screeningRepository) {
+                         ScreeningRepository screeningRepository,
+                         CurrencyConverterClient currencyConverter) {
         this.ticketRepository = ticketRepository;
         this.customerRepository = customerRepository;
         this.appUserRepository = appUserRepository;
         this.bookingRepository = bookingRepository;
         this.screeningRepository = screeningRepository;
+        this.currencyConverter = currencyConverter;
     }
 
     //Hjälpmetod för att beräkna biljettpris
@@ -123,7 +125,7 @@ public class TicketService {
 
         // --- Sätt pris per biljett och totalpris ---
         BigDecimal priceSek = calculateTicketPrice(newTicket); // SEK
-        BigDecimal priceUsd = converter.toUSD(priceSek);
+        BigDecimal priceUsd = currencyConverter.convertSekToUsd(priceSek);
         newTicket.setPriceSek(priceSek);
         newTicket.setPriceUsd(priceUsd);
         newTicket.setTotalPriceSek(priceSek.multiply(BigDecimal.valueOf(newTicket.getNumberOfTickets())));

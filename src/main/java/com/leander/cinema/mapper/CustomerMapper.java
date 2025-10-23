@@ -7,7 +7,7 @@ import com.leander.cinema.dto.AdminDto.customerDto.AdminCustomerWithAccountReque
 import com.leander.cinema.dto.AdminDto.screeningDto.AdminScreeningResponseDto;
 import com.leander.cinema.dto.AdminDto.ticketDto.AdminTicketResponseDto;
 import com.leander.cinema.entity.*;
-import com.wigell.grupp4.currencyconverter.CurrencyConverter;
+import com.leander.cinema.service.CurrencyConverterClient;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -17,7 +17,6 @@ import java.util.List;
 
 public class CustomerMapper {
 
-    static CurrencyConverter converter = new CurrencyConverter();
 
     public static Customer toCustomerEntity(AdminCustomerWithAccountRequestDto body) {
         return new Customer(

@@ -11,7 +11,6 @@ import com.leander.cinema.exception.BookingConflictException;
 import com.leander.cinema.exception.InvalidScreeningException;
 import com.leander.cinema.mapper.ScreeningMapper;
 import com.leander.cinema.repository.*;
-import com.wigell.grupp4.currencyconverter.CurrencyConverter;
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,30 +23,31 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ScreeningService {
     Logger logger = LoggerFactory.getLogger(ScreeningService.class);
-
-    CurrencyConverter converter = new CurrencyConverter();
 
     private final ScreeningRepository screeningRepository;
     private final RoomRepository roomRepository;
     private final MovieRepository movieRepository;
     private final BookingRepository bookingRepository;
     private final TicketRepository ticketRepository;
+    private final CurrencyConverterClient currencyConverter;
 
     public ScreeningService(ScreeningRepository screeningRepository,
                             RoomRepository roomRepository,
                             MovieRepository movieRepository,
                             BookingRepository bookingRepository,
-                            TicketRepository ticketRepository) {
+                            TicketRepository ticketRepository,
+                            CurrencyConverterClient currencyConverter
+                            ) {
         this.screeningRepository = screeningRepository;
         this.roomRepository = roomRepository;
         this.movieRepository = movieRepository;
         this.bookingRepository = bookingRepository;
         this.ticketRepository = ticketRepository;
+        this.currencyConverter = currencyConverter;
     }
 
     // === Kunden listar föreställningar ===
@@ -124,7 +124,7 @@ public class ScreeningService {
         }
 
         BigDecimal priceSek = screening.getPriceSek();
-        BigDecimal priceUsd = converter.toUSD(priceSek);
+        BigDecimal priceUsd = currencyConverter.convertSekToUsd(priceSek);
         screening.setPriceUsd(priceUsd);
 
         screeningRepository.save(screening);
