@@ -4,8 +4,9 @@ import com.leander.cinema.dto.AdminDto.addressDto.AdminAddressResponseDto;
 import com.leander.cinema.dto.AdminDto.bookingDto.AdminBookingResponseDto;
 import com.leander.cinema.dto.AdminDto.customerDto.AdminCustomerResponseDto;
 import com.leander.cinema.dto.AdminDto.customerDto.AdminCustomerWithAccountRequestDto;
-import com.leander.cinema.dto.AdminDto.screeningDto.AdminScreeningResponseDto;
-import com.leander.cinema.dto.AdminDto.ticketDto.AdminTicketResponseDto;
+import com.leander.cinema.dto.AdminDto.ticketDto.AdminTicketBookingResponseDto;
+import com.leander.cinema.dto.AdminDto.ticketDto.AdminTicketResponse;
+import com.leander.cinema.dto.AdminDto.ticketDto.AdminTicketScreeningResponseDto;
 import com.leander.cinema.entity.*;
 import com.wigell.grupp4.currencyconverter.CurrencyConverter;
 
@@ -48,49 +49,54 @@ public class CustomerMapper {
         }
 
         // --- Biljetter ---
-        List<AdminTicketResponseDto> ticketDtos = new ArrayList<>();
+        List<AdminTicketResponse> ticketDtos = new ArrayList<>();
 
         for (Ticket ticket : customer.getTickets()) {
 
-            AdminScreeningResponseDto screeningDto = null;
-            AdminBookingResponseDto bookingDto = null;
-
-            // Om biljetten hör till en screening
-            if (ticket.getScreening() != null) {
-                screeningDto = ScreeningMapper.toAdminScreeningResponseDto(ticket.getScreening());
-            }
-
-            // Om biljetten hör till en bokning
-            if (ticket.getBooking() != null) {
-                bookingDto = BookingMapper.toAdminBookingResponseDto(ticket.getBooking());
+            // Kontrollera att biljetten har antingen screening eller booking, inte båda
+            if (ticket.getScreening() != null && ticket.getBooking() != null) {
+                throw new IllegalStateException("Ticket " + ticket.getId() + " har både screening och booking - endast en av de får sättas!");
             }
 
             // Dynamisk beräkning av pris per biljett och totalpris
             BigDecimal priceSek = calculateTicketPrice(ticket);
-
             BigDecimal totalPriceSek = priceSek.multiply(BigDecimal.valueOf(ticket.getNumberOfTickets()));
             BigDecimal priceUsd = currencyConverter.toUSD(totalPriceSek);
             BigDecimal totalPriceUsd = currencyConverter.toUSD(totalPriceSek);
 
-
-            ticketDtos.add(new AdminTicketResponseDto(
-                    ticket.getId(),
-                    ticket.getNumberOfTickets(),
-                    ticket.getCustomer().getFirstName(),
-                    ticket.getCustomer().getLastName(),
-                    priceSek,
-                    priceUsd,
-                    totalPriceSek,
-                    totalPriceUsd,
-                    screeningDto,
-                    bookingDto
-            ));
+            // Skapa rätt DTO beroende på typ
+            if (ticket.getScreening() != null) {
+                ticketDtos.add(new AdminTicketScreeningResponseDto(
+                        ticket.getId(),
+                        ticket.getNumberOfTickets(),
+                        priceSek,
+                        priceUsd,
+                        totalPriceSek,
+                        totalPriceUsd,
+                        ScreeningMapper.toAdminScreeningResponseDto(ticket.getScreening())
+                ));
+            } else if (ticket.getBooking() != null) {
+                ticketDtos.add(new AdminTicketBookingResponseDto(
+                        ticket.getId(),
+                        ticket.getNumberOfTickets(),
+                        priceSek,
+                        priceUsd,
+                        totalPriceSek,
+                        totalPriceUsd,
+                        BookingMapper.toAdminBookingResponseDto(ticket.getBooking())
+                ));
+            }
         }
 
         // --- Bokningar ---
         List<AdminBookingResponseDto> bookingDtos = new ArrayList<>();
         for (Booking booking : customer.getBookings()) {
             bookingDtos.add(BookingMapper.toAdminBookingResponseDto(booking));
+        }
+
+        String username = null;
+        if (customer.getAppUser() != null) {
+            username = customer.getAppUser().getUsername();
         }
 
         return new AdminCustomerResponseDto(
@@ -102,8 +108,9 @@ public class CustomerMapper {
                 addressDtos,
                 ticketDtos,
                 bookingDtos,
-                customer.getAppUser().getUsername()
+                username
         );
+
     }
 
     //Hjälpmetod för att beräkna biljettpris

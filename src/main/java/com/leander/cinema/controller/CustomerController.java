@@ -4,7 +4,8 @@ import com.leander.cinema.dto.CustomerDto.bookingDto.BookingPatchRequestDto;
 import com.leander.cinema.dto.CustomerDto.bookingDto.BookingPostRequestDto;
 import com.leander.cinema.dto.CustomerDto.bookingDto.BookingResponseDto;
 import com.leander.cinema.dto.CustomerDto.ticketDto.TicketRequestDto;
-import com.leander.cinema.dto.CustomerDto.ticketDto.TicketResponseDto;
+import com.leander.cinema.dto.CustomerDto.ticketDto.TicketResponse;
+import com.leander.cinema.dto.CustomerDto.ticketDto.TicketScreeningResponseDto;
 import com.leander.cinema.service.BookingService;
 import com.leander.cinema.service.TicketService;
 import jakarta.validation.Valid;
@@ -53,16 +54,16 @@ public class CustomerController {
     }
 
     @PostMapping("/tickets")
-    public ResponseEntity<TicketResponseDto> ticket(@Valid @RequestBody TicketRequestDto body) {
-        TicketResponseDto response = ticketService.buyTicket(body);
+    public ResponseEntity<TicketResponse> ticket(@Valid @RequestBody TicketRequestDto body) {
+        TicketResponse response = ticketService.buyTicket(body);
         logger.info("POST /api/v1/tickets kunden köpte biljett {}", response.toString());
         URI location = URI.create("/api/v1/tickets" + response.ticketId());
         return ResponseEntity.created(location).body(response);
     }
 
     @GetMapping("/tickets")
-    public ResponseEntity<List<TicketResponseDto>> tickets(@RequestParam Long customerId) {
-        List<TicketResponseDto> response = ticketService.getTicketsByCustomer(customerId);
+    public ResponseEntity<List<TicketResponse>> tickets(@RequestParam Long customerId) {
+        List<TicketResponse> response = ticketService.getTicketsByCustomer(customerId);
         return ResponseEntity.ok(response);
     }
 }

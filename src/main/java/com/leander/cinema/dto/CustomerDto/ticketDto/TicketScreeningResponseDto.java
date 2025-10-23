@@ -4,16 +4,15 @@ import com.leander.cinema.dto.CustomerDto.screeningDto.ScreeningResponseDto;
 
 import java.math.BigDecimal;
 
-public record TicketResponseDto(
+public record TicketScreeningResponseDto(
         Long ticketId,
-        String customerFirstName,
-        String customerLastName,
+        String firstName,
+        String lastName,
         int numberOfTickets,
         BigDecimal priceSek,
         BigDecimal priceUsd,
         BigDecimal totalPriceSek,
         BigDecimal totalPriceUsd,
-        ScreeningResponseDto screening,
-        TicketBookingResponseDto booking
-) {
+        ScreeningResponseDto screening
+) implements TicketResponse {
 }

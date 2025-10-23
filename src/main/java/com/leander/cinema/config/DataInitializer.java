@@ -236,14 +236,14 @@ public class DataInitializer {
                 );
 
                 Booking booking3 = new Booking(
-                        LocalDateTime.of(2025, 10, 20, 15, 0),
-                        LocalDateTime.of(2025, 10, 20, 17, 0),
+                        LocalDateTime.of(2025, 11, 20, 15, 0),
+                        LocalDateTime.of(2025, 11, 20, 17, 0),
                         movie4,
                         150,
                         new ArrayList<>(List.of("Mikrofon", "Scenbelysning", "Högtalare")),
                         new BigDecimal("60000.00"),
                         new BigDecimal("6000.00"),
-                        BookingStatus.COMPLETED,
+                        BookingStatus.ACTIVE,
                         room2,
                         customer3
                 );

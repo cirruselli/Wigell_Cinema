@@ -143,20 +143,12 @@ public class ScreeningService {
         // Hämta biljetter kopplade till screeningen
         List<Ticket> tickets = ticketRepository.findByScreening(screening);
 
-        // Kontrollera om det finns biljetter utan booking
-        boolean hasTicketsWithoutBooking = tickets.stream()
-                .anyMatch(ticket -> ticket.getBooking() == null);
-
-        if (hasTicketsWithoutBooking) {
+        // Om det finns biljetter kopplade → kasta fel
+        if (!tickets.isEmpty()) {
             throw new IllegalStateException("Föreställningen kan inte tas bort eftersom det finns biljetter kopplade till den");
         }
 
-        // Om vi kommer hit → inga "fria" biljetter, ta bort screeningen
-        for (Ticket ticket : tickets) {
-            ticket.setScreening(null); // frikoppla från screeningen
-            ticketRepository.save(ticket);
-        }
-
+        // Ta bort screeningen
         screeningRepository.delete(screening);
 
         if (movie != null) {

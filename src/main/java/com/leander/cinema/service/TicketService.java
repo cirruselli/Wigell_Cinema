@@ -1,11 +1,14 @@
 package com.leander.cinema.service;
 
+import com.leander.cinema.dto.CustomerDto.movieDto.MovieResponseDto;
 import com.leander.cinema.dto.CustomerDto.ticketDto.TicketBookingResponseDto;
 import com.leander.cinema.dto.CustomerDto.screeningDto.ScreeningResponseDto;
 import com.leander.cinema.dto.CustomerDto.ticketDto.TicketRequestDto;
-import com.leander.cinema.dto.CustomerDto.ticketDto.TicketResponseDto;
+import com.leander.cinema.dto.CustomerDto.ticketDto.TicketResponse;
+import com.leander.cinema.dto.CustomerDto.ticketDto.TicketScreeningResponseDto;
 import com.leander.cinema.entity.*;
 import com.leander.cinema.exception.ForbiddenTicketAccessException;
+import com.leander.cinema.mapper.MovieMapper;
 import com.leander.cinema.mapper.ScreeningMapper;
 import com.leander.cinema.repository.*;
 import com.leander.cinema.security.AppUser;
@@ -71,7 +74,6 @@ public class TicketService {
     }
 
 
-
     //Hjälpmetod för inlogg
     public Customer getLoggedInCustomer() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -90,7 +92,7 @@ public class TicketService {
 
 
     @Transactional
-    public TicketResponseDto buyTicket(TicketRequestDto body) {
+    public TicketResponse buyTicket(TicketRequestDto body) {
 
         Customer customer = getLoggedInCustomer();
 
@@ -132,79 +134,103 @@ public class TicketService {
         ticketRepository.save(newTicket);
         logger.info("Kund {} köpte biljett {}", customer.getId(), newTicket.getId());
 
-        // --- Skapa föreställning/film DTO ---
-        ScreeningResponseDto screeningDto = null;
-        TicketBookingResponseDto bookingDto = null;
-
+        // --- Returnera rätt DTO beroende på typ ---
         if (screening != null) {
-            // Ticket direkt till föreställning
-            screeningDto = ScreeningMapper.toScreeningResponseDto(newTicket);
+            ScreeningResponseDto screeningDto = ScreeningMapper.toScreeningResponseDto(newTicket);
+            return new TicketScreeningResponseDto(
+                    newTicket.getId(),
+                    newTicket.getCustomer().getFirstName(),
+                    newTicket.getCustomer().getLastName(),
+                    newTicket.getNumberOfTickets(),
+                    priceSek,
+                    priceUsd,
+                    newTicket.getTotalPriceSek(),
+                    newTicket.getTotalPriceUsd(),
+                    screeningDto
+            );
         } else if (booking != null) {
-            // Ticket kopplad till bokning
-            bookingDto = new TicketBookingResponseDto(
+            MovieResponseDto movieDto = null;
+            if (booking.getMovie() != null) {
+                movieDto = MovieMapper.toMovieResponseDto(booking.getMovie());
+            }
+
+            return new TicketBookingResponseDto(
+                    newTicket.getId(),
+                    newTicket.getCustomer().getFirstName(),
+                    newTicket.getCustomer().getLastName(),
+                    newTicket.getNumberOfTickets(),
+                    newTicket.getPriceSek(),
+                    newTicket.getPriceUsd(),
+                    newTicket.getTotalPriceSek(),
+                    newTicket.getTotalPriceUsd(),
                     newTicket.getBooking().getReservationStartTime(),
                     newTicket.getBooking().getReservationEndTime(),
                     newTicket.getBooking().getRoom().getName(),
-                    newTicket.getBooking().getSpeakerName()
+                    newTicket.getBooking().getSpeakerName(),
+                    movieDto
             );
+
         }
 
-        return new TicketResponseDto(
-                newTicket.getId(),
-                newTicket.getCustomer().getFirstName(),
-                newTicket.getCustomer().getLastName(),
-                newTicket.getNumberOfTickets(),
-                priceSek,
-                priceUsd,
-                newTicket.getTotalPriceSek(),
-                newTicket.getTotalPriceUsd(),
-                screeningDto,
-                bookingDto
-        );
+        // Detta nås egentligen aldrig, men behövs för kompilering
+        throw new IllegalStateException("Varken filmvisning eller bokning var angiven, oväntat tillstånd");
     }
 
     @Transactional(readOnly = true)
-    public List<TicketResponseDto> getTicketsByCustomer(Long customerId) {
+    public List<TicketResponse> getTicketsByCustomer(Long customerId) {
         Customer loggedInCustomer = getLoggedInCustomer();
 
         if (!loggedInCustomer.getId().equals(customerId)) {
             throw new ForbiddenTicketAccessException("Du kan endast se dina egna biljetter");
         }
 
-        List<Ticket> tickets = ticketRepository.findByCustomerId((customerId));
-        List<TicketResponseDto> responseList = new ArrayList<>();
+        List<Ticket> tickets = ticketRepository.findByCustomerId(customerId);
+        List<TicketResponse> responseList = new ArrayList<>();
 
         for (Ticket ticket : tickets) {
-            ScreeningResponseDto screeningDto = null;
-            TicketBookingResponseDto bookingDto = null;
-
             if (ticket.getScreening() != null) {
-                screeningDto = ScreeningMapper.toScreeningResponseDto(ticket);
+                ScreeningResponseDto screeningResponseDto = ScreeningMapper.toScreeningResponseDto(ticket.getScreening());
 
-            }
-            if (ticket.getBooking() != null) {
-                bookingDto = new TicketBookingResponseDto(
-                        ticket.getBooking().getReservationStartTime(),
-                        ticket.getBooking().getReservationEndTime(),
-                        ticket.getBooking().getRoom().getName(),
-                        ticket.getBooking().getSpeakerName()
+                TicketScreeningResponseDto screeningTicket = new TicketScreeningResponseDto(
+                        ticket.getId(),
+                        ticket.getCustomer().getFirstName(),
+                        ticket.getCustomer().getLastName(),
+                        ticket.getNumberOfTickets(),
+                        ticket.getPriceSek(),
+                        ticket.getPriceUsd(),
+                        ticket.getTotalPriceSek(),
+                        ticket.getTotalPriceUsd(),
+                        screeningResponseDto
                 );
-            }
+                responseList.add(screeningTicket);
 
-            TicketResponseDto responseDto = new TicketResponseDto(
-                    ticket.getId(),
-                    ticket.getCustomer().getFirstName(),
-                    ticket.getCustomer().getLastName(),
-                    ticket.getNumberOfTickets(),
-                    ticket.getPriceSek(),
-                    ticket.getPriceUsd(),
-                    ticket.getTotalPriceSek(),
-                    ticket.getTotalPriceUsd(),
-                    screeningDto,
-                    bookingDto
-            );
-            responseList.add(responseDto);
+            } else if (ticket.getBooking() != null) {
+                Booking booking = ticket.getBooking();
+                MovieResponseDto movieDto = null;
+                if (booking.getMovie() != null) {
+                    movieDto = MovieMapper.toMovieResponseDto(booking.getMovie());
+                }
+
+                TicketBookingResponseDto bookingTicket = new TicketBookingResponseDto(
+                        ticket.getId(),
+                        ticket.getCustomer().getFirstName(),
+                        ticket.getCustomer().getLastName(),
+                        ticket.getNumberOfTickets(),
+                        ticket.getPriceSek(),
+                        ticket.getPriceUsd(),
+                        ticket.getTotalPriceSek(),
+                        ticket.getTotalPriceUsd(),
+                        booking.getReservationStartTime(),
+                        booking.getReservationEndTime(),
+                        booking.getRoom().getName(),
+                        booking.getSpeakerName(),
+                        movieDto
+                );
+
+                responseList.add(bookingTicket); // <-- glöm inte att lägga till i listan
+            }
         }
+
         return responseList;
     }
 }
