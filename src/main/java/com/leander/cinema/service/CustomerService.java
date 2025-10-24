@@ -445,7 +445,7 @@ public class CustomerService {
     @Transactional
     public AdminAddressResponseDto addAddressToCustomer(Long customerId, AdminAddressRequestDto body) {
         Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(() -> new RuntimeException("Kunden hittades inte"));
+                .orElseThrow(() -> new EntityNotFoundException("Kunden med id " + customerId + " hittades inte"));
 
         String street = body.street().trim();
         String postalCode = body.postalCode().trim();
@@ -475,17 +475,14 @@ public class CustomerService {
     @Transactional
     public void removeAddressFromCustomer(Long customerId, Long addressId) {
         Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Kunden med id " + customerId + " hittades inte"));
+                .orElseThrow(() -> new EntityNotFoundException("Kunden med id " + customerId + " hittades inte"));
 
         Address address = addressRepository.findById(addressId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Adressen med id " + addressId + " hittades inte"));
+                .orElseThrow(() -> new EntityNotFoundException("Adressen med id " + addressId + " hittades inte"));
 
         // Kolla att kunden faktiskt har adressen
         if (!customer.getAddresses().contains(address)) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "Kunden har inte denna adress."
+            throw new AddressNotAssociatedWithCustomerException("Kunden har inte denna adress."
             );
         }
 
