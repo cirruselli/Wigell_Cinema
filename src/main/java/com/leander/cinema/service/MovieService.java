@@ -6,7 +6,6 @@ import com.leander.cinema.dto.CustomerDto.movieDto.MovieResponseDto;
 import com.leander.cinema.entity.Booking;
 import com.leander.cinema.entity.Movie;
 import com.leander.cinema.entity.Screening;
-import com.leander.cinema.entity.Ticket;
 import com.leander.cinema.mapper.MovieMapper;
 import com.leander.cinema.repository.BookingRepository;
 import com.leander.cinema.repository.MovieRepository;
@@ -18,7 +17,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 

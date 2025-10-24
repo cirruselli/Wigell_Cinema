@@ -1,5 +1,6 @@
 package com.leander.cinema.service;
 
+import com.leander.cinema.currencyConverter.CurrencyConverter;
 import com.leander.cinema.dto.CustomerDto.bookingDto.BookingPatchRequestDto;
 import com.leander.cinema.dto.CustomerDto.bookingDto.BookingPostRequestDto;
 import com.leander.cinema.dto.CustomerDto.bookingDto.BookingResponseDto;
@@ -11,7 +12,6 @@ import com.leander.cinema.exception.InvalidBookingException;
 import com.leander.cinema.mapper.BookingMapper;
 import com.leander.cinema.repository.*;
 import com.leander.cinema.security.AppUser;
-import com.wigell.grupp4.currencyconverter.CurrencyConverter;
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,27 +30,28 @@ import java.util.List;
 public class BookingService {
     Logger logger = LoggerFactory.getLogger(BookingService.class);
 
-    CurrencyConverter currencyConverter = new CurrencyConverter();
-
     private final BookingRepository bookingRepository;
     private final RoomRepository roomRepository;
     private final ScreeningRepository screeningRepository;
     private final AppUserRepository appUserRepository;
     private final CustomerRepository customerRepository;
     private final MovieRepository movieRepository;
+    private final CurrencyConverter currencyConverter;
 
     public BookingService(BookingRepository bookingRepository,
                           RoomRepository roomRepository,
                           ScreeningRepository screeningRepository,
                           AppUserRepository appUserRepository,
                           CustomerRepository customerRepository,
-                          MovieRepository movieRepository) {
+                          MovieRepository movieRepository,
+                          CurrencyConverter currencyConverter) {
         this.bookingRepository = bookingRepository;
         this.roomRepository = roomRepository;
         this.screeningRepository = screeningRepository;
         this.appUserRepository = appUserRepository;
         this.customerRepository = customerRepository;
         this.movieRepository = movieRepository;
+        this.currencyConverter = currencyConverter;
     }
 
     //Hjälpmetod för inlogg

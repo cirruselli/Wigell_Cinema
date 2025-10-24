@@ -1,4 +1,7 @@
 #Basprofil
+server:
+  port: 8081
+
 spring:
   application:
     name: Wigell Cinema mikrotjänst
@@ -11,7 +14,7 @@ logging:
 
 management:
   server:
-    port: 6081
+    port: 6080
   info:
     env:
       enabled: true
@@ -46,7 +49,7 @@ spring:
     database-platform: org.hibernate.dialect.H2Dialect
 
 server:
-  port: 8080
+  port: 8081
 
 management:
   endpoints:

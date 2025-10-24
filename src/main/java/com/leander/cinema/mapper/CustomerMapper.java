@@ -1,5 +1,6 @@
 package com.leander.cinema.mapper;
 
+import com.leander.cinema.currencyConverter.CurrencyConverter;
 import com.leander.cinema.dto.AdminDto.addressDto.AdminAddressResponseDto;
 import com.leander.cinema.dto.AdminDto.bookingDto.AdminBookingResponseDto;
 import com.leander.cinema.dto.AdminDto.customerDto.AdminCustomerResponseDto;
@@ -8,7 +9,6 @@ import com.leander.cinema.dto.AdminDto.ticketDto.AdminTicketBookingResponseDto;
 import com.leander.cinema.dto.AdminDto.ticketDto.AdminTicketResponse;
 import com.leander.cinema.dto.AdminDto.ticketDto.AdminTicketScreeningResponseDto;
 import com.leander.cinema.entity.*;
-import com.wigell.grupp4.currencyconverter.CurrencyConverter;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

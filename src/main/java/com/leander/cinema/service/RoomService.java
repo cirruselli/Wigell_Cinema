@@ -1,13 +1,12 @@
 package com.leander.cinema.service;
 
+import com.leander.cinema.currencyConverter.CurrencyConverter;
 import com.leander.cinema.dto.AdminDto.roomDto.AdminRoomRequestDto;
 import com.leander.cinema.dto.AdminDto.roomDto.AdminRoomResponseDto;
 import com.leander.cinema.entity.Room;
 import com.leander.cinema.exception.RoomAlreadyExistsException;
 import com.leander.cinema.mapper.RoomMapper;
-import com.leander.cinema.repository.CustomerRepository;
 import com.leander.cinema.repository.RoomRepository;
-import com.wigell.grupp4.currencyconverter.CurrencyConverter;
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,12 +23,13 @@ public class RoomService {
 
     Logger logger = LoggerFactory.getLogger(RoomService.class);
 
-    CurrencyConverter currencyConverter = new CurrencyConverter();
-
     private final RoomRepository roomRepository;
+    private final CurrencyConverter currencyConverter;
 
-    public RoomService(RoomRepository roomRepository) {
+    public RoomService(RoomRepository roomRepository,
+                       CurrencyConverter currencyConverter) {
         this.roomRepository = roomRepository;
+        this.currencyConverter = currencyConverter;
     }
 
     @Transactional(readOnly = true)

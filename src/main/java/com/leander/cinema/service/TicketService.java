@@ -1,5 +1,6 @@
 package com.leander.cinema.service;
 
+import com.leander.cinema.currencyConverter.CurrencyConverter;
 import com.leander.cinema.dto.CustomerDto.movieDto.MovieResponseDto;
 import com.leander.cinema.dto.CustomerDto.ticketDto.TicketBookingResponseDto;
 import com.leander.cinema.dto.CustomerDto.screeningDto.ScreeningResponseDto;
@@ -12,7 +13,6 @@ import com.leander.cinema.mapper.MovieMapper;
 import com.leander.cinema.mapper.ScreeningMapper;
 import com.leander.cinema.repository.*;
 import com.leander.cinema.security.AppUser;
-import com.wigell.grupp4.currencyconverter.CurrencyConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -31,46 +31,25 @@ import java.util.List;
 public class TicketService {
     Logger logger = LoggerFactory.getLogger(TicketService.class);
 
-    CurrencyConverter currencyConverter = new CurrencyConverter();
-
     private final TicketRepository ticketRepository;
     private final CustomerRepository customerRepository;
     private final AppUserRepository appUserRepository;
     private final BookingRepository bookingRepository;
     private final ScreeningRepository screeningRepository;
+    private final CurrencyConverter currencyConverter;
 
     public TicketService(TicketRepository ticketRepository,
                          CustomerRepository customerRepository,
                          AppUserRepository appUserRepository,
                          BookingRepository bookingRepository,
-                         ScreeningRepository screeningRepository) {
+                         ScreeningRepository screeningRepository,
+                         CurrencyConverter currencyConverter) {
         this.ticketRepository = ticketRepository;
         this.customerRepository = customerRepository;
         this.appUserRepository = appUserRepository;
         this.bookingRepository = bookingRepository;
         this.screeningRepository = screeningRepository;
-    }
-
-    //Hjälpmetod för att beräkna biljettpris
-    public static BigDecimal calculateTicketPrice(Ticket ticket) {
-        if (ticket.getBooking() != null) {
-            Booking booking = ticket.getBooking();
-            if (booking.getSpeakerName() != null && !booking.getSpeakerName().isBlank()) {
-                return (booking.getTotalPriceSek()
-                        .divide(BigDecimal.valueOf(booking.getNumberOfGuests()).add(BigDecimal.valueOf(100)), 2, RoundingMode.HALF_UP));
-            }
-            if (booking.getMovie() != null) {
-                BigDecimal roomPricePerGuest = booking.getRoom().getPriceSek()
-                        .divide(BigDecimal.valueOf(booking.getNumberOfGuests()), 2, RoundingMode.HALF_UP).add(booking.getRoom().getPriceSek());
-                return roomPricePerGuest;
-            }
-        }
-        if (ticket.getScreening() != null) {
-            Screening screening = ticket.getScreening();
-            BigDecimal roomPricePerGuest = screening.getPriceSek();
-            return roomPricePerGuest;
-        }
-        return BigDecimal.ZERO;
+        this.currencyConverter = currencyConverter;
     }
 
 
@@ -124,7 +103,7 @@ public class TicketService {
 
 
         // --- Sätt pris per biljett och totalpris ---
-        BigDecimal priceSek = calculateTicketPrice(newTicket); // SEK
+        BigDecimal priceSek = calculateTicketPrice(newTicket);
         BigDecimal priceUsd = currencyConverter.toUSD(priceSek);
         newTicket.setPriceSek(priceSek);
         newTicket.setPriceUsd(priceUsd);
@@ -172,7 +151,6 @@ public class TicketService {
 
         }
 
-        // Detta nås egentligen aldrig, men behövs för kompilering
         throw new IllegalStateException("Varken filmvisning eller bokning var angiven, oväntat tillstånd");
     }
 
@@ -227,10 +205,36 @@ public class TicketService {
                         movieDto
                 );
 
-                responseList.add(bookingTicket); // <-- glöm inte att lägga till i listan
+                responseList.add(bookingTicket);
             }
         }
 
         return responseList;
+    }
+
+    //Hjälpmetod för att beräkna biljettpris
+    public BigDecimal calculateTicketPrice(Ticket ticket) {
+        if (ticket.getBooking() != null) {
+            Booking booking = ticket.getBooking();
+            if (booking.getSpeakerName() != null && !booking.getSpeakerName().isBlank()) {
+                BigDecimal pricePerGuest = booking.getTotalPriceSek()
+                        .divide(BigDecimal.valueOf(booking.getNumberOfGuests()), 2, RoundingMode.HALF_UP);
+
+                // Lägg till 200 kr extra per biljett
+                return pricePerGuest.add(BigDecimal.valueOf(400));
+            }
+            if (booking.getMovie() != null) {
+                BigDecimal roomPricePerGuest = booking.getRoom().getPriceSek()
+                        .divide(BigDecimal.valueOf(booking.getNumberOfGuests()), 2, RoundingMode.HALF_UP);
+
+                return roomPricePerGuest;
+            }
+        }
+        if (ticket.getScreening() != null) {
+            Screening screening = ticket.getScreening();
+            BigDecimal roomPricePerGuest = screening.getPriceSek();
+            return roomPricePerGuest;
+        }
+        return BigDecimal.ZERO;
     }
 }
