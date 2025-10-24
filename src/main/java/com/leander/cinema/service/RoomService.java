@@ -1,6 +1,7 @@
 package com.leander.cinema.service;
 
-import com.leander.cinema.currencyConverter.CurrencyConverter;
+import com.leander.cinema.currency.CurrencyCalculator;
+import com.leander.cinema.currency.CurrencyConverter;
 import com.leander.cinema.dto.AdminDto.roomDto.AdminRoomRequestDto;
 import com.leander.cinema.dto.AdminDto.roomDto.AdminRoomResponseDto;
 import com.leander.cinema.entity.Room;
@@ -60,7 +61,7 @@ public class RoomService {
         Room room = RoomMapper.toRoomEntity(body);
 
         BigDecimal priceSek = body.priceSek();
-        BigDecimal priceUsd = currencyConverter.toUSD(priceSek);
+        BigDecimal priceUsd = currencyConverter.toUsd(priceSek);
 
         room.setPriceUsd(priceUsd);
 
@@ -84,7 +85,7 @@ public class RoomService {
 
         // --- Beräkna USD ---
         BigDecimal priceSek = body.priceSek();
-        BigDecimal priceUsd = currencyConverter.toUSD(priceSek);
+        BigDecimal priceUsd = currencyConverter.toUsd(priceSek);
         room.setPriceUsd(priceUsd);
 
         if (body.standardEquipment() == null) {

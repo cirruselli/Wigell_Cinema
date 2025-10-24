@@ -1,9 +1,9 @@
 package com.leander.cinema.service;
 
-import com.leander.cinema.currencyConverter.CurrencyConverter;
+import com.leander.cinema.currency.CurrencyConverter;
 import com.leander.cinema.dto.CustomerDto.bookingDto.BookingPatchRequestDto;
 import com.leander.cinema.dto.CustomerDto.bookingDto.BookingPostRequestDto;
-import com.leander.cinema.dto.CustomerDto.bookingDto.BookingResponseDto;
+import com.leander.cinema.dto.CustomerDto.bookingDto.BookingResponseContent;
 import com.leander.cinema.entity.*;
 import com.leander.cinema.exception.BookingCapacityExceededException;
 import com.leander.cinema.exception.BookingConflictException;
@@ -73,7 +73,7 @@ public class BookingService {
 
     // === Kunden ser tidigare och aktiva bokningar ===
     @Transactional(readOnly = true)
-    public List<BookingResponseDto> getActiveAndCompletedBookings(Long customerId) {
+    public List<BookingResponseContent> getActiveAndCompletedBookings(Long customerId) {
         Customer loggedInCustomer = getLoggedInCustomer();
 
         List<Booking> bookings = bookingRepository.findByCustomerId((customerId));
@@ -92,10 +92,10 @@ public class BookingService {
             }
         }
 
-        List<BookingResponseDto> responseList = new ArrayList<>();
+        List<BookingResponseContent> responseList = new ArrayList<>();
 
         for (Booking booking : filteredBookings) {
-            BookingResponseDto bookingDto = BookingMapper.toBookingResponseDto(booking);
+            BookingResponseContent bookingDto = BookingMapper.toBookingResponseDto(booking);
             responseList.add(bookingDto);
         }
 
@@ -104,7 +104,7 @@ public class BookingService {
 
     // === Kunden reserverar lokal -> bokning skapas ===
     @Transactional
-    public BookingResponseDto createBooking(BookingPostRequestDto body) {
+    public BookingResponseContent createBooking(BookingPostRequestDto body) {
         Customer customer = getLoggedInCustomer();
 
         // Säkerställ att endast ett av alternativen används
@@ -171,7 +171,7 @@ public class BookingService {
 
         // --- Totalpris ---
         BigDecimal totalPriceSek = room.getPriceSek();
-        BigDecimal totalPriceUsd = currencyConverter.toUSD(totalPriceSek);
+        BigDecimal totalPriceUsd = currencyConverter.toUsd(totalPriceSek);
 
         booking.setTotalPriceSek(totalPriceSek);
         booking.setTotalPriceUsd(totalPriceUsd);
@@ -186,7 +186,7 @@ public class BookingService {
 
     // === Kunden uppdaterar bokning ===
     @Transactional
-    public BookingResponseDto updateBooking(Long bookingId, BookingPatchRequestDto body) {
+    public BookingResponseContent updateBooking(Long bookingId, BookingPatchRequestDto body) {
         Customer customer = getLoggedInCustomer();
 
         Booking booking = bookingRepository.findById(bookingId)

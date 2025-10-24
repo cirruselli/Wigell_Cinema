@@ -1,8 +1,8 @@
 package com.leander.cinema.dto.AdminDto.customerDto;
 
 import com.leander.cinema.dto.AdminDto.addressDto.AdminAddressResponseDto;
-import com.leander.cinema.dto.AdminDto.bookingDto.AdminBookingResponseDto;
-import com.leander.cinema.dto.AdminDto.ticketDto.AdminTicketResponse;
+import com.leander.cinema.dto.AdminDto.bookingDto.AdminBookingResponseContent;
+import com.leander.cinema.dto.AdminDto.ticketDto.AdminTicketResponseContent;
 
 import java.util.List;
 
@@ -13,8 +13,7 @@ public record AdminCustomerResponseDto(
         String email,
         String phone,
         List<AdminAddressResponseDto> addresses,
-        List<AdminTicketResponse> tickets,
-        List<AdminBookingResponseDto> bookings,
+        List<AdminTicketResponseContent> tickets, // interface
+        List<AdminBookingResponseContent> bookings, // interface
         String username
-) {
-}
+) { }

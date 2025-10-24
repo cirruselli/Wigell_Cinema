@@ -1,24 +1,24 @@
 package com.leander.cinema.mapper;
 
-import com.leander.cinema.currencyConverter.CurrencyConverter;
+import com.leander.cinema.currency.CurrencyCalculator;
+import com.leander.cinema.currency.CurrencyConverter;
 import com.leander.cinema.dto.AdminDto.addressDto.AdminAddressResponseDto;
-import com.leander.cinema.dto.AdminDto.bookingDto.AdminBookingResponseDto;
+import com.leander.cinema.dto.AdminDto.bookingDto.AdminBookingResponseContent;
 import com.leander.cinema.dto.AdminDto.customerDto.AdminCustomerResponseDto;
 import com.leander.cinema.dto.AdminDto.customerDto.AdminCustomerWithAccountRequestDto;
 import com.leander.cinema.dto.AdminDto.ticketDto.AdminTicketBookingResponseDto;
-import com.leander.cinema.dto.AdminDto.ticketDto.AdminTicketResponse;
+import com.leander.cinema.dto.AdminDto.ticketDto.AdminTicketResponseContent;
 import com.leander.cinema.dto.AdminDto.ticketDto.AdminTicketScreeningResponseDto;
 import com.leander.cinema.entity.*;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
 
 public class CustomerMapper {
 
-    static CurrencyConverter currencyConverter = new CurrencyConverter();
+    private static final CurrencyConverter currencyConverter = new CurrencyConverter();
 
     public static Customer toCustomerEntity(AdminCustomerWithAccountRequestDto body) {
         return new Customer(
@@ -49,7 +49,7 @@ public class CustomerMapper {
         }
 
         // --- Biljetter ---
-        List<AdminTicketResponse> ticketDtos = new ArrayList<>();
+        List<AdminTicketResponseContent> ticketDtos = new ArrayList<>();
 
         for (Ticket ticket : customer.getTickets()) {
 
@@ -59,10 +59,10 @@ public class CustomerMapper {
             }
 
             // Dynamisk beräkning av pris per biljett och totalpris
-            BigDecimal priceSek = calculateTicketPrice(ticket);
+            BigDecimal priceSek = CurrencyCalculator.calculateTicketPrice(ticket);
             BigDecimal totalPriceSek = priceSek.multiply(BigDecimal.valueOf(ticket.getNumberOfTickets()));
-            BigDecimal priceUsd = currencyConverter.toUSD(totalPriceSek);
-            BigDecimal totalPriceUsd = currencyConverter.toUSD(totalPriceSek);
+            BigDecimal priceUsd = currencyConverter.toUsd(priceSek);
+            BigDecimal totalPriceUsd = currencyConverter.toUsd(totalPriceSek);
 
             // Skapa rätt DTO beroende på typ
             if (ticket.getScreening() != null) {
@@ -83,15 +83,15 @@ public class CustomerMapper {
                         priceUsd,
                         totalPriceSek,
                         totalPriceUsd,
-                        BookingMapper.toAdminBookingResponseDto(ticket.getBooking())
+                        BookingMapper.toAdminBookingResponseContent(ticket.getBooking())
                 ));
             }
         }
 
         // --- Bokningar ---
-        List<AdminBookingResponseDto> bookingDtos = new ArrayList<>();
+        List<AdminBookingResponseContent> bookingDtos = new ArrayList<>();
         for (Booking booking : customer.getBookings()) {
-            bookingDtos.add(BookingMapper.toAdminBookingResponseDto(booking));
+            bookingDtos.add(BookingMapper.toAdminBookingResponseContent(booking));
         }
 
         String username = null;
@@ -112,27 +112,4 @@ public class CustomerMapper {
         );
 
     }
-
-    //Hjälpmetod för att beräkna biljettpris
-    public static BigDecimal calculateTicketPrice(Ticket ticket) {
-        if (ticket.getBooking() != null) {
-            Booking booking = ticket.getBooking();
-            if (booking.getSpeakerName() != null && !booking.getSpeakerName().isBlank()) {
-                return booking.getTotalPriceSek()
-                        .divide(BigDecimal.valueOf(booking.getNumberOfGuests()).add(BigDecimal.valueOf(100)), 2, RoundingMode.HALF_UP);
-            }
-            if (booking.getMovie() != null) {
-                BigDecimal roomPricePerGuest = booking.getRoom().getPriceSek()
-                        .divide(BigDecimal.valueOf(booking.getNumberOfGuests()), 2, RoundingMode.HALF_UP);
-                return roomPricePerGuest;
-            }
-        }
-        if (ticket.getScreening() != null) {
-            Screening screening = ticket.getScreening();
-            BigDecimal roomPricePerGuest = screening.getPriceSek();
-            return roomPricePerGuest;
-        }
-        return BigDecimal.ZERO;
-    }
-
 }

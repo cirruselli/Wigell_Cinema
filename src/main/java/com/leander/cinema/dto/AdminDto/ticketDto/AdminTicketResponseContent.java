@@ -2,7 +2,7 @@ package com.leander.cinema.dto.AdminDto.ticketDto;
 
 import java.math.BigDecimal;
 
-public interface AdminTicketResponse {
+public interface AdminTicketResponseContent {
     Long ticketId();
     int numberOfTickets();
     BigDecimal priceSek();

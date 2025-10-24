@@ -146,7 +146,7 @@ public class MovieService {
         boolean hasActiveBookings = false;
         if (bookings != null) {
             for (Booking b : bookings) {
-                if (b.getStatus() != BookingStatus.COMPLETED) {
+                if (b.getStatus() == BookingStatus.ACTIVE) {
                     hasActiveBookings = true;
                     break;
                 }
@@ -160,7 +160,7 @@ public class MovieService {
         // --- Frikoppla completed bokningar (snapshot) ---
         if (bookings != null) {
             for (Booking booking : bookings) {
-                if (booking.getStatus() == BookingStatus.COMPLETED) {
+                if (booking.getStatus() == BookingStatus.COMPLETED || booking.getStatus() == BookingStatus.CANCELLED) {
                     booking.setMovie(null);
                     booking.setMovieTitle(movie.getTitle());
                     booking.setMovieGenre(movie.getGenre());

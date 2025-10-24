@@ -1,6 +1,6 @@
 package com.leander.cinema.service;
 
-import com.leander.cinema.currencyConverter.CurrencyConverter;
+import com.leander.cinema.currency.CurrencyConverter;
 import com.leander.cinema.dto.AdminDto.screeningDto.AdminScreeningRequestDto;
 import com.leander.cinema.dto.AdminDto.screeningDto.AdminScreeningResponseDto;
 import com.leander.cinema.dto.CustomerDto.screeningDto.ScreeningResponseDto;
@@ -124,7 +124,7 @@ public class ScreeningService {
         }
 
         BigDecimal priceSek = screening.getPriceSek();
-        BigDecimal priceUsd = currencyConverter.toUSD(priceSek);
+        BigDecimal priceUsd = currencyConverter.toUsd(priceSek);
         screening.setPriceUsd(priceUsd);
 
         screeningRepository.save(screening);

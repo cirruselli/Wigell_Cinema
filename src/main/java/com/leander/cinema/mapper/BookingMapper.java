@@ -1,14 +1,12 @@
 package com.leander.cinema.mapper;
 
-import com.leander.cinema.dto.AdminDto.bookingDto.AdminBookingResponseDto;
-import com.leander.cinema.dto.AdminDto.movieDto.AdminMovieResponseDto;
+import com.leander.cinema.dto.AdminDto.bookingDto.AdminBookingMovieResponseDto;
+import com.leander.cinema.dto.AdminDto.bookingDto.AdminBookingResponseContent;
+import com.leander.cinema.dto.AdminDto.bookingDto.AdminBookingSpeakerResponseDto;
 import com.leander.cinema.dto.AdminDto.roomDto.AdminRoomResponseDto;
-import com.leander.cinema.dto.CustomerDto.bookingDto.BookingPostRequestDto;
-import com.leander.cinema.dto.CustomerDto.bookingDto.BookingResponseDto;
+import com.leander.cinema.dto.CustomerDto.bookingDto.*;
 import com.leander.cinema.dto.CustomerDto.movieDto.MovieResponseDto;
 import com.leander.cinema.entity.Booking;
-import com.leander.cinema.entity.Room;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,7 +28,7 @@ public class BookingMapper {
         return booking;
     }
 
-    public static BookingResponseDto toBookingResponseDto(Booking booking) {
+    public static BookingResponseContent toBookingResponseDto(Booking booking) {
 
         // Room
         String roomName = booking.getRoom().getName();
@@ -42,79 +40,88 @@ public class BookingMapper {
             equipments.addAll(booking.getRoom().getStandardEquipment());
         }
 
-        // Om bokningen har egen utrustning, använd den istället (överlagrar rummet)
+        // Om bokningen har egen utrustning, använd den istället
         if (booking.getRoomEquipment() != null) {
-            equipments = new ArrayList<>(booking.getRoomEquipment()); // kopiera så att vi inte ändrar ursprungsrummet
+            equipments = new ArrayList<>(booking.getRoomEquipment()); // kopiera för att inte ändra ursprungsrummet
         }
 
-
-        // Speaker
-        String speakerName = "----";
-        if (booking.getSpeakerName() != null && !booking.getSpeakerName().isBlank()) {
-            speakerName = booking.getSpeakerName();
-        }
-
-        // Movie
-        MovieResponseDto movieDto = null;
         if (booking.getMovie() != null) {
-            movieDto = MovieMapper.toMovieResponseDto(booking.getMovie());
+            return new BookingMovieResponseDto(
+                    booking.getId(),
+                    booking.getReservationStartTime(),
+                    booking.getReservationEndTime(),
+                    booking.getNumberOfGuests(),
+                    booking.getTotalPriceSek(),
+                    booking.getTotalPriceUsd(),
+                    equipments,
+                    roomName,
+                    maxGuests,
+                    booking.getCustomer().getFirstName(),
+                    booking.getCustomer().getLastName(),
+                    MovieMapper.toMovieResponseDto(booking.getMovie())
+            );
         }
-
-        // Customer
-        String customerFirstName = booking.getCustomer().getFirstName();
-        String customerLastName = booking.getCustomer().getLastName();
-
-        return new BookingResponseDto(
-                booking.getId(),
-                booking.getStatus(),
-                booking.getReservationStartTime(),
-                booking.getReservationEndTime(),
-                booking.getNumberOfGuests(),
-                booking.getTotalPriceSek(),
-                booking.getTotalPriceUsd(),
-                roomName,
-                equipments,
-                maxGuests,
-                speakerName,
-                movieDto,
-                customerFirstName,
-                customerLastName
-        );
+        if (booking.getSpeakerName() != null && !booking.getSpeakerName().isBlank()) {
+            return new BookingSpeakerResponseDto(
+                    booking.getId(),
+                    booking.getReservationStartTime(),
+                    booking.getReservationEndTime(),
+                    booking.getNumberOfGuests(),
+                    booking.getTotalPriceSek(),
+                    booking.getTotalPriceUsd(),
+                    roomName,
+                    equipments,
+                    maxGuests,
+                    booking.getSpeakerName(),
+                    booking.getCustomer().getFirstName(),
+                    booking.getCustomer().getLastName()
+            );
+        }
+        throw new IllegalStateException("Bokning måste ha antingen talare eller film");
     }
 
-    public static AdminBookingResponseDto toAdminBookingResponseDto(Booking booking) {
-
+    public static AdminBookingResponseContent toAdminBookingResponseContent (Booking booking) {
+        // --- Bygg Room-dto ---
         AdminRoomResponseDto roomDto = null;
         if (booking.getRoom() != null) {
-            Room room = booking.getRoom();
             roomDto = new AdminRoomResponseDto(
-                    room.getId(),
-                    room.getName(),
-                    room.getMaxGuests(),
-                    room.getPriceSek(),
-                    room.getPriceUsd(),
-                    room.getStandardEquipment()
+                    booking.getRoom().getId(),
+                    booking.getRoom().getName(),
+                    booking.getRoom().getMaxGuests(),
+                    booking.getRoom().getPriceSek(),
+                    booking.getRoom().getPriceUsd(),
+                    booking.getRoom().getStandardEquipment()
             );
         }
 
-        // Movie
-        AdminMovieResponseDto movieDto = null;
         if (booking.getMovie() != null) {
-            movieDto = MovieMapper.toAdminMovieResponseDto(booking.getMovie());
+            MovieResponseDto movieDto = MovieMapper.toMovieResponseDto(booking.getMovie());
+            return new AdminBookingMovieResponseDto(
+                    booking.getId(),
+                    booking.getReservationStartTime(),
+                    booking.getReservationEndTime(),
+                    booking.getNumberOfGuests(),
+                    booking.getTotalPriceSek(),
+                    booking.getTotalPriceUsd(),
+                    booking.getRoomEquipment(),
+                    booking.getStatus(),
+                    roomDto,
+                    movieDto
+            );
+        } else if (booking.getSpeakerName() != null && !booking.getSpeakerName().isBlank()) {
+            return new AdminBookingSpeakerResponseDto(
+                    booking.getId(),
+                    booking.getReservationStartTime(),
+                    booking.getReservationEndTime(),
+                    booking.getNumberOfGuests(),
+                    booking.getTotalPriceSek(),
+                    booking.getTotalPriceUsd(),
+                    booking.getRoomEquipment(),
+                    booking.getStatus(),
+                    roomDto,
+                    booking.getSpeakerName()
+            );
         }
-
-        return new AdminBookingResponseDto(
-                booking.getId(),
-                booking.getReservationStartTime(),
-                booking.getReservationEndTime(),
-                booking.getNumberOfGuests(),
-                booking.getRoomEquipment(),
-                roomDto,
-                booking.getTotalPriceSek(),
-                booking.getTotalPriceUsd(),
-                booking.getSpeakerName(),
-                movieDto,
-                booking.getStatus()
-        );
+        throw new IllegalStateException("Bokning måste ha antingen talare eller film");
     }
 }

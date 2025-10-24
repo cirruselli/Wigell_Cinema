@@ -96,10 +96,10 @@ public class GlobalExceptionHandler {
     // === Färdiga exceptions ===
 
     @ExceptionHandler(ResponseStatusException.class)
-    public ResponseEntity<Map<String, String>> handleResponseStatusException(ResponseStatusException ex) {
-        Map<String, String> body = new HashMap<>();
-        body.put("message", ex.getReason());
-        return new ResponseEntity<>(body, ex.getStatusCode());
+    public ResponseEntity<String> handleResponseStatusException(ResponseStatusException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ex.getReason());
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

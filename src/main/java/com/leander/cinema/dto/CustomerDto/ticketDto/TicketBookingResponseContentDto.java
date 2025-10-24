@@ -5,7 +5,7 @@ import com.leander.cinema.dto.CustomerDto.movieDto.MovieResponseDto;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-public record TicketBookingResponseDto(
+public record TicketBookingResponseContentDto(
         Long ticketId,
         String firstName,
         String lastName,
@@ -19,5 +19,5 @@ public record TicketBookingResponseDto(
         String roomName,
         String speakerName,
         MovieResponseDto movie
-) implements TicketResponse{
+) implements TicketResponseContent {
 }

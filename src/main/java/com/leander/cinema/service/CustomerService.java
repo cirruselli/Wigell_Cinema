@@ -275,6 +275,7 @@ public class CustomerService {
                 Booking booking = bookingRepository.findById(bookingDto.bookingId())
                         .orElseThrow(() -> new EntityNotFoundException("Bokning med id " + bookingDto.bookingId() + " hittades inte"));
 
+
                 //Kontrollera att bokningen tillhör kunden
                 if (!booking.getCustomer().getId().equals(customer.getId())) {
                     throw new CustomerOwnershipException(
@@ -317,14 +318,22 @@ public class CustomerService {
                 }
 
                 // Hantera film vs talare
-                if (bookingDto.movieId() == null || (bookingDto.speakerName() == null || bookingDto.speakerName().isBlank())) {
-                    throw new InvalidBookingException("Både film och talare måste anges på bokning " + bookingDto.bookingId());
+                if ((bookingDto.movieId() == null && (bookingDto.speakerName() == null || bookingDto.speakerName().isBlank())) ||
+                        (bookingDto.movieId() != null && bookingDto.speakerName() != null && !bookingDto.speakerName().isBlank())) {
+                    throw new InvalidBookingException(
+                            "Endast en film ELLER en talare måste anges på bokning, och aldrig båda ");
                 }
 
-                Movie movie = movieRepository.findById(bookingDto.movieId())
-                        .orElseThrow(() -> new EntityNotFoundException("Filmen med id " + bookingDto.movieId() + " hittades inte på bokningen med id" + bookingDto.bookingId()));
+                if (bookingDto.movieId() != null) {
+                    Movie movie = movieRepository.findById(bookingDto.movieId())
+                            .orElseThrow(() -> new EntityNotFoundException(
+                                    "Filmen med id " + bookingDto.movieId() + " hittades inte på bokningen med id " + bookingDto.bookingId()
+                            ));
+                    booking.setMovie(movie);
+                } else {
+                    booking.setMovie(null);
+                }
 
-                booking.setMovie(movie);
                 booking.setSpeakerName(bookingDto.speakerName());
 
                 booking.setReservationStartTime(bookingDto.reservationStartTime());
@@ -353,11 +362,7 @@ public class CustomerService {
                     updatedBookings.add(booking);
                 }
 
-                // --- Viktigt: koppla bokningen till kunden ---
                 booking.setCustomer(customer);
-
-                updatedBookings.add(booking);
-
 
                 // --- Behåll bokningar som har biljetter kopplade ---
                 for (Booking oldBooking : oldBookings) {
@@ -376,7 +381,6 @@ public class CustomerService {
                 // Spara båda sidor av relationen
                 for (Booking updatedbooking : updatedBookings) {
                     booking.setCustomer(customer);
-
                 }
             }
 
@@ -400,33 +404,41 @@ public class CustomerService {
 
     @Transactional
     public void deleteCustomer(Long id) {
-        Customer customerEntity = customerRepository.findById(id)
+        Customer customer = customerRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Kund med id " + id + " hittades inte"));
 
-        // --- Säkerhetskontroll ---
-        boolean hasActiveBookings = false;
-        for (Booking booking : customerEntity.getBookings()) {
-            if (booking.getStatus() == BookingStatus.ACTIVE) {
-                hasActiveBookings = true;
+        // Kontrollera aktiva bokningar med biljetter
+        boolean hasActiveBookingWithTickets = false;
+        for (Booking booking : customer.getBookings()) {
+            boolean hasTickets = booking.getTickets() != null && !booking.getTickets().isEmpty();
+            if (booking.getStatus() == BookingStatus.ACTIVE && hasTickets) {
+                hasActiveBookingWithTickets = true;
                 break;
             }
         }
 
-        if (hasActiveBookings) {
-            throw new IllegalStateException("Kunden har fortfarande aktiva bokningar och kan inte tas bort");
+        if (hasActiveBookingWithTickets) {
+            throw new IllegalStateException("Kunden kan inte tas bort eftersom kunden har aktiva bokningar med biljetter");
+        }
+
+        // Koppla loss adresser
+        if (customer.getAddresses() != null && !customer.getAddresses().isEmpty()) {
+            customer.getAddresses().clear();
+            customerRepository.save(customer);
+            logger.info("Alla adresser kopplade till kund {} har frikopplats", customer.getId());
         }
 
         // --- Koppla loss adresser ---
-        if (customerEntity.getAddresses() != null && !customerEntity.getAddresses().isEmpty()) {
-            customerEntity.getAddresses().clear();
-            customerRepository.save(customerEntity);
-            logger.info("Alla adresser kopplade till kund {} har frikopplats", customerEntity.getId());
+        if (customer.getAddresses() != null && !customer.getAddresses().isEmpty()) {
+            customer.getAddresses().clear();
+            customerRepository.save(customer);
+            logger.info("Alla adresser kopplade till kund {} har frikopplats", customer.getId());
         }
 
         // --- Ta bort kunden (cascade tar bort biljetter & bokningar) ---
-        customerRepository.delete(customerEntity);
+        customerRepository.delete(customer);
         customerRepository.flush();
-        logger.info("Kund {} raderades", customerEntity.getId());
+        logger.info("Kund {} raderades", customer.getId());
 
         // --- Rensa överblivna adresser ---
         List<Address> allAddresses = addressRepository.findAll();
@@ -437,7 +449,7 @@ public class CustomerService {
             }
         }
 
-        logger.info("Admin tog bort kund {}", customerEntity.getId());
+        logger.info("Admin tog bort kund {}", customer.getId());
     }
 
 

@@ -11,7 +11,6 @@ import java.util.List;
 public record AdminBookingUpdateRequestDto(
         @NotNull(message = "Boknings-ID måste anges")
         Long bookingId,
-
         @NotNull(message = "Datum och tid måste anges")
         @FutureOrPresent(message = "Startdatum/tid kan inte vara bakåt i tiden")
         LocalDateTime reservationStartTime,

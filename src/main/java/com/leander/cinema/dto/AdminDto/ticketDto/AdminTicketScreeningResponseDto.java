@@ -12,7 +12,7 @@ public record AdminTicketScreeningResponseDto(
         BigDecimal totalPriceSek,
         BigDecimal totalPriceUsd,
         AdminScreeningResponseDto screening
-) implements AdminTicketResponse {
+) implements AdminTicketResponseContent {
 }
 
 

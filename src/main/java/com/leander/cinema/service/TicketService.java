@@ -1,12 +1,13 @@
 package com.leander.cinema.service;
 
-import com.leander.cinema.currencyConverter.CurrencyConverter;
+import com.leander.cinema.currency.CurrencyCalculator;
+import com.leander.cinema.currency.CurrencyConverter;
 import com.leander.cinema.dto.CustomerDto.movieDto.MovieResponseDto;
-import com.leander.cinema.dto.CustomerDto.ticketDto.TicketBookingResponseDto;
+import com.leander.cinema.dto.CustomerDto.ticketDto.TicketBookingResponseContentDto;
 import com.leander.cinema.dto.CustomerDto.screeningDto.ScreeningResponseDto;
 import com.leander.cinema.dto.CustomerDto.ticketDto.TicketRequestDto;
-import com.leander.cinema.dto.CustomerDto.ticketDto.TicketResponse;
-import com.leander.cinema.dto.CustomerDto.ticketDto.TicketScreeningResponseDto;
+import com.leander.cinema.dto.CustomerDto.ticketDto.TicketResponseContent;
+import com.leander.cinema.dto.CustomerDto.ticketDto.TicketScreeningResponseContentDto;
 import com.leander.cinema.entity.*;
 import com.leander.cinema.exception.ForbiddenTicketAccessException;
 import com.leander.cinema.mapper.MovieMapper;
@@ -23,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -71,7 +71,7 @@ public class TicketService {
 
 
     @Transactional
-    public TicketResponse buyTicket(TicketRequestDto body) {
+    public TicketResponseContent buyTicket(TicketRequestDto body) {
 
         Customer customer = getLoggedInCustomer();
 
@@ -103,8 +103,8 @@ public class TicketService {
 
 
         // --- Sätt pris per biljett och totalpris ---
-        BigDecimal priceSek = calculateTicketPrice(newTicket);
-        BigDecimal priceUsd = currencyConverter.toUSD(priceSek);
+        BigDecimal priceSek = CurrencyCalculator.calculateTicketPrice(newTicket);
+        BigDecimal priceUsd = currencyConverter.toUsd(priceSek);
         newTicket.setPriceSek(priceSek);
         newTicket.setPriceUsd(priceUsd);
         newTicket.setTotalPriceSek(priceSek.multiply(BigDecimal.valueOf(newTicket.getNumberOfTickets())));
@@ -116,7 +116,7 @@ public class TicketService {
         // --- Returnera rätt DTO beroende på typ ---
         if (screening != null) {
             ScreeningResponseDto screeningDto = ScreeningMapper.toScreeningResponseDto(newTicket);
-            return new TicketScreeningResponseDto(
+            return new TicketScreeningResponseContentDto(
                     newTicket.getId(),
                     newTicket.getCustomer().getFirstName(),
                     newTicket.getCustomer().getLastName(),
@@ -133,7 +133,7 @@ public class TicketService {
                 movieDto = MovieMapper.toMovieResponseDto(booking.getMovie());
             }
 
-            return new TicketBookingResponseDto(
+            return new TicketBookingResponseContentDto(
                     newTicket.getId(),
                     newTicket.getCustomer().getFirstName(),
                     newTicket.getCustomer().getLastName(),
@@ -155,7 +155,7 @@ public class TicketService {
     }
 
     @Transactional(readOnly = true)
-    public List<TicketResponse> getTicketsByCustomer(Long customerId) {
+    public List<TicketResponseContent> getTicketsByCustomer(Long customerId) {
         Customer loggedInCustomer = getLoggedInCustomer();
 
         if (!loggedInCustomer.getId().equals(customerId)) {
@@ -163,13 +163,13 @@ public class TicketService {
         }
 
         List<Ticket> tickets = ticketRepository.findByCustomerId(customerId);
-        List<TicketResponse> responseList = new ArrayList<>();
+        List<TicketResponseContent> responseList = new ArrayList<>();
 
         for (Ticket ticket : tickets) {
             if (ticket.getScreening() != null) {
                 ScreeningResponseDto screeningResponseDto = ScreeningMapper.toScreeningResponseDto(ticket.getScreening());
 
-                TicketScreeningResponseDto screeningTicket = new TicketScreeningResponseDto(
+                TicketScreeningResponseContentDto screeningTicket = new TicketScreeningResponseContentDto(
                         ticket.getId(),
                         ticket.getCustomer().getFirstName(),
                         ticket.getCustomer().getLastName(),
@@ -189,7 +189,7 @@ public class TicketService {
                     movieDto = MovieMapper.toMovieResponseDto(booking.getMovie());
                 }
 
-                TicketBookingResponseDto bookingTicket = new TicketBookingResponseDto(
+                TicketBookingResponseContentDto bookingTicket = new TicketBookingResponseContentDto(
                         ticket.getId(),
                         ticket.getCustomer().getFirstName(),
                         ticket.getCustomer().getLastName(),
@@ -210,31 +210,5 @@ public class TicketService {
         }
 
         return responseList;
-    }
-
-    //Hjälpmetod för att beräkna biljettpris
-    public BigDecimal calculateTicketPrice(Ticket ticket) {
-        if (ticket.getBooking() != null) {
-            Booking booking = ticket.getBooking();
-            if (booking.getSpeakerName() != null && !booking.getSpeakerName().isBlank()) {
-                BigDecimal pricePerGuest = booking.getTotalPriceSek()
-                        .divide(BigDecimal.valueOf(booking.getNumberOfGuests()), 2, RoundingMode.HALF_UP);
-
-                // Lägg till 200 kr extra per biljett
-                return pricePerGuest.add(BigDecimal.valueOf(400));
-            }
-            if (booking.getMovie() != null) {
-                BigDecimal roomPricePerGuest = booking.getRoom().getPriceSek()
-                        .divide(BigDecimal.valueOf(booking.getNumberOfGuests()), 2, RoundingMode.HALF_UP);
-
-                return roomPricePerGuest;
-            }
-        }
-        if (ticket.getScreening() != null) {
-            Screening screening = ticket.getScreening();
-            BigDecimal roomPricePerGuest = screening.getPriceSek();
-            return roomPricePerGuest;
-        }
-        return BigDecimal.ZERO;
     }
 }
