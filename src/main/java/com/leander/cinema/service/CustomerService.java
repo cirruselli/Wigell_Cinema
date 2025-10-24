@@ -16,6 +16,7 @@ import com.leander.cinema.security.Role;
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -83,11 +84,11 @@ public class CustomerService {
         String username = newUser.username().trim();
 
         if (customerRepository.existsByEmail(email)) {
-            throw new IllegalArgumentException("Email finns redan");
+            throw new DataIntegrityViolationException("Email finns redan");
         }
 
         if (appUserRepository.existsByUsername(username)) {
-            throw new IllegalArgumentException("Användarnamn finns redan");
+            throw new DataIntegrityViolationException("Användarnamn finns redan");
         }
 
         Customer customer = CustomerMapper.toCustomerEntity(newUser);
