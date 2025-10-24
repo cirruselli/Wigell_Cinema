@@ -353,45 +353,31 @@ public class CustomerService {
                     updatedBookings.add(booking);
                 }
 
-//                // --- Kontrollera om någon gammal bokning riskerar att tas bort ---
-//                for (Booking oldBooking : oldBookings) {
-//                    if (!updatedBookings.contains(oldBooking)) {
-//                        if (oldBooking.getTickets() != null && !oldBooking.getTickets().isEmpty()) {
-//                            // Finns biljetter kopplade → behåll bokningen
-//                            updatedBookings.add(oldBooking);
-//                            logger.info("Behöll bokning {} eftersom det finns biljetter kopplade", oldBooking.getId());
-//                        }
-//                    }
-//                }
+                // --- Viktigt: koppla bokningen till kunden ---
+                booking.setCustomer(customer);
 
-                // 2. Bygg final lista med gamla + nya bokningar
-                Set<Long> updatedBookingIds = updatedBookings.stream()
-                        .map(Booking::getId)
-                        .collect(Collectors.toSet());
+                updatedBookings.add(booking);
 
-                List<Booking> finalBookings = new ArrayList<>(updatedBookings);
 
+                // --- Behåll bokningar som har biljetter kopplade ---
                 for (Booking oldBooking : oldBookings) {
-                    boolean hasTickets = oldBooking.getTickets() != null && !oldBooking.getTickets().isEmpty();
-                    boolean isCompleted = oldBooking.getStatus() == BookingStatus.COMPLETED;
-
-                    if (!hasTickets || isCompleted) {
-                        // Ta bort bokningen
-                        oldBooking.setCustomer(null);  // nödvändigt för orphanRemoval
-                        bookingRepository.delete(oldBooking); // säkerställ att den tas bort
-                        customer.getBookings().remove(oldBooking);
-                        logger.info("Bokning {} togs bort (status: {}, biljetter: {})",
-                                oldBooking.getId(), oldBooking.getStatus(), oldBooking.getTickets() != null ? oldBooking.getTickets().size() : 0);
-                    } else {
-                        updatedBookings.add(oldBooking);
-                        logger.info("Behåller bokning {} (har biljetter och inte COMPLETED)", oldBooking.getId());
+                    if (!updatedBookings.contains(oldBooking)) {
+                        if (oldBooking.getTickets() != null && !oldBooking.getTickets().isEmpty()) {
+                            updatedBookings.add(oldBooking);
+                            logger.info("Behåller bokning {} eftersom den har biljetter.", oldBooking.getId());
+                        }
                     }
                 }
 
-                // 3. Sätt kundens bokningar
+                // --- Sätt kundens bokningar (och ta bort gamla utan biljetter) ---
                 customer.getBookings().clear();
-                customer.getBookings().addAll(finalBookings);
-                customerRepository.save(customer);
+                customer.getBookings().addAll(updatedBookings);
+
+                // Spara båda sidor av relationen
+                for (Booking updatedbooking : updatedBookings) {
+                    booking.setCustomer(customer);
+
+                }
             }
 
             // --- UPPDATERA APPUSER ---

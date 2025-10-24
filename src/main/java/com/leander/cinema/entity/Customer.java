@@ -39,7 +39,7 @@ public class Customer {
     private List<Ticket> tickets = new ArrayList<>();
 
     //RELATION
-    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Booking> bookings = new ArrayList<>();
 
     @OneToOne(mappedBy = "customer", cascade = CascadeType.ALL)
