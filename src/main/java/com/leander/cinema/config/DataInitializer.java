@@ -35,9 +35,9 @@ public class DataInitializer {
                                ScreeningRepository screeningRepository) {
         return args -> {
             if (appUserRepository.count() == 0) {
-                AppUser admin1 = new AppUser(
-                        "admin1",
-                        passwordEncoder.encode("admin1"),
+                AppUser admin = new AppUser(
+                        "admin",
+                        passwordEncoder.encode("admin"),
                         Set.of(Role.ADMIN)
                 );
 
@@ -47,8 +47,8 @@ public class DataInitializer {
                         Set.of(Role.ADMIN)
                 );
 
-                appUserRepository.save(admin1);
-                logger.info("admin1 skapades");
+                appUserRepository.save(admin);
+                logger.info("admin skapades");
                 appUserRepository.save(admin2);
                 logger.info("admin2 skapades");
 

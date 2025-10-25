@@ -1,5 +1,7 @@
 package com.leander.cinema.service;
 
+import com.leander.cinema.currency.CurrencyCalculator;
+import com.leander.cinema.currency.CurrencyConverter;
 import com.leander.cinema.dto.AdminDto.addressDto.AdminAddressRequestDto;
 import com.leander.cinema.dto.AdminDto.addressDto.AdminAddressResponseDto;
 import com.leander.cinema.dto.AdminDto.bookingDto.AdminBookingUpdateRequestDto;
@@ -17,16 +19,13 @@ import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class CustomerService {
@@ -41,6 +40,7 @@ public class CustomerService {
     private final RoomRepository roomRepository;
     private final AppUserRepository appUserRepository;
     private final PasswordEncoder passwordEncoder;
+    private final CurrencyConverter currencyConverter;
 
     public CustomerService(CustomerRepository customerRepository,
                            AddressRepository addressRepository,
@@ -50,7 +50,8 @@ public class CustomerService {
                            MovieRepository movieRepository,
                            RoomRepository roomRepository,
                            AppUserRepository appUserRepository,
-                           PasswordEncoder passwordEncoder) {
+                           PasswordEncoder passwordEncoder,
+                           CurrencyConverter currencyConverter) {
         this.customerRepository = customerRepository;
         this.addressRepository = addressRepository;
         this.ticketRepository = ticketRepository;
@@ -60,6 +61,7 @@ public class CustomerService {
         this.roomRepository = roomRepository;
         this.appUserRepository = appUserRepository;
         this.passwordEncoder = passwordEncoder;
+        this.currencyConverter = currencyConverter;
     }
 
 
@@ -199,7 +201,6 @@ public class CustomerService {
 
         // --- UPPDATERA BILJETTER ---
 
-
         if (requestDto.tickets() == null) {
             throw new InvalidTicketException("Biljett/er måste anges");
         } else {
@@ -225,11 +226,6 @@ public class CustomerService {
 
                 ticket.setNumberOfTickets(ticketDto.numberOfTickets());
 
-                //Räknar bara om totalbeloppet då enhetspriset ska vara låst vid uppdatering!
-                ticket.setTotalPriceSek(ticket.getPriceSek()
-                        .multiply(BigDecimal.valueOf(ticket.getNumberOfTickets())));
-                ticket.setTotalPriceUsd(ticket.getPriceUsd()
-                        .multiply(BigDecimal.valueOf(ticket.getNumberOfTickets())));
 
                 if (ticketDto.screeningId() != null) {
                     Screening screening = screeningRepository.findById(ticketDto.screeningId())
@@ -242,6 +238,12 @@ public class CustomerService {
                     ticket.setBooking(booking);
                     ticket.setScreening(null); // nollställ screening
                 }
+
+                //Räknar bara om totalbeloppet då enhetspriset ska vara låst vid uppdatering!
+                ticket.setTotalPriceSek(ticket.getPriceSek()
+                        .multiply(BigDecimal.valueOf(ticket.getNumberOfTickets())));
+                ticket.setTotalPriceUsd(ticket.getPriceUsd()
+                        .multiply(BigDecimal.valueOf(ticket.getNumberOfTickets())));
 
                 //Koppla tillbaka till kund
                 ticket.setCustomer(customer);
@@ -283,10 +285,19 @@ public class CustomerService {
                             "Bokning med id " + bookingDto.bookingId() + " tillhör inte kunden med id " + customer.getId());
                 }
 
+
                 // Uppdatera rum
                 Room room = roomRepository.findById(bookingDto.roomId())
                         .orElseThrow(() -> new EntityNotFoundException("Lokal med id " + bookingDto.roomId() + " hittades inte för bokning med id " + bookingDto.bookingId()));
                 booking.setRoom(room);
+
+
+                // --- Kontrollera att antal gäster inte överstiger rummets kapacitet ---
+                int maxGuests = booking.getRoom().getMaxGuests();
+                if (bookingDto.numberOfGuests() > maxGuests) {
+                    throw new IllegalArgumentException("Antalet gäster (" + bookingDto.numberOfGuests() +
+                            ") överstiger rummets maxkapacitet (" + maxGuests + ").");
+                }
 
                 // Kontrollera överlappning med pågående screenings
                 List<Screening> screenings = screeningRepository.findByRoom(room);
@@ -335,7 +346,18 @@ public class CustomerService {
                     booking.setMovie(null);
                 }
 
+                // Null-säker hantering av roomEquipment
+                if (bookingDto.roomEquipment() == null) {
+                    booking.setRoomEquipment(new ArrayList<>(booking.getRoom().getStandardEquipment()));
+                } else {
+                    booking.setRoomEquipment(new ArrayList<>(bookingDto.roomEquipment()));
+                }
+
+
                 booking.setSpeakerName(bookingDto.speakerName());
+
+                booking.setTotalPriceSek(booking.getRoom().getPriceSek());
+                booking.setTotalPriceUsd(currencyConverter.toUsd(booking.getTotalPriceSek()));
 
                 booking.setReservationStartTime(bookingDto.reservationStartTime());
                 booking.setReservationEndTime(bookingDto.reservationEndTime());
@@ -343,20 +365,6 @@ public class CustomerService {
                 booking.setStatus(bookingDto.bookingStatus());
 
 
-                // --- Kontrollera att antal gäster inte överstiger rummets kapacitet ---
-                int maxGuests = booking.getRoom().getMaxGuests();
-                if (bookingDto.numberOfGuests() > maxGuests) {
-                    throw new IllegalArgumentException("Antalet gäster (" + bookingDto.numberOfGuests() +
-                            ") överstiger rummets maxkapacitet (" + maxGuests + ").");
-                }
-
-
-                // Null-säker hantering av roomEquipment
-                if (bookingDto.roomEquipment() == null) {
-                    booking.setRoomEquipment(new ArrayList<>(booking.getRoom().getStandardEquipment()));
-                } else {
-                    booking.setRoomEquipment(new ArrayList<>(bookingDto.roomEquipment()));
-                }
 
                 // Hindrar att samma Booking-objekt läggs till i listan igen
                 if (!updatedBookings.contains(booking)) {
