@@ -2,6 +2,7 @@ package com.leander.cinema.dto.CustomerDto.bookingDto;
 
 
 import com.leander.cinema.dto.CustomerDto.movieDto.MovieResponseDto;
+import com.leander.cinema.service.BookingStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -17,8 +18,9 @@ public record BookingMovieResponseDto(
         List<String> roomEquipment,
         String roomName,
         int maxGuests,
+        MovieResponseDto movie,
         String firstName,
         String lastName,
-        MovieResponseDto movie)
+        BookingStatus bookingStatus)
         implements BookingResponseContent {
 }

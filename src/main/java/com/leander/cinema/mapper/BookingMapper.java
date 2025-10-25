@@ -7,6 +7,7 @@ import com.leander.cinema.dto.AdminDto.roomDto.AdminRoomResponseDto;
 import com.leander.cinema.dto.CustomerDto.bookingDto.*;
 import com.leander.cinema.dto.CustomerDto.movieDto.MovieResponseDto;
 import com.leander.cinema.entity.Booking;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,9 +57,10 @@ public class BookingMapper {
                     equipments,
                     roomName,
                     maxGuests,
+                    MovieMapper.toMovieResponseDto(booking.getMovie()),
                     booking.getCustomer().getFirstName(),
                     booking.getCustomer().getLastName(),
-                    MovieMapper.toMovieResponseDto(booking.getMovie())
+                    booking.getStatus()
             );
         }
         if (booking.getSpeakerName() != null && !booking.getSpeakerName().isBlank()) {
@@ -74,13 +76,14 @@ public class BookingMapper {
                     maxGuests,
                     booking.getSpeakerName(),
                     booking.getCustomer().getFirstName(),
-                    booking.getCustomer().getLastName()
+                    booking.getCustomer().getLastName(),
+                    booking.getStatus()
             );
         }
         throw new IllegalStateException("Bokning måste ha antingen talare eller film");
     }
 
-    public static AdminBookingResponseContent toAdminBookingResponseContent (Booking booking) {
+    public static AdminBookingResponseContent toAdminBookingResponseContent(Booking booking) {
         // --- Bygg Room-dto ---
         AdminRoomResponseDto roomDto = null;
         if (booking.getRoom() != null) {
