@@ -6,6 +6,7 @@ import com.leander.cinema.dto.AdminDto.bookingDto.AdminBookingSpeakerResponseDto
 import com.leander.cinema.dto.AdminDto.movieDto.AdminMovieResponseDto;
 import com.leander.cinema.dto.AdminDto.roomDto.AdminRoomResponseDto;
 import com.leander.cinema.dto.CustomerDto.bookingDto.*;
+import com.leander.cinema.dto.CustomerDto.movieDto.MovieResponseDto;
 import com.leander.cinema.entity.Booking;
 
 import java.util.ArrayList;
@@ -45,6 +46,32 @@ public class BookingMapper {
         if (booking.getRoomEquipment() != null) {
             equipments = new ArrayList<>(booking.getRoomEquipment()); // kopiera för att inte ändra ursprungsrummet
         }
+
+        // --- Snapshot-film (filmen har tagits bort) ---
+        if (booking.getMovieTitle() != null) {
+            MovieResponseDto snapshotMovie = new MovieResponseDto(
+                    booking.getMovieTitle(),
+                    booking.getMovieGenre(),
+                    booking.getMovieAgeLimit(),
+                    booking.getMovieDuration()
+            );
+            return new BookingMovieResponseDto(
+                    booking.getId(),
+                    booking.getReservationStartTime(),
+                    booking.getReservationEndTime(),
+                    booking.getNumberOfGuests(),
+                    booking.getTotalPriceSek(),
+                    booking.getTotalPriceUsd(),
+                    equipments,
+                    roomName,
+                    maxGuests,
+                    snapshotMovie,
+                    booking.getCustomer().getFirstName(),
+                    booking.getCustomer().getLastName(),
+                    booking.getStatus()
+            );
+        }
+
 
         if (booking.getMovie() != null) {
             return new BookingMovieResponseDto(
