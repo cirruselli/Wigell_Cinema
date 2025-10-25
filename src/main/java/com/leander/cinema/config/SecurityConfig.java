@@ -11,6 +11,10 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableMethodSecurity
 public class SecurityConfig {
 
+    /*
+    Korrigering för framtiden: använd @PreAuthorize i Controller-klasserna istället för att få denna långa SecurityFilterChain
+     */
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
