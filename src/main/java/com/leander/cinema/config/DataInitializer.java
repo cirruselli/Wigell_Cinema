@@ -17,6 +17,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Configuration
@@ -241,7 +242,7 @@ public class DataInitializer {
                         LocalDateTime.of(2025, 11, 20, 15, 0),
                         LocalDateTime.of(2025, 11, 20, 17, 0),
                         null,
-                        movie4,
+                        movie5,
                         150,
                         new ArrayList<>(List.of("Mikrofon", "Scenbelysning", "Högtalare")),
                         new BigDecimal("60000.00"),

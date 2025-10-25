@@ -80,7 +80,7 @@ public class BookingMapper {
                     booking.getStatus()
             );
         }
-        throw new IllegalStateException("Bokning måste ha antingen talare eller film");
+       return null;
     }
 
     public static AdminBookingResponseContent toAdminBookingResponseContent(Booking booking) {
@@ -94,6 +94,29 @@ public class BookingMapper {
                     booking.getRoom().getPriceSek(),
                     booking.getRoom().getPriceUsd(),
                     booking.getRoom().getStandardEquipment()
+            );
+        }
+
+        // Om filmen har tagits bort men snapshot finns
+        if (booking.getMovieTitle() != null) {
+            AdminMovieResponseDto snapshotMovie = new AdminMovieResponseDto(
+                    null, // ingen film-id längre
+                    booking.getMovieTitle(),
+                    booking.getMovieGenre(),
+                    booking.getMovieAgeLimit(),
+                    booking.getMovieDuration()
+            );
+            return new AdminBookingMovieResponseDto(
+                    booking.getId(),
+                    booking.getReservationStartTime(),
+                    booking.getReservationEndTime(),
+                    booking.getNumberOfGuests(),
+                    booking.getTotalPriceSek(),
+                    booking.getTotalPriceUsd(),
+                    booking.getRoomEquipment(),
+                    booking.getStatus(),
+                    roomDto,
+                    snapshotMovie
             );
         }
 
@@ -125,6 +148,6 @@ public class BookingMapper {
                     booking.getSpeakerName()
             );
         }
-        throw new IllegalStateException("Bokning måste ha antingen talare eller film");
+        return null;
     }
 }
