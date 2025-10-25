@@ -213,6 +213,7 @@ public class DataInitializer {
                         LocalDateTime.of(2025, 10, 30, 18, 0),
                         LocalDateTime.of(2025, 10, 30, 20, 30),
                         "Johan Glans",
+                        null,
                         500,
                         new ArrayList<>(List.of("Mikrofon", "Mikrofon", "Scenbelysning", "Projektor", "Dator", "Högtalare")),
                         new BigDecimal("12000.00"),
@@ -225,6 +226,7 @@ public class DataInitializer {
                 Booking booking2 = new Booking(
                         LocalDateTime.of(2025, 10, 30, 15, 0),
                         LocalDateTime.of(2025, 10, 30, 17, 0),
+                        null,
                         movie4,
                         150,
                         new ArrayList<>(List.of("Mikrofon", "Scenbelysning", "Högtalare")),
@@ -238,6 +240,7 @@ public class DataInitializer {
                 Booking booking3 = new Booking(
                         LocalDateTime.of(2025, 11, 20, 15, 0),
                         LocalDateTime.of(2025, 11, 20, 17, 0),
+                        null,
                         movie4,
                         150,
                         new ArrayList<>(List.of("Mikrofon", "Scenbelysning", "Högtalare")),

@@ -86,6 +86,14 @@ public class TicketService {
             booking = bookingRepository.findById(body.bookingId())
                     .orElseThrow(() -> new ResponseStatusException(
                             HttpStatus.NOT_FOUND, "Bokning hittades inte"));
+
+            // --- Kontrollera att bokningen är aktiv ---
+            if (booking.getStatus() != BookingStatus.ACTIVE) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Du kan endast köpa biljetter till aktiva bokningar. Aktuell status: " + booking.getStatus()
+                );
+            }
         } else if (body.screeningId() != null) {
             screening = screeningRepository.findById(body.screeningId())
                     .orElseThrow(() -> new ResponseStatusException(

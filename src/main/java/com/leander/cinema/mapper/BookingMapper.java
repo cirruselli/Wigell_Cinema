@@ -3,9 +3,9 @@ package com.leander.cinema.mapper;
 import com.leander.cinema.dto.AdminDto.bookingDto.AdminBookingMovieResponseDto;
 import com.leander.cinema.dto.AdminDto.bookingDto.AdminBookingResponseContent;
 import com.leander.cinema.dto.AdminDto.bookingDto.AdminBookingSpeakerResponseDto;
+import com.leander.cinema.dto.AdminDto.movieDto.AdminMovieResponseDto;
 import com.leander.cinema.dto.AdminDto.roomDto.AdminRoomResponseDto;
 import com.leander.cinema.dto.CustomerDto.bookingDto.*;
-import com.leander.cinema.dto.CustomerDto.movieDto.MovieResponseDto;
 import com.leander.cinema.entity.Booking;
 
 import java.util.ArrayList;
@@ -98,7 +98,7 @@ public class BookingMapper {
         }
 
         if (booking.getMovie() != null) {
-            MovieResponseDto movieDto = MovieMapper.toMovieResponseDto(booking.getMovie());
+            AdminMovieResponseDto movieDto = MovieMapper.toAdminMovieResponseDto(booking.getMovie());
             return new AdminBookingMovieResponseDto(
                     booking.getId(),
                     booking.getReservationStartTime(),

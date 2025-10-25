@@ -78,22 +78,10 @@ public class Booking {
     public Booking() {
     }
 
-    public Booking(LocalDateTime reservationStartTime, LocalDateTime reservationEndTime, String speakerName, int numberOfGuests, List<String> roomEquipment, BigDecimal totalPriceSek, BigDecimal totalPriceUsd, BookingStatus status, Room room, Customer customer) {
+    public Booking(LocalDateTime reservationStartTime, LocalDateTime reservationEndTime, String speakerName, Movie movie, int numberOfGuests, List<String> roomEquipment, BigDecimal totalPriceSek, BigDecimal totalPriceUsd, BookingStatus status, Room room, Customer customer) {
         this.reservationStartTime = reservationStartTime;
         this.reservationEndTime = reservationEndTime;
         this.speakerName = speakerName;
-        this.numberOfGuests = numberOfGuests;
-        this.roomEquipment = roomEquipment;
-        this.totalPriceSek = totalPriceSek;
-        this.totalPriceUsd = totalPriceUsd;
-        this.status = status;
-        this.room = room;
-        this.customer = customer;
-    }
-
-    public Booking(LocalDateTime reservationStartTime, LocalDateTime reservationEndTime, Movie movie, int numberOfGuests, List<String> roomEquipment, BigDecimal totalPriceSek, BigDecimal totalPriceUsd, BookingStatus status, Room room, Customer customer) {
-        this.reservationStartTime = reservationStartTime;
-        this.reservationEndTime = reservationEndTime;
         this.movie = movie;
         this.numberOfGuests = numberOfGuests;
         this.roomEquipment = roomEquipment;

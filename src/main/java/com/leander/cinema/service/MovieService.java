@@ -78,58 +78,6 @@ public class MovieService {
         return MovieMapper.toAdminMovieResponseDto(movie);
     }
 
-//    @Transactional
-//    public void deleteMovie(Long id) {
-//        Movie movie = movieRepository.findById(id)
-//                .orElseThrow(() -> new EntityNotFoundException("Filmen hittades inte"));
-//
-//        // Ta bort alla screenings kopplade till filmen
-//        List<Screening> screenings = screeningRepository.findByMovie(movie);
-//        for (Screening screening : screenings) {
-//            List<Ticket> tickets = ticketRepository.findByScreening(screening);
-//
-//            // Frikoppla tickets från screeningen
-//            for (Ticket ticket : tickets) {
-//                ticket.setScreening(null);
-//            }
-//            ticketRepository.saveAll(tickets);
-//
-//            // Ta bort screeningen
-//            screeningRepository.delete(screening);
-//            logger.info("Admin tog bort föreställning {} kopplad till film {}", screening.getId(), movie.getId());
-//        }
-//
-//        // Hantera bokningar kopplade till filmen
-//        List<Booking> bookings = bookingRepository.findByMovie(movie);
-//        for (Booking booking : bookings) {
-//            if (booking.getReservationStartTime() != null && booking.getReservationStartTime().isAfter(LocalDateTime.now())) {
-//                throw new IllegalStateException(
-//                        "Filmen används fortfarande i aktiva och/eller framtida bokningar och kan inte tas bort"
-//                );
-//            }
-//
-//            // Om bokningen är completed ELLER har starttid passerad
-//            if (booking.getStatus() == BookingStatus.COMPLETED ||
-//                    (booking.getReservationStartTime() != null &&
-//                            booking.getReservationStartTime().isBefore(LocalDateTime.now()))) {
-//
-//                // Snapshot av filmdata
-//                booking.setMovie(null);
-//                booking.setMovieTitle(movie.getTitle());
-//                booking.setMovieGenre(movie.getGenre());
-//                booking.setMovieAgeLimit(movie.getAgeLimit());
-//                booking.setMovieDuration(movie.getDuration());
-//            }
-//            // Framtida/pågående bokningar behåller FK
-//        }
-//        bookingRepository.saveAll(bookings);
-//        logger.info("Admin frikopplade gamla/completed bokningar från film {}", movie.getId());
-//
-//        // Ta bort filmen
-//        movieRepository.delete(movie);
-//        logger.info("Admin tog bort film {}", id);
-//    }
-
     @Transactional
     public void deleteMovie(Long id) {
         Movie movie = movieRepository.findById(id)
@@ -175,6 +123,4 @@ public class MovieService {
         movieRepository.delete(movie);
         logger.info("Admin tog bort film {}", id);
     }
-
-
 }

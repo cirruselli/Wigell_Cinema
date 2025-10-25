@@ -1,5 +1,6 @@
 package com.leander.cinema.dto.AdminDto.bookingDto;
 
+import com.leander.cinema.dto.AdminDto.movieDto.AdminMovieResponseDto;
 import com.leander.cinema.dto.AdminDto.roomDto.AdminRoomResponseDto;
 import com.leander.cinema.dto.CustomerDto.movieDto.MovieResponseDto;
 import com.leander.cinema.service.BookingStatus;
@@ -18,6 +19,6 @@ public record AdminBookingMovieResponseDto(
         List<String> bookingEquipment,
         BookingStatus bookingStatus,
         AdminRoomResponseDto room,
-        MovieResponseDto movie
+        AdminMovieResponseDto movie
         ) implements AdminBookingResponseContent {
 }
