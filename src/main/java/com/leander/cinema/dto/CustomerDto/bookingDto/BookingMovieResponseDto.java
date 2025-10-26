@@ -1,6 +1,5 @@
 package com.leander.cinema.dto.CustomerDto.bookingDto;
 
-
 import com.leander.cinema.dto.CustomerDto.movieDto.MovieResponseDto;
 import com.leander.cinema.service.BookingStatus;
 

@@ -6,11 +6,11 @@ import com.leander.cinema.dto.CustomerDto.movieDto.MovieResponseDto;
 import com.leander.cinema.entity.Booking;
 import com.leander.cinema.entity.Movie;
 import com.leander.cinema.entity.Screening;
+import com.leander.cinema.exception.MovieDeletionException;
 import com.leander.cinema.mapper.MovieMapper;
 import com.leander.cinema.repository.BookingRepository;
 import com.leander.cinema.repository.MovieRepository;
 import com.leander.cinema.repository.ScreeningRepository;
-import com.leander.cinema.repository.TicketRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,16 +26,13 @@ public class MovieService {
 
     private final MovieRepository movieRepository;
     private final ScreeningRepository screeningRepository;
-    private final TicketRepository ticketRepository;
     private final BookingRepository bookingRepository;
 
     public MovieService(MovieRepository movieRepository,
                         ScreeningRepository screeningRepository,
-                        TicketRepository ticketRepository,
                         BookingRepository bookingRepository) {
         this.movieRepository = movieRepository;
         this.screeningRepository = screeningRepository;
-        this.ticketRepository = ticketRepository;
         this.bookingRepository = bookingRepository;
     }
 
@@ -81,12 +78,12 @@ public class MovieService {
     @Transactional
     public void deleteMovie(Long id) {
         Movie movie = movieRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Filmen hittades inte"));
+                .orElseThrow(() -> new EntityNotFoundException("Filmen med id " + id + " hittades inte"));
 
         // --- Kontrollera att inga screenings finns kvar ---
         List<Screening> screenings = screeningRepository.findByMovie(movie);
         if (screenings != null && !screenings.isEmpty()) {
-            throw new IllegalStateException("Filmen kan inte tas bort eftersom det finns föreställningar på filmen");
+            throw new MovieDeletionException("Filmen med id " + id + " kan inte tas bort eftersom det finns föreställningar på filmen");
         }
 
         // --- Kontrollera att inga aktiva bokningar finns ---
@@ -102,7 +99,7 @@ public class MovieService {
         }
 
         if (hasActiveBookings) {
-            throw new IllegalStateException("Filmen kan inte tas bort eftersom det finns aktiva bokningar som använder filmen");
+            throw new MovieDeletionException("Filmen med id " + id + "  kan inte tas bort eftersom det finns aktiva bokningar som använder filmen");
         }
 
         // --- Frikoppla completed bokningar (snapshot) ---

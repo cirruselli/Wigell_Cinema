@@ -33,25 +33,25 @@ public class Room {
     public Room() {
     }
 
-    public Room(String name, int maxGuests, BigDecimal priceSek) {
-        this.name = name;
-        this.maxGuests = maxGuests;
-        this.priceSek = priceSek;
-    }
-
+//    public Room(String name, int maxGuests, BigDecimal priceSek) {
+//        this.name = name;
+//        this.maxGuests = maxGuests;
+//        this.priceSek = priceSek;
+//    }
+//
     public Room(String name, int maxGuests, BigDecimal priceSek, List<String> standardEquipment) {
         this.name = name;
         this.maxGuests = maxGuests;
         this.priceSek = priceSek;
         this.standardEquipment = standardEquipment;
     }
-
-    public Room(String name, int maxGuests, BigDecimal priceSek, BigDecimal priceUsd) {
-        this.name = name;
-        this.maxGuests = maxGuests;
-        this.priceSek = priceSek;
-        this.priceUsd = priceUsd;
-    }
+//
+//    public Room(String name, int maxGuests, BigDecimal priceSek, BigDecimal priceUsd) {
+//        this.name = name;
+//        this.maxGuests = maxGuests;
+//        this.priceSek = priceSek;
+//        this.priceUsd = priceUsd;
+//    }
 
     public Room(String name, int maxGuests, BigDecimal priceSek, BigDecimal priceUsd, List<String> standardEquipment) {
         this.name = name;

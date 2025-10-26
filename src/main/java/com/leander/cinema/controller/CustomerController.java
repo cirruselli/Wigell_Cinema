@@ -31,7 +31,7 @@ public class CustomerController {
     }
 
     @GetMapping("/bookings")
-    public ResponseEntity<List<BookingResponseContent>> getBookings(@RequestParam Long customerId) {
+    public ResponseEntity<List<BookingResponseContent>> bookings(@RequestParam Long customerId) {
         List<BookingResponseContent> response = bookingService.getActiveAndCompletedBookings(customerId);
         return ResponseEntity.ok(response);
     }

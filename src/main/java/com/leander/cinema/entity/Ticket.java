@@ -44,26 +44,6 @@ public class Ticket {
     public Ticket() {
     }
 
-    public Ticket(int numberOfTickets, BigDecimal priceSek, BigDecimal priceUsd, BigDecimal totalPriceSek, BigDecimal totalPriceUsd, Screening screening) {
-        this.numberOfTickets = numberOfTickets;
-        this.priceSek = priceSek;
-        this.priceUsd = priceUsd;
-        this.totalPriceSek = totalPriceSek;
-        this.totalPriceUsd = totalPriceUsd;
-        this.screening = screening;
-    }
-
-    public Ticket(int numberOfTickets, BigDecimal priceSek, BigDecimal priceUsd, BigDecimal totalPriceSek, BigDecimal totalPriceUsd, Customer customer, Screening screening, Booking booking) {
-        this.numberOfTickets = numberOfTickets;
-        this.priceSek = priceSek;
-        this.priceUsd = priceUsd;
-        this.totalPriceSek = totalPriceSek;
-        this.totalPriceUsd = totalPriceUsd;
-        this.customer = customer;
-        this.screening = screening;
-        this.booking = booking;
-    }
-
     public Long getId() {
         return id;
     }

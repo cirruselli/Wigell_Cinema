@@ -1,7 +1,6 @@
 package com.leander.cinema.currency;
 
 import com.leander.cinema.entity.Booking;
-import com.leander.cinema.entity.Screening;
 import com.leander.cinema.entity.Ticket;
 import org.springframework.stereotype.Component;
 

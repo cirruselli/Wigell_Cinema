@@ -5,10 +5,7 @@ import com.leander.cinema.dto.CustomerDto.bookingDto.BookingPatchRequestDto;
 import com.leander.cinema.dto.CustomerDto.bookingDto.BookingPostRequestDto;
 import com.leander.cinema.dto.CustomerDto.bookingDto.BookingResponseContent;
 import com.leander.cinema.entity.*;
-import com.leander.cinema.exception.BookingCapacityExceededException;
-import com.leander.cinema.exception.BookingConflictException;
-import com.leander.cinema.exception.CustomerOwnershipException;
-import com.leander.cinema.exception.InvalidBookingException;
+import com.leander.cinema.exception.*;
 import com.leander.cinema.mapper.BookingMapper;
 import com.leander.cinema.repository.*;
 import com.leander.cinema.security.AppUser;
@@ -122,7 +119,7 @@ public class BookingService {
 
         //Kontrollera att reservationens slut inte är före start
         if (body.reservationEndTime().isBefore(body.reservationStartTime())) {
-            throw new BookingConflictException("Reservationens slutdatum/tid kan inte vara före startdatum/tid.");
+            throw new InvalidReservationTimeException("Reservationens slutdatum/tid kan inte vara före startdatum/tid.");
         }
 
         booking.setReservationStartTime(body.reservationStartTime());
@@ -190,7 +187,7 @@ public class BookingService {
         Customer customer = getLoggedInCustomer();
 
         Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new EntityNotFoundException("Bokningen hittades inte"));
+                .orElseThrow(() -> new EntityNotFoundException("Bokningen med id " + bookingId + " hittades inte"));
 
         if (!booking.getCustomer().getId().equals(customer.getId())) {
             throw new CustomerOwnershipException("Du kan bara uppdatera dina egna bokningar.");
@@ -204,7 +201,7 @@ public class BookingService {
         }
 
         if (booking.getReservationEndTime().isBefore(booking.getReservationStartTime())) {
-            throw new BookingConflictException("Slutdatum/tid kan inte vara före startdatum/tid.");
+            throw new InvalidReservationTimeException("Slutdatum/tid kan inte vara före startdatum/tid.");
         }
 
         if (body.roomEquipment() != null) {

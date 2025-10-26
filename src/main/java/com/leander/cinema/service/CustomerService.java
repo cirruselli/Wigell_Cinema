@@ -218,7 +218,7 @@ public class CustomerService {
                 // Validera DTO
                 if ((ticketDto.screeningId() == null && ticketDto.bookingId() == null) ||
                         (ticketDto.screeningId() != null && ticketDto.bookingId() != null)) {
-                    throw new IllegalArgumentException(
+                    throw new InvalidTicketException(
                             "Biljett " + ticketDto.ticketId() + " måste ha antingen en föreställning eller bokning, aldrig att båda saknas eller att båda är satta"
                     );
                 }
@@ -294,7 +294,7 @@ public class CustomerService {
                 // --- Kontrollera att antal gäster inte överstiger rummets kapacitet ---
                 int maxGuests = booking.getRoom().getMaxGuests();
                 if (bookingDto.numberOfGuests() > maxGuests) {
-                    throw new IllegalArgumentException("Antalet gäster (" + bookingDto.numberOfGuests() +
+                    throw new BookingCapacityExceededException("Antalet gäster (" + bookingDto.numberOfGuests() +
                             ") överstiger rummets maxkapacitet (" + maxGuests + ").");
                 }
 
@@ -325,14 +325,14 @@ public class CustomerService {
                 // Kontrollera att sluttid inte är före starttid
                 if (bookingDto.reservationEndTime() != null && bookingDto.reservationStartTime() != null
                         && bookingDto.reservationEndTime().isBefore(bookingDto.reservationStartTime())) {
-                    throw new IllegalArgumentException("Sluttiden för bokningen kan inte vara före starttiden.");
+                    throw new InvalidReservationTimeException("Sluttiden för bokning " + bookingDto.bookingId() + " kan inte vara före starttiden.");
                 }
 
                 // Hantera film vs talare
                 if ((bookingDto.movieId() == null && (bookingDto.speakerName() == null || bookingDto.speakerName().isBlank())) ||
                         (bookingDto.movieId() != null && bookingDto.speakerName() != null && !bookingDto.speakerName().isBlank())) {
                     throw new InvalidBookingException(
-                            "Endast en film ELLER en talare måste anges på bokning, och aldrig båda ");
+                            "Endast en film ELLER en talare måste anges på bokning " + bookingDto.bookingId() + ", och aldrig båda ");
                 }
 
                 if (bookingDto.movieId() != null) {
@@ -426,7 +426,7 @@ public class CustomerService {
         }
 
         if (hasActiveBookingWithTickets) {
-            throw new IllegalStateException("Kunden kan inte tas bort eftersom kunden har aktiva bokningar med biljetter");
+            throw new ActiveBookingException("Kunden kan inte tas bort eftersom kunden har aktiva bokningar med biljetter");
         }
 
         // Koppla loss adresser

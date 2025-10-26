@@ -14,6 +14,7 @@ import com.leander.cinema.mapper.MovieMapper;
 import com.leander.cinema.mapper.ScreeningMapper;
 import com.leander.cinema.repository.*;
 import com.leander.cinema.security.AppUser;
+import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -84,20 +85,18 @@ public class TicketService {
 
         if (body.bookingId() != null) {
             booking = bookingRepository.findById(body.bookingId())
-                    .orElseThrow(() -> new ResponseStatusException(
-                            HttpStatus.NOT_FOUND, "Bokning hittades inte"));
+                    .orElseThrow(() -> new EntityNotFoundException("Bokning med id " + body.bookingId() + " hittades inte"));
 
             // --- Kontrollera att bokningen är aktiv ---
             if (booking.getStatus() != BookingStatus.ACTIVE) {
                 throw new ResponseStatusException(
                         HttpStatus.BAD_REQUEST,
-                        "Du kan endast köpa biljetter till aktiva bokningar. Aktuell status: " + booking.getStatus()
+                        "Ange endast en bokad föreställning eller en filmvisning, aldrig båda"
                 );
             }
         } else if (body.screeningId() != null) {
             screening = screeningRepository.findById(body.screeningId())
-                    .orElseThrow(() -> new ResponseStatusException(
-                            HttpStatus.NOT_FOUND, "Föreställningen hittades inte"));
+                    .orElseThrow(() -> new EntityNotFoundException("Föreställningen med id " + body.screeningId() + " hittades inte"));
         } else {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST, "Du måste ange antingen en bokad föreställning eller en filmvisning");
@@ -159,7 +158,10 @@ public class TicketService {
 
         }
 
-        throw new IllegalStateException("Varken filmvisning eller bokning var angiven, oväntat tillstånd");
+        throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Du måste ange antingen en bokad föreställning eller en filmvisning"
+        );
     }
 
     @Transactional(readOnly = true)

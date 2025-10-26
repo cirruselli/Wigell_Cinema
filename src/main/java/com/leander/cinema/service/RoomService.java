@@ -1,6 +1,5 @@
 package com.leander.cinema.service;
 
-import com.leander.cinema.currency.CurrencyCalculator;
 import com.leander.cinema.currency.CurrencyConverter;
 import com.leander.cinema.dto.AdminDto.roomDto.AdminRoomRequestDto;
 import com.leander.cinema.dto.AdminDto.roomDto.AdminRoomResponseDto;

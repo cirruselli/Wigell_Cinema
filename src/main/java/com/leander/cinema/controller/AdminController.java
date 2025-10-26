@@ -101,7 +101,7 @@ public class AdminController {
     // === FILMER ===
 
     @GetMapping("/movies")
-    public ResponseEntity<?> getMovies(Authentication authentication) {
+    public ResponseEntity<?> movies(Authentication authentication) {
         boolean isAdmin = authentication.getAuthorities().stream()
                 .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
 

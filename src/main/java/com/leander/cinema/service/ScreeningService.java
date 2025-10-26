@@ -10,6 +10,7 @@ import com.leander.cinema.entity.Screening;
 import com.leander.cinema.entity.Ticket;
 import com.leander.cinema.exception.BookingConflictException;
 import com.leander.cinema.exception.InvalidScreeningException;
+import com.leander.cinema.exception.ScreeningDeletionException;
 import com.leander.cinema.mapper.ScreeningMapper;
 import com.leander.cinema.repository.*;
 import jakarta.persistence.EntityNotFoundException;
@@ -146,7 +147,7 @@ public class ScreeningService {
 
         // Om det finns biljetter kopplade → kasta fel
         if (!tickets.isEmpty()) {
-            throw new IllegalStateException("Föreställningen kan inte tas bort eftersom det finns biljetter kopplade till den");
+            throw new ScreeningDeletionException("Föreställningen kan inte tas bort eftersom det finns biljetter kopplade till den");
         }
 
         // Ta bort screeningen

@@ -17,11 +17,30 @@ public class GlobalExceptionHandler {
 
     // === Egna exceptions ===
 
+    @ExceptionHandler(ScreeningDeletionException.class)
+    public ResponseEntity<String> handleScreeningDeletion(ScreeningDeletionException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(MovieDeletionException.class)
+    public ResponseEntity<String> handleMovieDeletion(MovieDeletionException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(ActiveBookingException.class)
+    public ResponseEntity<String> handleActiveBookingException(ActiveBookingException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(InvalidReservationTimeException.class)
+    public ResponseEntity<String> handleInvalidReservationTime(InvalidReservationTimeException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+
     @ExceptionHandler(AddressNotAssociatedWithCustomerException.class)
     public ResponseEntity<String> handleAddressNotAssociatedWithCustomer(AddressNotAssociatedWithCustomerException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
-
 
     @ExceptionHandler(ForbiddenTicketAccessException.class)
     public ResponseEntity<String> handleForbidden(ForbiddenTicketAccessException ex) {
@@ -35,7 +54,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AddressAlreadyExistsException.class)
     public ResponseEntity<String> handleAddressAlreadyExists(AddressAlreadyExistsException ex) {
-        return ResponseEntity.badRequest().body(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 
     @ExceptionHandler(CustomerNotFoundException.class)
@@ -125,7 +144,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleDataIntegrityViolation() {
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
-                .body("En konflikt uppstod");
+                .body("Konflikt i data");
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
