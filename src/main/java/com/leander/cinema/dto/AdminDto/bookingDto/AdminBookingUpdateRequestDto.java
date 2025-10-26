@@ -21,7 +21,7 @@ public record AdminBookingUpdateRequestDto(
         @Min(value = 1, message = "Antal gäster måste vara minst 1")
         int numberOfGuests,
         @NotNull(message = "Utrustning för rummet måste anges")
-        List<String> roomEquipment,
+        List<String> bookingEquipment,
         @NotNull(message = "Lokal måste anges på bokningen")
         Long roomId,
         String speakerName,

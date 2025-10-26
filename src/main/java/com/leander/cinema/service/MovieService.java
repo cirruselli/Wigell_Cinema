@@ -80,13 +80,11 @@ public class MovieService {
         Movie movie = movieRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Filmen med id " + id + " hittades inte"));
 
-        // --- Kontrollera att inga screenings finns kvar ---
         List<Screening> screenings = screeningRepository.findByMovie(movie);
         if (screenings != null && !screenings.isEmpty()) {
             throw new MovieDeletionException("Filmen med id " + id + " kan inte tas bort eftersom det finns föreställningar på filmen");
         }
 
-        // --- Kontrollera att inga aktiva bokningar finns ---
         List<Booking> bookings = bookingRepository.findByMovie(movie);
         boolean hasActiveBookings = false;
         if (bookings != null) {
@@ -102,7 +100,7 @@ public class MovieService {
             throw new MovieDeletionException("Filmen med id " + id + "  kan inte tas bort eftersom det finns aktiva bokningar som använder filmen");
         }
 
-        // --- Frikoppla completed bokningar (snapshot) ---
+
         if (bookings != null) {
             for (Booking booking : bookings) {
                 if (booking.getStatus() == BookingStatus.COMPLETED || booking.getStatus() == BookingStatus.CANCELLED) {
@@ -116,7 +114,6 @@ public class MovieService {
             bookingRepository.saveAll(bookings);
         }
 
-        // --- Ta bort filmen ---
         movieRepository.delete(movie);
         logger.info("Admin tog bort film {}", id);
     }

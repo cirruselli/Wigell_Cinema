@@ -96,15 +96,12 @@ public class ScreeningService {
         screening.setMovie(movie);
         screening.setEndTime(body.startTime().plusMinutes(movie.getDuration()));
 
-        // Filmens längd + 30 minuter
         screening.setTotalEndTime(screening.getEndTime().plusMinutes(30));
 
-        //Kontroller av tiderna
         if (screening.getEndTime().isBefore(body.startTime())) {
             throw new InvalidScreeningException("Sluttiden kan inte vara före starttiden.");
         }
 
-        // Kontrollera om det finns någon bokning i samma rum som krockar med föreställningens totala tid
         boolean conflictWithBooking = bookingRepository.overlaps(
                 room,
                 body.startTime(),
@@ -138,19 +135,17 @@ public class ScreeningService {
     @Transactional
     public void deleteScreening(Long id) {
         Screening screening = screeningRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Föreställning hittades inte"));
+                .orElseThrow(() -> new EntityNotFoundException("Föreställning med id " + id + " hittades inte"));
 
-        Movie movie = screening.getMovie(); // kan vara null
+        Movie movie = screening.getMovie();
 
-        // Hämta biljetter kopplade till screeningen
         List<Ticket> tickets = ticketRepository.findByScreening(screening);
 
-        // Om det finns biljetter kopplade → kasta fel
+
         if (!tickets.isEmpty()) {
-            throw new ScreeningDeletionException("Föreställningen kan inte tas bort eftersom det finns biljetter kopplade till den");
+            throw new ScreeningDeletionException("Föreställningen kan inte tas bort eftersom det finns köpta biljetter");
         }
 
-        // Ta bort screeningen
         screeningRepository.delete(screening);
 
         if (movie != null) {

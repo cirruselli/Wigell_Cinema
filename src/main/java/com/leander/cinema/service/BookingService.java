@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -79,10 +80,9 @@ public class BookingService {
             throw new CustomerOwnershipException("Du kan bara se dina egna bokningar.");
         }
 
-        // Lista att lägga till bokningar att visa
         List<Booking> filteredBookings = new ArrayList<>();
 
-        // Filtrera bort oönskade statusar
+
         for (Booking booking : bookings) {
             if (booking.getStatus() == BookingStatus.ACTIVE || booking.getStatus() == BookingStatus.COMPLETED) {
                 filteredBookings.add(booking);
@@ -104,12 +104,12 @@ public class BookingService {
     public BookingResponseContent createBooking(BookingPostRequestDto body) {
         Customer customer = getLoggedInCustomer();
 
-        // Säkerställ att endast ett av alternativen används
+
         if (body.speakerName() != null && body.movieId() != null) {
             throw new InvalidBookingException("Ange antingen talarens namn ELLER film, inte båda.");
         }
 
-        // Säkerställ att minst ett av alternativen finns
+
         if ((body.speakerName() == null || body.speakerName().isBlank()) && body.movieId() == null) {
             throw new InvalidBookingException("Du måste ange antingen talarens namn eller film.");
         }
@@ -117,7 +117,7 @@ public class BookingService {
         Booking booking = BookingMapper.toBookingEntity(body);
         booking.setCustomer(customer);
 
-        //Kontrollera att reservationens slut inte är före start
+
         if (body.reservationEndTime().isBefore(body.reservationStartTime())) {
             throw new InvalidReservationTimeException("Reservationens slutdatum/tid kan inte vara före startdatum/tid.");
         }
@@ -129,7 +129,8 @@ public class BookingService {
                 .orElseThrow(() -> new EntityNotFoundException("Rummet med id " + body.roomId() + " hittades inte"));
         booking.setRoom(room);
 
-        // --- Talare eller film ---
+
+
         if (body.movieId() != null) {
             Movie movie = movieRepository.findById(body.movieId())
                     .orElseThrow(() -> new EntityNotFoundException("Filmen med id " + body.movieId() + " hittades inte"));
@@ -139,7 +140,7 @@ public class BookingService {
             booking.setSpeakerName(body.speakerName().trim());
         }
 
-        // --- Kontroller ---
+
         if (body.numberOfGuests() > room.getMaxGuests()) {
             throw new BookingCapacityExceededException("Antal gäster överstiger rummets kapacitet på " + room.getMaxGuests());
         }
@@ -148,7 +149,6 @@ public class BookingService {
             throw new BookingConflictException("Rummet är upptaget under den valda tiden av en annan bokning.");
         }
 
-        // --- Kontrollera överlapp med screenings ---
         List<Screening> screenings = screeningRepository.findByRoom(room);
         List<Screening> conflictingScreenings = new ArrayList<>();
 
@@ -166,12 +166,17 @@ public class BookingService {
             );
         }
 
-        // --- Totalpris ---
+        if (body.roomEquipment() == null) {
+            booking.setRoomEquipment(new ArrayList<>(Arrays.asList("Mikrofon", "Högtalare", "Projektor")));
+        } else {
+            booking.setRoomEquipment(new ArrayList<>(body.roomEquipment()));
+        }
+
         BigDecimal totalPriceSek = room.getPriceSek();
         BigDecimal totalPriceUsd = currencyConverter.toUsd(totalPriceSek);
-
         booking.setTotalPriceSek(totalPriceSek);
         booking.setTotalPriceUsd(totalPriceUsd);
+
         booking.setStatus(BookingStatus.ACTIVE);
 
         bookingRepository.save(booking);
@@ -210,7 +215,7 @@ public class BookingService {
 
         Room room = booking.getRoom();
 
-        //Rums-krock
+
         boolean conflict = bookingRepository.overlapsForUpdate(
                 room,
                 booking.getReservationStartTime(),
@@ -221,7 +226,7 @@ public class BookingService {
             throw new BookingConflictException("Rummet är upptaget under den valda tiden.");
         }
 
-        //Screening-krock
+
         List<Screening> screenings = screeningRepository.findByRoom(room);
         for (Screening screening : screenings) {
             LocalDateTime totalEndTime = screening.getTotalEndTime();

@@ -1,12 +1,14 @@
 package com.leander.cinema.dto.AdminDto.screeningDto;
 
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public record AdminScreeningRequestDto(
+        @FutureOrPresent(message = "Startdatum/tid kan inte vara bakåt i tiden")
         @NotNull(message = "Starttid måste anges")
         LocalDateTime startTime,
         @NotNull(message = "Pris i SEK måste anges")

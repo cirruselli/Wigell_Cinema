@@ -87,7 +87,6 @@ public class TicketService {
             booking = bookingRepository.findById(body.bookingId())
                     .orElseThrow(() -> new EntityNotFoundException("Bokning med id " + body.bookingId() + " hittades inte"));
 
-            // --- Kontrollera att bokningen är aktiv ---
             if (booking.getStatus() != BookingStatus.ACTIVE) {
                 throw new ResponseStatusException(
                         HttpStatus.BAD_REQUEST,
@@ -109,7 +108,6 @@ public class TicketService {
         newTicket.setNumberOfTickets(body.numberOfTickets());
 
 
-        // --- Sätt pris per biljett och totalpris ---
         BigDecimal priceSek = CurrencyCalculator.calculateTicketPrice(newTicket);
         BigDecimal priceUsd = currencyConverter.toUsd(priceSek);
         newTicket.setPriceSek(priceSek);
@@ -120,7 +118,6 @@ public class TicketService {
         ticketRepository.save(newTicket);
         logger.info("Kund {} köpte biljett {}", customer.getId(), newTicket.getId());
 
-        // --- Returnera rätt DTO beroende på typ ---
         if (screening != null) {
             ScreeningResponseDto screeningDto = ScreeningMapper.toScreeningResponseDto(newTicket);
             return new TicketScreeningResponseContentDto(

@@ -14,7 +14,7 @@ logging:
 
 management:
   server:
-    port: 6080
+    port: 6081
   info:
     env:
       enabled: true
@@ -70,7 +70,7 @@ spring:
         username: admin
         password: admin
         instance:
-          management-base-url=http://localhost:6080:
+          management-base-url=http://localhost:6081:
           metadata:
             user:
               name: admin

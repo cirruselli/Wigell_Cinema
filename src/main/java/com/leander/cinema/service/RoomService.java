@@ -82,7 +82,6 @@ public class RoomService {
 
         RoomMapper.updateRoom(room, body);
 
-        // --- Beräkna USD ---
         BigDecimal priceSek = body.priceSek();
         BigDecimal priceUsd = currencyConverter.toUsd(priceSek);
         room.setPriceUsd(priceUsd);

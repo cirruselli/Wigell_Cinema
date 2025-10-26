@@ -93,7 +93,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(CustomerOwnershipException.class)
     public ResponseEntity<String> handleOwnershipException(CustomerOwnershipException ex) {
         return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
+                .status(HttpStatus.FORBIDDEN)
                 .body(ex.getMessage());
     }
 

@@ -17,7 +17,7 @@ public record BookingPostRequestDto(
         @NotNull(message = "Antal gäster måste anges")
         @Min(value = 1, message = "Antal gäster måste vara minst 1")
         Integer numberOfGuests,
-        @NotNull(message = "Utrustning för rummet måste anges")
+        //Hanterar null i BookingService
         List<String> roomEquipment,
         @NotNull(message = "Lokal måste anges")
         Long roomId,
